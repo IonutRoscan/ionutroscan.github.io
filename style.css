@@ -4230,3 +4230,67 @@ html[data-theme="dark"] .status-planned {
 
 }
 
+
+
+/* ============================================================
+   33. SCROLLBAR — soft paper look
+   ============================================================ */
+
+/* Firefox */
+* {
+    scrollbar-width: thin;
+    scrollbar-color:
+        var(--rose-soft)
+        transparent;
+}
+
+
+/* Chromium / Safari / Edge */
+*::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+
+*::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+
+*::-webkit-scrollbar-thumb {
+    background:
+        var(--rose-soft);
+
+    border-radius: 999px;
+
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}
+
+
+*::-webkit-scrollbar-thumb:hover {
+    background:
+        var(--rose);
+
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}
+
+
+*::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
+
+/* Scrapbook modal keeps a slightly softer thumb */
+.scrapbook-window::-webkit-scrollbar-thumb {
+    background:
+        var(--lavender-soft);
+}
+
+
+.scrapbook-window::-webkit-scrollbar-thumb:hover {
+    background:
+        var(--lavender);
+}
+

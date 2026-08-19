@@ -1,32 +1,76 @@
 [
-  {
-    "id": "001",
-    "name": "Clank Lorebook Importer",
-    "status": "stable",
-    "statusLabel": "✦ ready!",
-    "meta": "Browser extension · Brave / Chromium · Manifest V3",
-    "desc": "Automates lorebook entry ingestion on Clank.world. Bypasses the site's reactive input barriers by piping text directly through the Chrome DevTools Protocol instead of simulating keystrokes.",
-    "previewImg": "clank-preview.png",
-    "caption": "the importer, mid-incantation ✨",
-    "stamp": "Verified",
-    "detailTitle": "Accepted payload format",
-    "codeBlock": "Title: [Entry Name]\nKeywords: [tag1, tag2]\nContent: [Lore description...]",
-    "stack": [
-      "<code>manifest.json</code> — Manifest V3, CDP debugger permission",
-      "<code>background.js</code> — dispatches <code>Input.insertText</code> streams",
-      "<code>content.js</code> — DOM automation, drop-zone parser &amp; sequencer"
-    ],
-    "downloadUrl": "clank-lorebook-importer.zip",
-    "downloadText": "Download .zip 🌸",
-    "hint": "Extract → <code>brave://extensions</code> → Load unpacked"
-  },
-  {
-    "id": "002",
-    "name": "Next cute creation",
-    "status": "planned",
-    "statusLabel": "☁ sprouting",
-    "meta": "",
-    "desc": "This little patch is waiting to bloom. Future tools, plugins, and experiments will sprout here when they're ready.",
-    "isPlanned": true
-  }
+    {
+        "id": "001",
+
+        "name": "Clank Lorebook Importer",
+
+        "type": "extension",
+
+        "typeLabel": "🌸 Browser Extension",
+
+        "status": "stable",
+
+        "statusLabel": "✦ ready!",
+
+        "featured": true,
+
+        "meta": "Browser extension · Brave / Chromium · Manifest V3",
+
+        "desc": "Automates lorebook entry ingestion on Clank.world. Bypasses the site's reactive input barriers by piping text directly through the Chrome DevTools Protocol instead of simulating keystrokes.",
+
+        "tags": [
+            "Brave",
+            "Chromium",
+            "Manifest V3",
+            "Chrome DevTools Protocol",
+            "Clank.world"
+        ],
+
+        "previewImg": "clank-preview.png",
+
+        "caption": "the importer, mid-incantation ✨",
+
+        "stamp": "Verified",
+
+        "detailTitle": "Accepted payload format",
+
+        "codeBlock": "Title: [Entry Name]\nKeywords: [tag1, tag2]\nContent: [Lore description...]",
+
+        "stack": [
+            "<code>manifest.json</code> — Manifest V3, CDP debugger permission",
+            "<code>background.js</code> — dispatches <code>Input.insertText</code> streams",
+            "<code>content.js</code> — DOM automation, drop-zone parser &amp; sequencer"
+        ],
+
+        "downloadUrl": "clank-lorebook-importer.zip",
+
+        "downloadText": "Download .zip 🌸",
+
+        "hint": "Extract → <code>brave://extensions</code> → Load unpacked"
+    },
+
+
+    {
+        "id": "002",
+
+        "name": "Next cute creation",
+
+        "type": "experiment",
+
+        "typeLabel": "🧪 Future Experiment",
+
+        "status": "planned",
+
+        "statusLabel": "☁ sprouting",
+
+        "meta": "A little placeholder for whatever comes next",
+
+        "desc": "This little patch is waiting to bloom. Future tools, plugins, and experiments will sprout here when they're ready.",
+
+        "tags": [
+            "coming soon"
+        ],
+
+        "isPlanned": true
+    }
 ]

@@ -1,697 +1,1649 @@
 /* ================================================================
-   ARCHIVE TERMINAL v5
+   THE ARCHIVE — GRIMOIRE ENGINE v4
    ================================================================ */
 
-const terminalHistory = [];
-let terminalHistoryIndex = -1;
+let currentSpread = 0;
+const totalSpreads = 3;
+const spreadLabels = ["I - II", "III - IV", "V - VI"];
 
-function openArchiveTerminal() {
-    const overlay = document.getElementById("terminal-overlay");
-    const input = document.getElementById("terminal-input");
+let audioCtx = null;
+let droneOsc1 = null;
+let droneOsc2 = null;
+let droneGain = null;
+let masterGain = null;
+let isAudioActive = false;
+let presenceTimer = null;
+let whisperTimer = null;
+let toastTimer = null;
+let candleTimer = null;
+let veilDisturbed = false;
 
-    if (!overlay) return;
+const ARCHIVE_KEY = "roscan_grimoire_archive_v4";
+const MAX_CORRUPTION = 100;
 
-    overlay.classList.add("open");
-    overlay.setAttribute("aria-hidden", "false");
-    document.body.classList.add("terminal-open");
+const artifacts = [
+    {
+        id: "001",
+        name: "Clank Lorebook Importer",
+        status: "OPERATIONAL",
+        released: true,
+        description: "A Chromium / Brave browser extension for importing lorebook entries into Clank.world.",
+        action: "invoke"
+    },
+    {
+        id: "002",
+        name: "The JSON Cleansing Engine",
+        status: "CONCEPT",
+        released: false,
+        description: "A planned utility for cleaning, structuring, and validating malformed JSON payloads.",
+        action: "sealed"
+    }
+];
 
-    setTimeout(() => input?.focus(), 80);
+const whispers = [
+    "the archive is quiet",
+    "you were not the first visitor",
+    "the seal remembers",
+    "there is no page seven",
+    "some ideas arrive before they are built",
+    "do not mistake the unfinished for the empty",
+    "the archive has recorded your presence",
+    "something moved between the pages",
+    "the workshop is listening",
+    "corruption is not always damage"
+];
+
+const defaultState = {
+    visits: 0,
+    discoveries: [],
+    bound: false,
+    veil: false,
+    conceptOpened: false,
+    spread: 0,
+    corruption: 0,
+    candleEnergy: 100
+};
+
+let archiveState = loadArchiveState();
+
+function loadArchiveState() {
+    try {
+        return {
+            ...defaultState,
+            ...JSON.parse(localStorage.getItem(ARCHIVE_KEY) || "{}")
+        };
+    } catch {
+        return { ...defaultState };
+    }
 }
 
-function closeArchiveTerminal() {
-    const overlay = document.getElementById("terminal-overlay");
-
-    if (!overlay) return;
-
-    overlay.classList.remove("open");
-    overlay.setAttribute("aria-hidden", "true");
-    document.body.classList.remove("terminal-open");
+function saveArchiveState() {
+    try {
+        localStorage.setItem(
+            ARCHIVE_KEY,
+            JSON.stringify(archiveState)
+        );
+    } catch {}
 }
 
-function terminalPrint(text, type = "terminal-output") {
-    const screen = document.getElementById("terminal-screen");
-    if (!screen) return;
+function discover(id, message) {
+    if (!archiveState.discoveries.includes(id)) {
+        archiveState.discoveries.push(id);
+        saveArchiveState();
+        updateArchiveMeta();
 
-    const line = document.createElement("div");
-
-    line.className =
-        `terminal-line ${type}`;
-
-    line.textContent = text;
-
-    screen.appendChild(line);
-
-    screen.scrollTop =
-        screen.scrollHeight;
+        if (message) {
+            showToast(message);
+        }
+    }
 }
 
-function terminalPrintBlock(
-    lines,
-    type = "terminal-output"
-) {
-    lines.forEach(
-        line => terminalPrint(
-            line,
-            type
+function hasDiscovery(id) {
+    return archiveState.discoveries.includes(id);
+}
+
+function addCorruption(amount, message) {
+    archiveState.corruption = Math.min(
+        MAX_CORRUPTION,
+        Math.max(
+            0,
+            archiveState.corruption + amount
         )
     );
+
+    saveArchiveState();
+    updateArchiveCondition();
+
+    if (message) {
+        showToast(message);
+    }
+
+    if (archiveState.corruption >= 35) {
+        document.body.classList.add(
+            "corruption-high"
+        );
+    }
+
+    if (archiveState.corruption >= 70) {
+        document.body.classList.add(
+            "corruption-critical"
+        );
+    }
 }
 
-function invokeArtifact(id) {
+function reduceCorruption(amount) {
+    archiveState.corruption = Math.max(
+        0,
+        archiveState.corruption - amount
+    );
 
-    const artifact =
-        artifacts.find(
-            a => a.id === id
+    saveArchiveState();
+    updateArchiveCondition();
+
+    if (archiveState.corruption < 35) {
+        document.body.classList.remove(
+            "corruption-high"
         );
-
-    if (!artifact) {
-
-        terminalPrint(
-            `ARTIFACT ${id} DOES NOT EXIST.`,
-            "terminal-error"
-        );
-
-        return;
     }
 
-    if (!artifact.released) {
+    if (archiveState.corruption < 70) {
+        document.body.classList.remove(
+            "corruption-critical"
+        );
+    }
+}
 
-        terminalPrint(
-            `ARTIFACT ${id} IS NOT OPERATIONAL.`,
-            "terminal-warning"
+function updateArchiveMeta() {
+    const visit =
+        document.getElementById(
+            "visit-count"
         );
 
-        terminalPrint(
-            "The archive refuses to fabricate a release."
+    const discoveries =
+        document.getElementById(
+            "discovery-count"
         );
 
-        return;
+    const released =
+        document.getElementById(
+            "released-count"
+        );
+
+    const concepts =
+        document.getElementById(
+            "concept-count"
+        );
+
+    const sealed =
+        document.getElementById(
+            "sealed-count"
+        );
+
+    if (visit) {
+        visit.textContent =
+            String(
+                archiveState.visits
+            ).padStart(3, "0");
     }
 
-    discover(
-        "terminal-invoke",
-        "ARTIFACT INVOCATION REQUESTED · 001"
+    if (discoveries) {
+        discoveries.textContent =
+            String(
+                archiveState.discoveries.length
+            ).padStart(3, "0");
+    }
+
+    if (released) {
+        released.textContent =
+            String(
+                artifacts.filter(
+                    a => a.released
+                ).length
+            ).padStart(3, "0");
+    }
+
+    if (concepts) {
+        concepts.textContent =
+            String(
+                artifacts.filter(
+                    a => a.status === "CONCEPT"
+                ).length
+            ).padStart(3, "0");
+    }
+
+    if (sealed) {
+        sealed.textContent = "000";
+    }
+}
+
+function updateArchiveCondition() {
+    const corruption =
+        archiveState.corruption;
+
+    const integrity =
+        100 - corruption;
+
+    const integrityValue =
+        document.getElementById(
+            "integrity-value"
+        );
+
+    const corruptionValue =
+        document.getElementById(
+            "corruption-value"
+        );
+
+    const integrityFill =
+        document.getElementById(
+            "integrity-fill"
+        );
+
+    const corruptionFill =
+        document.getElementById(
+            "corruption-fill"
+        );
+
+    const conditionLabel =
+        document.getElementById(
+            "condition-label"
+        );
+
+    const conditionNote =
+        document.getElementById(
+            "condition-note"
+        );
+
+    if (integrityValue) {
+        integrityValue.textContent =
+            `${integrity}%`;
+    }
+
+    if (corruptionValue) {
+        corruptionValue.textContent =
+            `${corruption}%`;
+    }
+
+    if (integrityFill) {
+        integrityFill.style.width =
+            `${integrity}%`;
+    }
+
+    if (corruptionFill) {
+        corruptionFill.style.width =
+            `${corruption}%`;
+    }
+
+    let label = "STABLE";
+    let note =
+        "No structural anomalies detected.";
+
+    if (corruption >= 15) {
+        label = "UNEASY";
+        note =
+            "Minor irregularities have entered the record.";
+    }
+
+    if (corruption >= 35) {
+        label = "UNSTABLE";
+        note =
+            "The archive is responding to repeated interference.";
+    }
+
+    if (corruption >= 70) {
+        label = "CRITICAL";
+        note =
+            "Do not assume every message belongs to the author.";
+    }
+
+    if (corruption >= 90) {
+        label = "COMPROMISED";
+        note =
+            "The archive is no longer certain which side of the screen it occupies.";
+    }
+
+    if (conditionLabel) {
+        conditionLabel.textContent =
+            label;
+    }
+
+    if (conditionNote) {
+        conditionNote.textContent =
+            note;
+    }
+}
+
+function showToast(
+    message,
+    duration = 3200
+) {
+    const toast =
+        document.getElementById(
+            "archive-toast"
+        );
+
+    if (!toast) return;
+
+    clearTimeout(toastTimer);
+
+    toast.textContent = message;
+
+    toast.classList.add("show");
+
+    toastTimer = setTimeout(
+        () => {
+            toast.classList.remove(
+                "show"
+            );
+        },
+        duration
+    );
+}
+
+function showWhisper(text) {
+    const el =
+        document.getElementById(
+            "whisper-text"
+        );
+
+    const line =
+        document.querySelector(
+            ".whisper-line"
+        );
+
+    if (!el || !line) return;
+
+    el.textContent =
+        `“${text}”`;
+
+    line.classList.remove(
+        "active"
     );
 
-    addCorruption(2);
+    void line.offsetWidth;
 
-    terminalPrint(
-        `INVOCATION ACCEPTED · ${artifact.name}`,
-        "terminal-success"
+    line.classList.add(
+        "active"
     );
 
-    terminalPrint(
-        "Opening the released artifact..."
+    clearTimeout(
+        whisperTimer
     );
 
-    setTimeout(() => {
+    whisperTimer =
+        setTimeout(
+            () => {
+                line.classList.remove(
+                    "active"
+                );
+            },
+            2200
+        );
+}
 
-        const link =
-            document.querySelector(
-                'a[href="clank-lorebook-importer.zip"]'
+function initAudioEngine() {
+    if (!audioCtx) {
+        audioCtx =
+            new (
+                window.AudioContext ||
+                window.webkitAudioContext
+            )();
+    }
+}
+
+function toggleAmbientDrone() {
+    initAudioEngine();
+
+    const btn =
+        document.getElementById(
+            "audio-toggle"
+        );
+
+    if (!isAudioActive) {
+
+        if (
+            audioCtx.state ===
+            "suspended"
+        ) {
+            audioCtx.resume();
+        }
+
+        const filter =
+            audioCtx.createBiquadFilter();
+
+        masterGain =
+            audioCtx.createGain();
+
+        droneGain =
+            audioCtx.createGain();
+
+        droneOsc1 =
+            audioCtx.createOscillator();
+
+        droneOsc2 =
+            audioCtx.createOscillator();
+
+        droneOsc1.type =
+            "sawtooth";
+
+        droneOsc1.frequency.setValueAtTime(
+            55,
+            audioCtx.currentTime
+        );
+
+        droneOsc2.type =
+            "sine";
+
+        droneOsc2.frequency.setValueAtTime(
+            54.35,
+            audioCtx.currentTime
+        );
+
+        filter.type =
+            "lowpass";
+
+        filter.frequency.setValueAtTime(
+            135,
+            audioCtx.currentTime
+        );
+
+        filter.Q.setValueAtTime(
+            1.2,
+            audioCtx.currentTime
+        );
+
+        droneGain.gain.setValueAtTime(
+            0.0001,
+            audioCtx.currentTime
+        );
+
+        droneGain.gain.exponentialRampToValueAtTime(
+            0.055,
+            audioCtx.currentTime + 2.8
+        );
+
+        masterGain.gain.setValueAtTime(
+            0.72,
+            audioCtx.currentTime
+        );
+
+        droneOsc1.connect(filter);
+        droneOsc2.connect(filter);
+
+        filter.connect(droneGain);
+        droneGain.connect(masterGain);
+
+        masterGain.connect(
+            audioCtx.destination
+        );
+
+        droneOsc1.start();
+        droneOsc2.start();
+
+        isAudioActive = true;
+
+        if (btn) {
+            btn.classList.add("active");
+
+            btn.textContent =
+                "🕯 Resonance Bound (Active)";
+        }
+
+        discover(
+            "audio",
+            "RESONANCE ACTIVE · the archive can now hear you"
+        );
+
+        addCorruption(2);
+
+    } else {
+
+        if (droneGain) {
+
+            droneGain.gain.exponentialRampToValueAtTime(
+                0.0001,
+                audioCtx.currentTime + 1.2
             );
 
-        if (link) {
+            setTimeout(
+                () => {
 
-            link.click();
+                    try {
+                        droneOsc1?.stop();
+                    } catch {}
+
+                    try {
+                        droneOsc2?.stop();
+                    } catch {}
+
+                    droneOsc1?.disconnect();
+                    droneOsc2?.disconnect();
+                    droneGain?.disconnect();
+
+                    isAudioActive = false;
+
+                },
+                1250
+            );
+        }
+
+        if (btn) {
+
+            btn.classList.remove(
+                "active"
+            );
+
+            btn.textContent =
+                "🕯 Kindle Ambient Resonance";
+
+        }
+    }
+}
+
+function playTone(
+    freq,
+    duration = 0.12,
+    type = "sine",
+    volume = 0.035
+) {
+    if (
+        !isAudioActive ||
+        !audioCtx
+    ) {
+        return;
+    }
+
+    try {
+
+        const osc =
+            audioCtx.createOscillator();
+
+        const gain =
+            audioCtx.createGain();
+
+        osc.type = type;
+
+        osc.frequency.setValueAtTime(
+            freq,
+            audioCtx.currentTime
+        );
+
+        gain.gain.setValueAtTime(
+            volume,
+            audioCtx.currentTime
+        );
+
+        gain.gain.exponentialRampToValueAtTime(
+            0.0001,
+            audioCtx.currentTime + duration
+        );
+
+        osc.connect(gain);
+
+        gain.connect(
+            audioCtx.destination
+        );
+
+        osc.start();
+
+        osc.stop(
+            audioCtx.currentTime +
+            duration
+        );
+
+    } catch {}
+}
+
+function playPageFlipSound() {
+    if (
+        !isAudioActive ||
+        !audioCtx
+    ) {
+        return;
+    }
+
+    try {
+
+        const bufferSize =
+            Math.floor(
+                audioCtx.sampleRate *
+                0.18
+            );
+
+        const buffer =
+            audioCtx.createBuffer(
+                1,
+                bufferSize,
+                audioCtx.sampleRate
+            );
+
+        const output =
+            buffer.getChannelData(0);
+
+        for (
+            let i = 0;
+            i < bufferSize;
+            i++
+        ) {
+            output[i] =
+                Math.random() * 2 - 1;
+        }
+
+        const source =
+            audioCtx.createBufferSource();
+
+        const filter =
+            audioCtx.createBiquadFilter();
+
+        const gain =
+            audioCtx.createGain();
+
+        source.buffer =
+            buffer;
+
+        filter.type =
+            "bandpass";
+
+        filter.frequency.setValueAtTime(
+            800,
+            audioCtx.currentTime
+        );
+
+        filter.Q.setValueAtTime(
+            1.5,
+            audioCtx.currentTime
+        );
+
+        gain.gain.setValueAtTime(
+            0.045,
+            audioCtx.currentTime
+        );
+
+        gain.gain.exponentialRampToValueAtTime(
+            0.0001,
+            audioCtx.currentTime + 0.18
+        );
+
+        source.connect(filter);
+        filter.connect(gain);
+        gain.connect(
+            audioCtx.destination
+        );
+
+        source.start();
+
+    } catch {}
+}
+
+function turnToPage(index) {
+
+    if (
+        index < 0 ||
+        index >= totalSpreads
+    ) {
+        return;
+    }
+
+    currentSpread = index;
+
+    archiveState.spread =
+        index;
+
+    saveArchiveState();
+
+    playPageFlipSound();
+
+    playTone(
+        110 + index * 22,
+        0.16,
+        "triangle",
+        0.02
+    );
+
+    document
+        .querySelectorAll(
+            ".tome-page-spread"
+        )
+        .forEach(
+            (spread, idx) => {
+
+                spread.classList.toggle(
+                    "active",
+                    idx === currentSpread
+                );
+
+            }
+        );
+
+    document
+        .querySelectorAll(
+            ".ribbon-btn"
+        )
+        .forEach(
+            (btn, idx) => {
+
+                btn.classList.toggle(
+                    "active",
+                    idx === currentSpread
+                );
+
+            }
+        );
+
+    const indicator =
+        document.getElementById(
+            "spread-count"
+        );
+
+    if (indicator) {
+        indicator.textContent =
+            spreadLabels[currentSpread];
+    }
+
+    if (index === 1) {
+        discover(
+            "artifact",
+            "ARTIFACT 001 · operational record opened"
+        );
+    }
+
+    if (index === 2) {
+        discover(
+            "worktable",
+            "WORKTABLE ACCESSED · concepts are not artifacts"
+        );
+    }
+
+    addCorruption(
+        index === 1
+            ? 1
+            : 0.5
+    );
+
+    if (
+        Math.random() < 0.35
+    ) {
+
+        showWhisper(
+            whispers[
+                Math.floor(
+                    Math.random() *
+                    whispers.length
+                )
+            ]
+        );
+
+    }
+}
+
+function nextPage() {
+    turnToPage(
+        (currentSpread + 1) %
+        totalSpreads
+    );
+}
+
+function prevPage() {
+    turnToPage(
+        (currentSpread - 1 +
+            totalSpreads) %
+        totalSpreads
+    );
+}
+
+function glitchArchive() {
+
+    document.body.classList.remove(
+        "glitching"
+    );
+
+    void document.body.offsetWidth;
+
+    document.body.classList.add(
+        "glitching"
+    );
+
+    const status =
+        document.getElementById(
+            "status-text"
+        );
+
+    const footer =
+        document.getElementById(
+            "footer-status"
+        );
+
+    const oldStatus =
+        status?.textContent ||
+        "TOME UNSEALED · ARCHIVE ONLINE";
+
+    const oldFooter =
+        footer?.textContent ||
+        "THE ARCHIVE REMAINS OPEN TO THOSE WHO SEEK · IONUȚ ROȘCAN";
+
+    if (status) {
+        status.textContent =
+            "TOME OBSERVING · ARCHIVE AWAKE";
+    }
+
+    if (footer) {
+        footer.textContent =
+            "it knows you are here";
+    }
+
+    setTimeout(
+        () => {
+
+            if (status) {
+                status.textContent =
+                    oldStatus;
+            }
+
+            if (footer) {
+                footer.textContent =
+                    oldFooter;
+            }
+
+        },
+        1300
+    );
+}
+
+function disturbTheVeil() {
+
+    archiveState.veil =
+        !archiveState.veil;
+
+    saveArchiveState();
+
+    document.body.classList.toggle(
+        "veil-disturbed",
+        archiveState.veil
+    );
+
+    const btn =
+        document.getElementById(
+            "veil-toggle"
+        );
+
+    if (btn) {
+
+        btn.textContent =
+            archiveState.veil
+                ? "◈ Veil Disturbed"
+                : "◈ Disturb the Veil";
+
+        btn.classList.toggle(
+            "active",
+            archiveState.veil
+        );
+    }
+
+    if (archiveState.veil) {
+
+        veilDisturbed = true;
+
+        discover(
+            "veil",
+            "THE VEIL IS THIN · discovery recorded"
+        );
+
+        addCorruption(
+            12,
+            "VEIL DISTURBANCE · archive integrity reduced"
+        );
+
+        showWhisper(
+            "you should not have done that"
+        );
+
+        glitchArchive();
+
+    } else {
+
+        veilDisturbed = false;
+
+        reduceCorruption(3);
+
+        showWhisper(
+            "the veil settles"
+        );
+
+    }
+}
+
+function bindPresence() {
+
+    const sigil =
+        document.getElementById(
+            "altar-sigil"
+        );
+
+    if (!sigil) {
+        return;
+    }
+
+    const restore = () => {
+
+        if (!archiveState.bound) {
+            return;
+        }
+
+        sigil.classList.add(
+            "bound"
+        );
+
+        const prompt =
+            sigil.querySelector(
+                ".sigil-prompt"
+            );
+
+        if (prompt) {
+
+            prompt.textContent =
+                "✦ PRESENCE BOUND · THE ARCHIVE KNOWS YOU ✦";
+
+            prompt.style.color =
+                "#8d1119";
+
+        }
+
+    };
+
+    restore();
+
+    const bind = () => {
+
+        sigil.classList.add(
+            "bound"
+        );
+
+        archiveState.bound =
+            true;
+
+        saveArchiveState();
+
+        discover(
+            "seal",
+            "PRESENCE BOUND · visitor record updated"
+        );
+
+        addCorruption(5);
+
+        const prompt =
+            sigil.querySelector(
+                ".sigil-prompt"
+            );
+
+        if (prompt) {
+
+            prompt.textContent =
+                "✦ PRESENCE BOUND · THE ARCHIVE KNOWS YOU ✦";
+
+            prompt.style.color =
+                "#8d1119";
+
+        }
+
+        playTone(
+            73.4,
+            0.6,
+            "sine",
+            0.035
+        );
+
+        showWhisper(
+            "your presence has been recorded"
+        );
+
+        document.body.classList.remove(
+            "presence-flash"
+        );
+
+        void document.body.offsetWidth;
+
+        document.body.classList.add(
+            "presence-flash"
+        );
+
+    };
+
+    sigil.addEventListener(
+        "click",
+        bind
+    );
+
+    sigil.addEventListener(
+        "keydown",
+        e => {
+
+            if (
+                e.key === "Enter" ||
+                e.key === " "
+            ) {
+
+                e.preventDefault();
+
+                bind();
+
+            }
+
+        }
+    );
+}
+
+function bindSealedCuriosity() {
+
+    const card =
+        document.getElementById(
+            "sealed-curio"
+        );
+
+    if (!card) {
+        return;
+    }
+
+    if (
+        archiveState.conceptOpened
+    ) {
+        card.classList.add(
+            "revealed"
+        );
+    }
+
+    const reveal = () => {
+
+        card.classList.toggle(
+            "revealed"
+        );
+
+        const revealed =
+            card.classList.contains(
+                "revealed"
+            );
+
+        archiveState.conceptOpened =
+            revealed;
+
+        saveArchiveState();
+
+        const p =
+            card.querySelector(
+                "p"
+            );
+
+        const status =
+            card.querySelector(
+                ".status-pill"
+            );
+
+        if (revealed) {
+
+            discover(
+                "concept-note",
+                "RESTRICTED NOTE OPENED · this entry was waiting"
+            );
+
+            addCorruption(7);
+
+            if (p) {
+
+                p.textContent =
+                    "You found the note. The concept is real; the artifact is not. Yet.";
+
+            }
+
+            if (status) {
+
+                status.textContent =
+                    "Classification: PLANNED / NOT FORGED";
+
+            }
 
         } else {
 
-            terminalPrint(
-                "INVOCATION FAILED · artifact file not found in this deployment.",
-                "terminal-error"
-            );
+            if (p) {
 
-        }
+                p.textContent =
+                    "Not forged yet. A planned utility for cleaning, structuring, and validating malformed JSON payloads.";
 
-    }, 350);
-}
-
-function terminalStatus() {
-
-    terminalPrintBlock([
-        "ARCHIVE STATUS",
-        `VISITS       ${String(
-            archiveState.visits
-        ).padStart(3, "0")}`,
-        `DISCOVERIES  ${String(
-            archiveState.discoveries.length
-        ).padStart(3, "0")}`,
-        `INTEGRITY    ${
-            100 - archiveState.corruption
-        }%`,
-        `CORRUPTION   ${
-            archiveState.corruption
-        }%`,
-        `CANDLE       ${
-            archiveState.candleEnergy
-        }%`,
-        `PRESENCE     ${
-            archiveState.bound
-                ? "BOUND"
-                : "UNBOUND"
-        }`,
-        `VEIL         ${
-            archiveState.veil
-                ? "DISTURBED"
-                : "SEALED"
-        }`,
-        `FOLIO        ${
-            spreadLabels[currentSpread]
-        }`
-    ]);
-}
-
-function terminalList() {
-
-    terminalPrint(
-        "REGISTERED ARTIFACTS",
-        "terminal-success"
-    );
-
-    artifacts.forEach(
-        artifact => {
-
-            terminalPrint(
-                `[${artifact.id}] ${artifact.name} · ${artifact.status}`
-            );
-
-        }
-    );
-}
-
-function terminalInspect(id) {
-
-    const artifact =
-        artifacts.find(
-            a => a.id === id
-        );
-
-    if (!artifact) {
-
-        terminalPrint(
-            `NO RECORD FOUND FOR ${id}.`,
-            "terminal-error"
-        );
-
-        return;
-    }
-
-    discover(
-        `inspect-${id}`,
-        `ARTIFACT ${id} INSPECTED`
-    );
-
-    terminalPrintBlock([
-        `ARTIFACT ${artifact.id}`,
-        `NAME        ${artifact.name}`,
-        `STATUS      ${artifact.status}`,
-        `RELEASED    ${
-            artifact.released
-                ? "YES"
-                : "NO"
-        }`,
-        `CLASS       ${
-            artifact.released
-                ? "UTILITY"
-                : "CONCEPT"
-        }`,
-        "",
-        artifact.description
-    ]);
-}
-
-function terminalDiscoveries() {
-
-    if (
-        !archiveState.discoveries.length
-    ) {
-
-        terminalPrint(
-            "NO DISCOVERIES RECORDED.",
-            "terminal-warning"
-        );
-
-        return;
-    }
-
-    terminalPrint(
-        "RECORDED DISCOVERIES",
-        "terminal-success"
-    );
-
-    archiveState.discoveries.forEach(
-        (id, index) => {
-
-            terminalPrint(
-                `${String(
-                    index + 1
-                ).padStart(2, "0")} · ${id}`
-            );
-
-        }
-    );
-}
-
-function terminalWhoAmI() {
-
-    terminalPrintBlock([
-        "VISITOR RECORD",
-        "ROLE         ARCHIVIST",
-        `VISITS       ${
-            archiveState.visits
-        }`,
-        `FIRST SEEN   ${
-            new Date(
-                archiveState.firstVisit ||
-                Date.now()
-            ).toLocaleString()
-        }`,
-        "IDENTITY     NOT VERIFIED",
-        "",
-        "The archive knows only that you returned."
-    ]);
-}
-
-function terminalHistoryCommand() {
-
-    if (!terminalHistory.length) {
-
-        terminalPrint(
-            "NO COMMANDS RECORDED THIS SESSION."
-        );
-
-        return;
-    }
-
-    terminalHistory.forEach(
-        (command, index) => {
-
-            terminalPrint(
-                `${String(
-                    index + 1
-                ).padStart(2, "0")}  ${command}`
-            );
-
-        }
-    );
-}
-
-function terminalExecute(
-    rawCommand
-) {
-
-    const raw =
-        rawCommand.trim();
-
-    if (!raw) return;
-
-    terminalHistory.push(
-        raw
-    );
-
-    terminalHistoryIndex =
-        terminalHistory.length;
-
-    terminalPrint(
-        `> ${raw}`,
-        "terminal-command"
-    );
-
-    const parts =
-        raw.split(/\s+/);
-
-    const command =
-        parts[0].toLowerCase();
-
-    const argument =
-        parts[1]?.toUpperCase();
-
-    switch (command) {
-
-        case "help":
-
-            terminalPrintBlock([
-                "AVAILABLE COMMANDS",
-                "help              show this list",
-                "clear             clear the terminal",
-                "status            inspect archive condition",
-                "list              list registered artifacts",
-                "inspect <id>      inspect an artifact",
-                "invoke <id>       invoke a released artifact",
-                "discoveries       list recorded discoveries",
-                "whoami             inspect visitor record",
-                "history           show this session's commands",
-                "open <folio>      open folio 1, 2, or 3",
-                "veil              disturb the veil",
-                "soothe            reduce archive corruption",
-                "VII               query the forbidden folio"
-            ]);
-
-            break;
-
-
-        case "clear": {
-
-            const screen =
-                document.getElementById(
-                    "terminal-screen"
-                );
-
-            if (screen) {
-                screen.innerHTML = "";
             }
 
-            break;
+            if (status) {
+
+                status.textContent =
+                    "Click to inspect restricted note";
+
+            }
+
         }
 
+    };
 
-        case "status":
+    card.addEventListener(
+        "click",
+        reveal
+    );
 
-            terminalStatus();
-
-            break;
-
-
-        case "list":
-        case "artifacts":
-
-            terminalList();
-
-            break;
-
-
-        case "inspect":
-
-            terminalInspect(
-                argument || "001"
-            );
-
-            break;
-
-
-        case "invoke":
-
-            invokeArtifact(
-                argument || "001"
-            );
-
-            break;
-
-
-        case "discoveries":
-
-            terminalDiscoveries();
-
-            break;
-
-
-        case "whoami":
-
-            terminalWhoAmI();
-
-            break;
-
-
-        case "history":
-
-            terminalHistoryCommand();
-
-            break;
-
-
-        case "open": {
-
-            const requested =
-                Number(argument);
+    card.addEventListener(
+        "keydown",
+        e => {
 
             if (
-                [1, 2, 3].includes(
-                    requested
-                )
+                e.key === "Enter" ||
+                e.key === " "
             ) {
 
-                turnToPage(
-                    requested - 1
-                );
+                e.preventDefault();
 
-                terminalPrint(
-                    `FOLIO ${requested} OPENED.`,
-                    "terminal-success"
-                );
-
-            } else {
-
-                terminalPrint(
-                    "VALID FOLIOS: 1 · 2 · 3",
-                    "terminal-error"
-                );
+                reveal();
 
             }
 
-            break;
+        }
+    );
+}
+
+function bindHiddenRune() {
+
+    const rune =
+        document.getElementById(
+            "hidden-rune"
+        );
+
+    if (!rune) {
+        return;
+    }
+
+    const activate = () => {
+
+        if (
+            !hasDiscovery("rune")
+        ) {
+
+            discover(
+                "rune",
+                "HIDDEN RUNE FOUND · the archive noticed your curiosity"
+            );
+
+            addCorruption(4);
+
+            showWhisper(
+                "you looked in the correct corner"
+            );
+
+        } else {
+
+            showWhisper(
+                "the rune is no longer hiding"
+            );
+
         }
 
+    };
 
-        case "veil":
+    rune.addEventListener(
+        "click",
+        activate
+    );
 
-            disturbTheVeil();
+    rune.addEventListener(
+        "keydown",
+        e => {
 
-            terminalPrint(
-                "VEIL COMMAND EXECUTED.",
-                "terminal-warning"
-            );
+            if (
+                e.key === "Enter" ||
+                e.key === " "
+            ) {
 
-            break;
+                e.preventDefault();
 
+                activate();
 
-        case "soothe":
+            }
 
-            reduceCorruption(
-                12
-            );
+        }
+    );
+}
+
+function bindCalmArchive() {
+
+    const button =
+        document.getElementById(
+            "calm-archive"
+        );
+
+    if (!button) {
+        return;
+    }
+
+    button.addEventListener(
+        "click",
+        () => {
+
+            reduceCorruption(10);
 
             archiveState.candleEnergy =
                 Math.min(
                     100,
-                    archiveState.candleEnergy + 15
+                    archiveState.candleEnergy + 12
                 );
 
             saveArchiveState();
 
-            updateCandle();
-
-            terminalPrint(
-                "ARCHIVE SOOTHED.",
-                "terminal-success"
+            showToast(
+                "ARCHIVE SOOTHED · structural noise receding"
             );
 
-            break;
-
-
-        case "vii":
-        case "7":
-        case "page7":
-
-            discover(
-                "asked-vii",
-                "THE ARCHIVE DOES NOT ACKNOWLEDGE FOLIO VII"
+            showWhisper(
+                "for now, it is quiet"
             );
 
-            addCorruption(
-                9
-            );
+            resetCandle();
 
-            terminalPrintBlock([
-                "QUERY: FOLIO VII",
-                "",
-                "RESULT: NO SUCH FOLIO",
-                "",
-                "The archive contains six pages.",
-                "The archive contains six pages.",
-                "The archive contains six pages.",
-                "",
-                "...doesn't it?"
-            ], "terminal-warning");
-
-            glitchArchive();
-
-            break;
-
-
-        default:
-
-            terminalPrint(
-                `UNKNOWN COMMAND: ${command}`,
-                "terminal-error"
-            );
-
-            terminalPrint(
-                "Type 'help' to inspect the command index."
-            );
-    }
+        }
+    );
 }
 
-function bindArchiveTerminal() {
+function updateCandle() {
 
-    const openButton =
-        document.getElementById(
-            "terminal-toggle"
+    const energy =
+        archiveState.candleEnergy;
+
+    document.body.classList.toggle(
+        "candle-fading",
+        energy <= 35
+    );
+
+    document.body.classList.toggle(
+        "candle-extinguished",
+        energy <= 5
+    );
+}
+
+function resetCandle() {
+
+    archiveState.candleEnergy =
+        100;
+
+    saveArchiveState();
+
+    updateCandle();
+}
+
+function startCandle() {
+
+    updateCandle();
+
+    candleTimer =
+        setInterval(
+            () => {
+
+                if (document.hidden) {
+                    return;
+                }
+
+                archiveState.candleEnergy =
+                    Math.max(
+                        0,
+                        archiveState.candleEnergy - 1
+                    );
+
+                saveArchiveState();
+
+                updateCandle();
+
+                if (
+                    archiveState.candleEnergy ===
+                    35
+                ) {
+
+                    showWhisper(
+                        "the candle is beginning to fail"
+                    );
+
+                }
+
+                if (
+                    archiveState.candleEnergy ===
+                    5
+                ) {
+
+                    showWhisper(
+                        "the light has expired"
+                    );
+
+                    addCorruption(3);
+
+                }
+
+            },
+            60000
         );
+}
 
-    const closeButton =
-        document.getElementById(
-            "terminal-close"
-        );
+function initMouseSigil() {
 
-    const overlay =
+    const cursor =
         document.getElementById(
-            "terminal-overlay"
-        );
-
-    const form =
-        document.getElementById(
-            "terminal-form"
-        );
-
-    const input =
-        document.getElementById(
-            "terminal-input"
+            "sigil-cursor"
         );
 
     if (
-        !openButton ||
-        !closeButton ||
-        !overlay ||
-        !form ||
-        !input
+        !cursor ||
+        window.matchMedia(
+            "(prefers-reduced-motion: reduce)"
+        ).matches
     ) {
         return;
     }
 
-    openButton.addEventListener(
-        "click",
-        openArchiveTerminal
-    );
+    document.addEventListener(
+        "pointermove",
+        e => {
 
-    closeButton.addEventListener(
-        "click",
-        closeArchiveTerminal
-    );
+            cursor.style.left =
+                `${e.clientX}px`;
 
-    overlay.addEventListener(
-        "click",
-        event => {
+            cursor.style.top =
+                `${e.clientY}px`;
 
-            if (
-                event.target ===
-                overlay
-            ) {
-
-                closeArchiveTerminal();
-
-            }
-
-        }
-    );
-
-    form.addEventListener(
-        "submit",
-        event => {
-
-            event.preventDefault();
-
-            terminalExecute(
-                input.value
-            );
-
-            input.value = "";
-
-        }
-    );
-
-    input.addEventListener(
-        "keydown",
-        event => {
-
-            if (
-                event.key ===
-                "ArrowUp"
-            ) {
-
-                event.preventDefault();
-
-                if (
-                    !terminalHistory.length
-                ) {
-                    return;
-                }
-
-                terminalHistoryIndex =
-                    Math.max(
-                        0,
-                        terminalHistoryIndex - 1
-                    );
-
-                input.value =
-                    terminalHistory[
-                        terminalHistoryIndex
-                    ] || "";
-
-            }
-
-
-            if (
-                event.key ===
-                "ArrowDown"
-            ) {
-
-                event.preventDefault();
-
-                terminalHistoryIndex =
-                    Math.min(
-                        terminalHistory.length,
-                        terminalHistoryIndex + 1
-                    );
-
-                input.value =
-                    terminalHistory[
-                        terminalHistoryIndex
-                    ] || "";
-
-            }
-
-
-            if (
-                event.key ===
-                "Escape"
-            ) {
-
-                closeArchiveTerminal();
-
-            }
+            cursor.style.opacity =
+                "1";
 
         }
     );
 
     document.addEventListener(
-        "keydown",
-        event => {
+        "pointerleave",
+        () => {
+            cursor.style.opacity =
+                "0";
+        }
+    );
+}
 
-            if (
-                event.key ===
-                "Escape"
-            ) {
+function initTomeParallax() {
 
-                closeArchiveTerminal();
+    const tome =
+        document.getElementById(
+            "tome"
+        );
+
+    if (
+        !tome ||
+        window.matchMedia(
+            "(prefers-reduced-motion: reduce)"
+        ).matches
+    ) {
+        return;
+    }
+
+    document.addEventListener(
+        "pointermove",
+        e => {
+
+            const rect =
+                tome.getBoundingClientRect();
+
+            const inside =
+                e.clientX >= rect.left &&
+                e.clientX <= rect.right &&
+                e.clientY >= rect.top &&
+                e.clientY <= rect.bottom;
+
+            if (!inside) {
+
+                tome.style.transform =
+                    "";
+
+                return;
 
             }
+
+            const x =
+                (
+                    (e.clientX - rect.left) /
+                    rect.width -
+                    0.5
+                ) * 2;
+
+            const y =
+                (
+                    (e.clientY - rect.top) /
+                    rect.height -
+                    0.5
+                ) * 2;
+
+            tome.style.transform =
+                `perspective(1800px)
+                 rotateY(${x * 0.7}deg)
+                 rotateX(${-y * 0.45}deg)`;
 
         }
     );
 }
 
+function initArchivePresence() {
+
+    presenceTimer =
+        setInterval(
+            () => {
+
+                if (document.hidden) {
+                    return;
+                }
+
+                if (
+                    Math.random() < 0.18
+                ) {
+
+                    showWhisper(
+                        whispers[
+                            Math.floor(
+                                Math.random() *
+                                whispers.length
+                            )
+                        ]
+                    );
+
+                    if (
+                        Math.random() < 0.22
+                    ) {
+
+                        glitchArchive();
+
+                        addCorruption(1);
+
+                    }
+
+                }
+
+            },
+            18000
+        );
+}
+
+function initializeReturningState() {
+
+    archiveState.visits += 1;
+
+    saveArchiveState();
+
+    updateArchiveMeta();
+
+    updateArchiveCondition();
+
+    currentSpread =
+        Number.isInteger(
+            archiveState.spread
+        )
+            ? archiveState.spread
+            : 0;
+
+    veilDisturbed =
+        Boolean(
+            archiveState.veil
+        );
+
+    if (veilDisturbed) {
+        document.body.classList.add(
+            "veil-disturbed"
+        );
+    }
+
+    if (
+        archiveState.corruption >= 35
+    ) {
+        document.body.classList.add(
+            "corruption-high"
+        );
+    }
+
+    if (
+        archiveState.corruption >= 70
+    ) {
+        document.body.classList.add(
+            "corruption-critical"
+        );
+    }
+
+    turnToPage(
+        currentSpread
+    );
+
+    setTimeout(
+        () => {
+
+            if (
+                archiveState.visits === 1
+            ) {
+
+                showWhisper(
+                    "the archive is open"
+                );
+
+            } else if (
+                archiveState.visits === 2
+            ) {
+
+                showWhisper(
+                    "you returned"
+                );
+
+                discover(
+                    "returning",
+                    "RETURN VISITOR DETECTED · memory retained"
+                );
+
+            } else {
+
+                showWhisper(
+                    "welcome back, archivist"
+                );
+
+            }
+
+        },
+        1400
+    );
+}
+
 document.addEventListener(
     "DOMContentLoaded",
-    bindArchiveTerminal
+    () => {
+
+        initializeReturningState();
+
+        bindPresence();
+
+        bindSealedCuriosity();
+
+        bindHiddenRune();
+
+        bindCalmArchive();
+
+        initMouseSigil();
+
+        initTomeParallax();
+
+        initArchivePresence();
+
+        startCandle();
+
+        const audioBtn =
+            document.getElementById(
+                "audio-toggle"
+            );
+
+        if (audioBtn) {
+
+            audioBtn.addEventListener(
+                "click",
+                toggleAmbientDrone
+            );
+
+        }
+
+        const veilBtn =
+            document.getElementById(
+                "veil-toggle"
+            );
+
+        if (veilBtn) {
+
+            veilBtn.addEventListener(
+                "click",
+                disturbTheVeil
+            );
+
+        }
+
+        document.addEventListener(
+            "keydown",
+            e => {
+
+                if (
+                    e.key ===
+                    "ArrowRight"
+                ) {
+                    nextPage();
+                }
+
+                if (
+                    e.key ===
+                    "ArrowLeft"
+                ) {
+                    prevPage();
+                }
+
+                if (
+                    e.key.toLowerCase() ===
+                    "v"
+                ) {
+                    disturbTheVeil();
+                }
+
+            }
+        );
+
+    }
+);
+
+window.addEventListener(
+    "beforeunload",
+    () => {
+
+        if (presenceTimer) {
+            clearInterval(
+                presenceTimer
+            );
+        }
+
+        if (candleTimer) {
+            clearInterval(
+                candleTimer
+            );
+        }
+
+    }
 );

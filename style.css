@@ -36,6 +36,40 @@ body {
     overflow-x: hidden;
 }
 
+/* ================= ARCANE SCROLLBAR ================= */
+/* Firefox Support */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--crimson) var(--altar-void);
+}
+
+/* Chrome, Brave, Edge, Safari Support */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+/* The dark background track */
+::-webkit-scrollbar-track {
+    background: var(--altar-void);
+    border-left: 1px solid var(--leather-border);
+}
+
+/* The sliding thumb */
+::-webkit-scrollbar-thumb {
+    background: #2b171a;
+    border: 1px solid var(--leather-border);
+    border-radius: 2px;
+    box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.8);
+}
+
+/* Glowing Crimson when hovered or dragged */
+::-webkit-scrollbar-thumb:hover,
+::-webkit-scrollbar-thumb:active {
+    background: var(--crimson);
+    border-color: var(--gold);
+    box-shadow: 0 0 10px var(--crimson-glow);
+}
+
 /* Atmospheric Glows */
 .altar-background {
     position: fixed;

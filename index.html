@@ -68,6 +68,30 @@
                 <div class="mascot-fallback" style="display:none;">🐰</div>
             </div>
         </section>
+        <!-- ============ REGISTRY WITH NOTEBOOK TABS ============ -->
+        <section class="registry" aria-labelledby="registry-heading">
+            <div class="registry-head">
+                <h2 id="registry-heading">Treasures & Registry</h2>
+                <span class="registry-count"><span id="entry-count">0</span> magical items logged</span>
+            </div>
+
+            <!-- Notebook Tab Navigation -->
+            <div class="notebook-tabs" role="tablist">
+                <button class="tab-btn active" role="tab" aria-selected="true" data-target="tab-all">
+                    <span>🌸 All Treasures</span>
+                </button>
+                <button class="tab-btn" role="tab" aria-selected="false" data-target="tab-stable">
+                    <span>✨ Stable</span>
+                </button>
+                <button class="tab-btn" role="tab" aria-selected="false" data-target="tab-planned">
+                    <span>☁ Sprouting</span>
+                </button>
+            </div>
+
+            <!-- Tab Content Panel (Dynamically populated via script.js) -->
+            <div class="notebook-panel active" id="tab-all" role="tabpanel">
+            </div>
+        </section>
 
         <!-- ============ REGISTRY WITH NOTEBOOK TABS ============ -->
         <section class="registry" aria-labelledby="registry-heading">

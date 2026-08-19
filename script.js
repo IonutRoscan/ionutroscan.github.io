@@ -1,117 +1,69 @@
-document.addEventListener('DOMContentLoaded', () => {
-    
-    // 1. TOME TAB FILTERING
-    const tabs = document.querySelectorAll('.nav-tab');
-    const cards = document.querySelectorAll('.artifact-card');
+let currentSpread = 0;
+const totalSpreads = 3;
+const spreadLabels = ["I - II", "III - IV", "V - VI"];
 
-    tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            tabs.forEach(t => t.classList.remove('active'));
-            tab.classList.add('active');
+function turnToPage(index) {
+    if (index < 0 || index >= totalSpreads) return;
 
-            const filter = tab.getAttribute('data-filter');
+    currentSpread = index;
 
-            cards.forEach(card => {
-                const category = card.getAttribute('data-category');
-                if (filter === 'all' || category === filter) {
-                    card.style.display = 'flex';
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-        });
-    });
-
-    // 2. INTERACTIVE TERMINAL
-    const terminalInput = document.getElementById('terminal-input');
-    const terminalOutput = document.getElementById('terminal-output');
-
-    if (terminalInput) {
-        terminalInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                const command = terminalInput.value.trim().toLowerCase();
-                processCommand(command);
-                terminalInput.value = '';
-            }
-        });
-    }
-
-    function processCommand(cmd) {
-        printLine(`🜁 ionut@archive:~$ ${cmd}`);
-
-        switch(cmd) {
-            case 'help':
-                printLine("Recognized Spells: [about] [artifacts] [skills] [clear] [sudo summon]");
-                break;
-            case 'about':
-                printLine("Ionuț Roșcan — Digital Architect, Tool Weaver & Occult Developer.");
-                break;
-            case 'artifacts':
-                printLine("Known Artefacts: Clank Lorebook Importer, JSON Formatter, Audio Carver.");
-                break;
-            case 'skills':
-                printLine("Masteries: Web Sorcery (85%), Python (80%), Godot (75%), Sound Synthesis (75%).");
-                break;
-            case 'clear':
-                terminalOutput.innerHTML = '';
-                break;
-            case 'sudo summon':
-            case 'summon':
-                openSecretModal();
-                printLine("✦ THE CONJURATION HAS SUCCEEDED ✦", "system-msg");
-                break;
-            case '':
-                break;
-            default:
-                printLine(`Command not recognized: '${cmd}'. Type 'help' for incantations.`, "highlight");
-        }
-
-        terminalOutput.scrollTop = terminalOutput.scrollHeight;
-    }
-
-    function printLine(text, className = '') {
-        const line = document.createElement('div');
-        line.className = `term-line ${className}`;
-        line.textContent = text;
-        terminalOutput.appendChild(line);
-    }
-
-    // 3. KONAMI CODE EASTER EGG (↑ ↑ ↓ ↓ ← → ← → B A)
-    const konamiSequence = [
-        'ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown',
-        'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight',
-        'b', 'a'
-    ];
-    let konamiIndex = 0;
-
-    document.addEventListener('keydown', (e) => {
-        if (e.key.toLowerCase() === konamiSequence[konamiIndex].toLowerCase()) {
-            konamiIndex++;
-            if (konamiIndex === konamiSequence.length) {
-                openSecretModal();
-                konamiIndex = 0;
-            }
+    // Update spread visibility
+    document.querySelectorAll('.tome-page-spread').forEach((spread, idx) => {
+        if (idx === currentSpread) {
+            spread.classList.add('active');
         } else {
-            konamiIndex = 0;
+            spread.classList.remove('active');
         }
     });
 
-    // 4. MODAL CONTROLS
-    const modal = document.getElementById('secret-modal');
-    const trigger = document.getElementById('summon-trigger');
+    // Update Ribbon button states
+    document.querySelectorAll('.ribbon-btn').forEach((btn, idx) => {
+        if (idx === currentSpread) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
 
-    if (trigger) {
-        trigger.addEventListener('click', (e) => {
-            e.preventDefault();
-            openSecretModal();
+    // Update indicator
+    const indicator = document.getElementById('spread-count');
+    if (indicator) indicator.textContent = spreadLabels[currentSpread];
+}
+
+function nextPage() {
+    if (currentSpread < totalSpreads - 1) {
+        turnToPage(currentSpread + 1);
+    } else {
+        turnToPage(0); // Loop back to start
+    }
+}
+
+function prevPage() {
+    if (currentSpread > 0) {
+        turnToPage(currentSpread - 1);
+    } else {
+        turnToPage(totalSpreads - 1);
+    }
+}
+
+// Altar Sigil Click Reaction
+document.addEventListener('DOMContentLoaded', () => {
+    const sigil = document.getElementById('altar-sigil');
+    if (sigil) {
+        sigil.addEventListener('click', () => {
+            sigil.style.borderColor = '#9e1b1b';
+            sigil.style.boxShadow = '0 0 20px rgba(158, 27, 27, 0.4)';
+            const prompt = sigil.querySelector('.sigil-prompt');
+            if (prompt) {
+                prompt.textContent = "✦ PRESENCE BOUND IN BLOOD & FREQUENCY ✦";
+                prompt.style.color = '#9e1b1b';
+            }
         });
     }
 
-    window.openSecretModal = () => {
-        if (modal) modal.style.display = 'flex';
-    };
-
-    window.closeSecretModal = () => {
-        if (modal) modal.style.display = 'none';
-    };
+    // Keyboard Arrow navigation for turns
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight') nextPage();
+        if (e.key === 'ArrowLeft') prevPage();
+    });
 });

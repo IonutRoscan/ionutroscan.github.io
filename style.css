@@ -1706,7 +1706,7 @@ html[data-theme="dark"] .status-planned {
     width: 100%;
     aspect-ratio: 4 / 3;
 
-    display: flex;
+    display: none;
     align-items: center;
     justify-content: center;
 
@@ -1725,6 +1725,11 @@ html[data-theme="dark"] .status-planned {
 
     font-size:
         2.8rem;
+}
+
+
+.entry-media.media-error .entry-media-placeholder {
+    display: flex;
 }
 
 
@@ -4090,3 +4095,138 @@ html[data-theme="dark"] .status-planned {
     }
 
 }
+
+/* ============================================================
+   32. POLISH — MASCOT IDLE + MEDIA FALLBACKS
+   ============================================================ */
+
+.hero-mascot img {
+    animation:
+        mascot-bob 4.8s ease-in-out infinite;
+}
+
+
+@keyframes mascot-bob {
+
+    0%,
+    100% {
+        transform:
+            translateY(0)
+            rotate(0deg);
+    }
+
+    45% {
+        transform:
+            translateY(-6px)
+            rotate(-1.2deg);
+    }
+
+    70% {
+        transform:
+            translateY(-2px)
+            rotate(0.6deg);
+    }
+
+}
+
+
+.hero-mascot:hover img {
+    animation: none;
+}
+
+
+/* Card media error (already triggered by onerror in JS) */
+
+.entry-media.media-error img {
+    display: none;
+}
+
+
+.entry-media.media-error
+.entry-media-placeholder {
+    display: flex;
+}
+
+
+/* Scrapbook preview fallback */
+
+.scrapbook-preview.preview-error {
+    min-height: 180px;
+}
+
+
+.scrapbook-preview-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 100%;
+    min-height: 200px;
+
+    border-radius: 3px;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--rose-soft),
+            var(--lavender-soft)
+        );
+
+    color: var(--rose-dark);
+
+    font-size: 3.2rem;
+}
+
+
+[data-theme="dark"]
+.scrapbook-preview-fallback {
+    background:
+        linear-gradient(
+            135deg,
+            #5a3646,
+            #403653
+        );
+
+    color: #e49aae;
+}
+
+
+/* Tiny hover lift on featured badge */
+
+.entry-featured::before {
+    transition:
+        transform 180ms ease,
+        box-shadow 180ms ease;
+}
+
+
+.entry-featured:hover::before {
+    transform:
+        rotate(-3deg)
+        scale(1.05);
+}
+
+
+/* Soft focus ring for scrapbook cards */
+
+.entry[role="button"]:focus-visible {
+    outline:
+        3px solid
+        rgba(208, 131, 157, 0.42);
+
+    outline-offset: 4px;
+}
+
+
+/* ------------------------------------------------------------
+   REDUCED MOTION — EXTRA
+   ------------------------------------------------------------ */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .hero-mascot img {
+        animation: none !important;
+    }
+
+}
+

@@ -98,16 +98,44 @@ body::-webkit-scrollbar-thumb:active,
     z-index: 0;
 }
 
+/* ================= EERIE CANDLE FLICKER ================= */
+@keyframes candleFlickerLeft {
+    0% { opacity: 0.12; transform: scale(1) translate(0, 0); }
+    20% { opacity: 0.18; transform: scale(1.06) translate(-4px, 6px); }
+    40% { opacity: 0.09; transform: scale(0.94) translate(2px, -3px); }
+    60% { opacity: 0.22; transform: scale(1.1) translate(-2px, -4px); }
+    80% { opacity: 0.14; transform: scale(1.02) translate(4px, 2px); }
+    100% { opacity: 0.12; transform: scale(1) translate(0, 0); }
+}
+
+@keyframes candleFlickerRight {
+    0% { opacity: 0.15; transform: scale(1); }
+    25% { opacity: 0.08; transform: scale(0.92) translate(5px, 3px); }
+    50% { opacity: 0.24; transform: scale(1.12) translate(-3px, -5px); }
+    75% { opacity: 0.11; transform: scale(0.98) translate(-2px, 4px); }
+    100% { opacity: 0.15; transform: scale(1); }
+}
+
 .candle-glow {
     position: absolute;
-    width: 350px;
-    height: 350px;
+    width: 380px;
+    height: 380px;
     border-radius: 50%;
-    filter: blur(80px);
-    opacity: 0.15;
+    filter: blur(90px);
+    pointer-events: none;
 }
-.candle-glow.left { top: 10%; left: 5%; background: #ff7700; }
-.candle-glow.right { top: 20%; right: 5%; background: var(--crimson); }
+.candle-glow.left { 
+    top: 8%; 
+    left: 3%; 
+    background: #ff5500; 
+    animation: candleFlickerLeft 4.5s ease-in-out infinite;
+}
+.candle-glow.right { 
+    top: 15%; 
+    right: 3%; 
+    background: var(--crimson); 
+    animation: candleFlickerRight 5.2s ease-in-out infinite;
+}
 
 /* Header */
 .altar-header {
@@ -200,18 +228,73 @@ body::-webkit-scrollbar-thumb:active,
     justify-content: center;
 }
 
+/* ================= LIVING TOME & CURSOR ================= */
+body {
+    cursor: crosshair;
+}
+
+a, button, .ribbon-btn, .turner-btn, .altar-sigil-box {
+    cursor: pointer;
+}
+
+@keyframes tomeBreathe {
+    0%, 100% {
+        box-shadow: 
+            0 25px 50px rgba(0,0,0,0.95),
+            inset 0 0 20px rgba(0,0,0,0.8),
+            0 0 0 2px var(--gold),
+            0 0 15px rgba(158, 27, 27, 0.15);
+    }
+    50% {
+        box-shadow: 
+            0 30px 60px rgba(0,0,0,0.98),
+            inset 0 0 25px rgba(0,0,0,0.85),
+            0 0 0 2px var(--crimson),
+            0 0 35px rgba(158, 27, 27, 0.45);
+    }
+}
+
 .tome-wrapper {
-    position: relative;
-    width: 100%;
-    background: var(--leather-dark);
-    border: 8px solid var(--leather-border);
-    border-radius: 6px;
-    box-shadow: 
-        0 25px 50px rgba(0,0,0,0.95),
-        inset 0 0 20px rgba(0,0,0,0.8),
-        0 0 0 2px var(--gold);
-    display: flex;
-    overflow: hidden;
+    animation: tomeBreathe 6.5s ease-in-out infinite;
+}
+
+/* Latin Whisper Hover Effect */
+.cursed-whisper {
+    font-family: var(--font-heading);
+    font-size: 0.8rem;
+    color: var(--crimson);
+    letter-spacing: 3px;
+    text-align: center;
+    margin: 12px 0 0;
+    transition: all 0.4s ease;
+    user-select: none;
+}
+
+.cursed-whisper:hover {
+    color: #ff3333;
+    text-shadow: 0 0 10px rgba(255, 51, 51, 0.8);
+    letter-spacing: 4px;
+}
+
+/* Audio Toggle Button in Header */
+.audio-toggle-btn {
+    background: rgba(184, 134, 11, 0.08);
+    border: 1px solid var(--leather-border);
+    color: var(--gold);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    padding: 5px 12px;
+    border-radius: 20px;
+    margin-top: 10px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.audio-toggle-btn:hover, .audio-toggle-btn.active {
+    background: var(--crimson);
+    color: #fff;
+    border-color: var(--crimson);
+    box-shadow: 0 0 10px var(--crimson-glow);
 }
 
 /* Center Spine */

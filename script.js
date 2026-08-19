@@ -2671,7 +2671,7 @@ function populateScrapbookStack(
     container.innerHTML = `
 
         <div class="scrapbook-section-label">
-            made with
+            notes
         </div>
 
 

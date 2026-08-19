@@ -1,809 +1,1193 @@
 /* ============================================================
    DXK — LITTLE WORKSHOP
-   Main site controller
+   V2 JavaScript
    ============================================================ */
 
-document.addEventListener("DOMContentLoaded", async () => {
 
-    /* ----------------------------------------------------------
-       INITIAL STATE
-       ---------------------------------------------------------- */
+/* ============================================================
+   01. CONFIG
+   ============================================================ */
 
-    document.documentElement.classList.add("js-ready");
+const CONFIG = {
+    dataFile: "creations.json",
 
-    const panel = document.getElementById("tab-all");
+    themeStorageKey: "dxk-theme",
 
-    if (!panel) {
-        console.warn("DXK: #tab-all was not found.");
-        return;
-    }
+    defaultTheme: "light",
 
+    sparkleCount: 18,
 
-    /* ----------------------------------------------------------
-       THEME
-       ---------------------------------------------------------- */
-
-    setupTheme();
+    searchDelay: 80
+};
 
 
-    /* ----------------------------------------------------------
-       BACKGROUND SPARKLES
-       ---------------------------------------------------------- */
+/* ============================================================
+   02. GLOBAL STATE
+   ============================================================ */
 
-    createSparkles();
+const state = {
+    creations: [],
 
+    activeFilter: "all",
 
-    /* ----------------------------------------------------------
-       LOAD PROJECTS
-       ---------------------------------------------------------- */
+    searchTerm: "",
 
-    let creations = [];
-
-    try {
-        const response = await fetch("creations.json", {
-            cache: "no-cache"
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-        }
-
-        creations = await response.json();
-
-        if (!Array.isArray(creations)) {
-            throw new Error("creations.json must contain an array.");
-        }
-
-    } catch (error) {
-        console.error("DXK: Could not load creations.json.", error);
-
-        panel.innerHTML = `
-            <article class="entry entry-empty">
-                <div class="entry-index">!</div>
-
-                <div class="entry-body">
-                    <div class="entry-top">
-                        <h3 class="entry-name entry-name-muted">
-                            Workshop sleepy...
-                        </h3>
-
-                        <span class="status-tag status-planned">
-                            ☁ error
-                        </span>
-                    </div>
-
-                    <p class="entry-desc entry-desc-muted">
-                        I couldn't open the workshop inventory right now.
-                        Please check that <code>creations.json</code> exists
-                        and is valid JSON.
-                    </p>
-                </div>
-            </article>
-        `;
-
-        return;
-    }
+    theme:
+        localStorage.getItem(
+            CONFIG.themeStorageKey
+        ) || CONFIG.defaultTheme
+};
 
 
-    /* ----------------------------------------------------------
-       RENDER
-       ---------------------------------------------------------- */
+/* ============================================================
+   03. DOM HELPERS
+   ============================================================ */
 
-    renderCreations(creations, panel);
+function $(selector) {
+    return document.querySelector(selector);
+}
 
-    updateCounts(creations);
 
-    setupTabs(creations, panel);
+function $all(selector) {
+    return Array.from(
+        document.querySelectorAll(selector)
+    );
+}
 
-    setupSearch(creations, panel);
+
+/* ============================================================
+   04. INITIALIZATION
+   ============================================================ */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    init
+);
+
+
+async function init() {
+
+    applyTheme();
+
+    setupThemeToggle();
 
     setupMascot();
 
-});
+    createSparkles();
 
+    setupSearch();
 
-/* ============================================================
-   RENDER PROJECTS
-   ============================================================ */
+    setupTabs();
 
-function renderCreations(creations, panel) {
-
-    panel.innerHTML = "";
-
-    if (creations.length === 0) {
-        panel.innerHTML = `
-            <article class="entry entry-empty">
-                <div class="entry-index">♡</div>
-
-                <div class="entry-body">
-                    <div class="entry-top">
-                        <h3 class="entry-name entry-name-muted">
-                            The shelves are empty...
-                        </h3>
-
-                        <span class="status-tag status-planned">
-                            ☁ quiet
-                        </span>
-                    </div>
-
-                    <p class="entry-desc entry-desc-muted">
-                        Nothing has been added to the workshop yet.
-                    </p>
-                </div>
-            </article>
-        `;
-
-        return;
-    }
-
-
-    creations.forEach((item, index) => {
-
-        const article = document.createElement("article");
-
-        article.className =
-            item.isPlanned
-                ? "entry entry-empty"
-                : "entry";
-
-        article.dataset.status = item.status || "unknown";
-        article.dataset.type = item.type || "other";
-        article.dataset.name = (item.name || "").toLowerCase();
-        article.dataset.index = index;
-
-
-        /* ------------------------------------------------------
-           PLANNED / WIP ENTRY
-           ------------------------------------------------------ */
-
-        if (item.isPlanned) {
-
-            article.innerHTML = `
-                <div class="entry-index">
-                    ${escapeHTML(item.id || String(index + 1).padStart(3, "0"))}
-                </div>
-
-                <div class="entry-body">
-
-                    <div class="entry-top">
-
-                        <h3 class="entry-name entry-name-muted">
-                            ${escapeHTML(item.name || "Unnamed project")}
-                        </h3>
-
-                        <span class="status-tag status-planned">
-                            ${escapeHTML(item.statusLabel || "☁ sprouting")}
-                        </span>
-
-                    </div>
-
-                    ${
-                        item.typeLabel
-                            ? `<p class="entry-meta">
-                                ${escapeHTML(item.typeLabel)}
-                               </p>`
-                            : ""
-                    }
-
-                    <p class="entry-desc entry-desc-muted">
-                        ${escapeHTML(item.desc || "")}
-                    </p>
-
-                </div>
-            `;
-
-            panel.appendChild(article);
-
-            return;
-        }
-
-
-        /* ------------------------------------------------------
-           NORMAL PROJECT
-           ------------------------------------------------------ */
-
-        const stackHtml =
-            Array.isArray(item.stack) && item.stack.length
-                ? `
-                    <ul class="stack-list">
-                        ${item.stack
-                            .map(stackItem =>
-                                `<li>${escapeHTML(stackItem)}</li>`
-                            )
-                            .join("")}
-                    </ul>
-                  `
-                : "";
-
-
-        const tagsHtml =
-            Array.isArray(item.tags) && item.tags.length
-                ? `
-                    <div class="entry-tags">
-                        ${item.tags
-                            .map(tag =>
-                                `<span class="project-tag">
-                                    ${escapeHTML(tag)}
-                                 </span>`
-                            )
-                            .join("")}
-                    </div>
-                  `
-                : "";
-
-
-        const githubButton =
-            item.githubUrl
-                ? `
-                    <a
-                        class="btn-secondary"
-                        href="${escapeAttribute(item.githubUrl)}"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                    >
-                        ♡ GitHub
-                    </a>
-                  `
-                : "";
-
-
-        article.innerHTML = `
-
-            <div class="entry-index">
-                ${escapeHTML(item.id || String(index + 1).padStart(3, "0"))}
-            </div>
-
-            <div class="entry-body has-media">
-
-                <figure class="entry-media">
-
-                    ${
-                        item.previewImg
-                            ? `
-                                <img
-                                    src="${escapeAttribute(item.previewImg)}"
-                                    alt="Preview of ${escapeAttribute(item.name || "project")}"
-                                    loading="lazy"
-                                >
-                              `
-                            : `
-                                <div class="entry-media-placeholder">
-                                    ${escapeHTML(item.icon || "✿")}
-                                </div>
-                              `
-                    }
-
-                    ${
-                        item.stamp
-                            ? `
-                                <span class="stamp-badge">
-                                    ${escapeHTML(item.stamp)}
-                                </span>
-                              `
-                            : ""
-                    }
-
-                    ${
-                        item.caption
-                            ? `
-                                <figcaption class="media-caption">
-                                    ${escapeHTML(item.caption)}
-                                </figcaption>
-                              `
-                            : ""
-                    }
-
-                </figure>
-
-
-                <div class="entry-content">
-
-                    <div class="entry-top">
-
-                        <h3 class="entry-name">
-                            ${escapeHTML(item.name || "Unnamed project")}
-                        </h3>
-
-                        <span class="status-tag status-stable">
-                            ${escapeHTML(item.statusLabel || "✦ ready!")}
-                        </span>
-
-                    </div>
-
-
-                    ${
-                        item.typeLabel
-                            ? `
-                                <p class="entry-type">
-                                    ${escapeHTML(item.typeLabel)}
-                                </p>
-                              `
-                            : ""
-                    }
-
-
-                    ${
-                        item.meta
-                            ? `
-                                <p class="entry-meta">
-                                    ${escapeHTML(item.meta)}
-                                </p>
-                              `
-                            : ""
-                    }
-
-
-                    <p class="entry-desc">
-                        ${escapeHTML(item.desc || "")}
-                    </p>
-
-
-                    ${tagsHtml}
-
-
-                    ${
-                        item.codeBlock
-                            ? `
-                                <details class="entry-detail">
-
-                                    <summary>
-                                        ${escapeHTML(
-                                            item.detailTitle || "Details"
-                                        )}
-                                    </summary>
-
-                                    <pre class="code-block"><code>${escapeHTML(
-                                        item.codeBlock
-                                    )}</code></pre>
-
-                                    ${stackHtml}
-
-                                </details>
-                              `
-                            : stackHtml
-                              ? `
-                                <details class="entry-detail">
-
-                                    <summary>
-                                        ✿ little details
-                                    </summary>
-
-                                    ${stackHtml}
-
-                                </details>
-                              `
-                              : ""
-                    }
-
-
-                    <div class="entry-actions">
-
-                        ${
-                            item.downloadUrl
-                                ? `
-                                    <a
-                                        class="btn-primary"
-                                        href="${escapeAttribute(item.downloadUrl)}"
-                                        ${
-                                            item.downloadUrl.endsWith(".zip")
-                                                ? "download"
-                                                : ""
-                                        }
-                                    >
-                                        ${escapeHTML(
-                                            item.downloadText || "♡ Open"
-                                        )}
-                                    </a>
-                                  `
-                                : ""
-                        }
-
-                        ${githubButton}
-
-                        ${
-                            item.hint
-                                ? `
-                                    <span class="entry-hint">
-                                        ${escapeHTML(item.hint)}
-                                    </span>
-                                  `
-                                : ""
-                        }
-
-                    </div>
-
-                </div>
-
-            </div>
-        `;
-
-
-        /* ------------------------------------------------------
-           FEATURED PROJECT
-           ------------------------------------------------------ */
-
-        if (item.featured) {
-            article.classList.add("entry-featured");
-        }
-
-
-        panel.appendChild(article);
-
-    });
-
-}
-
-
-/* ============================================================
-   TABS / FILTERS
-   ============================================================ */
-
-function setupTabs(creations, panel) {
-
-    const tabButtons = document.querySelectorAll(".tab-btn");
-
-    if (!tabButtons.length) {
-        return;
-    }
-
-
-    tabButtons.forEach(button => {
-
-        button.addEventListener("click", () => {
-
-            tabButtons.forEach(btn => {
-                btn.classList.remove("active");
-                btn.setAttribute("aria-selected", "false");
-            });
-
-
-            button.classList.add("active");
-            button.setAttribute("aria-selected", "true");
-
-
-            const target = button.dataset.target || "tab-all";
-
-
-            panel.querySelectorAll(".entry").forEach(entry => {
-
-                const status = entry.dataset.status;
-                const type = entry.dataset.type;
-
-
-                let visible = true;
-
-
-                if (target === "tab-stable") {
-                    visible = status === "stable";
-                }
-
-                else if (target === "tab-planned") {
-                    visible =
-                        status === "planned" ||
-                        status === "wip";
-                }
-
-                else if (target.startsWith("type-")) {
-                    const targetType =
-                        target.replace("type-", "");
-
-                    visible = type === targetType;
-                }
-
-
-                entry.hidden = !visible;
-
-            });
-
-
-            updateVisibleCount(panel);
-
-        });
-
-    });
-
-}
-
-
-/* ============================================================
-   SEARCH
-   ============================================================ */
-
-function setupSearch(creations, panel) {
-
-    const search =
-        document.getElementById("project-search");
-
-    if (!search) {
-        return;
-    }
-
-
-    search.addEventListener("input", () => {
-
-        const query =
-            search.value
-                .trim()
-                .toLowerCase();
-
-
-        panel.querySelectorAll(".entry").forEach(entry => {
-
-            const name =
-                entry.dataset.name || "";
-
-            const type =
-                entry.dataset.type || "";
-
-            const text =
-                entry.textContent.toLowerCase();
-
-
-            const matches =
-                !query ||
-                name.includes(query) ||
-                type.includes(query) ||
-                text.includes(query);
-
-
-            entry.hidden = !matches;
-
-        });
-
-
-        updateVisibleCount(panel);
-
-    });
-
-}
-
-
-/* ============================================================
-   COUNTERS
-   ============================================================ */
-
-function updateCounts(creations) {
-
-    const countEl =
-        document.getElementById("entry-count");
-
-    const statusEl =
-        document.getElementById("system-status");
-
-
-    const stable =
-        creations.filter(
-            item => item.status === "stable"
-        ).length;
-
-
-    const planned =
-        creations.filter(
-            item =>
-                item.status === "planned" ||
-                item.status === "wip"
-        ).length;
-
-
-    if (countEl) {
-        countEl.textContent =
-            String(creations.length);
-    }
-
-
-    if (statusEl) {
-
-        statusEl.textContent =
-            `${stable} stable · ${planned} sprouting`;
-
-    }
-
-}
-
-
-/* ============================================================
-   VISIBLE RESULT COUNTER
-   ============================================================ */
-
-function updateVisibleCount(panel) {
-
-    const visible =
-        panel.querySelectorAll(
-            ".entry:not([hidden])"
-        ).length;
-
-
-    const countEl =
-        document.getElementById("visible-count");
-
-
-    if (countEl) {
-        countEl.textContent =
-            String(visible);
-    }
-
-}
-
-
-/* ============================================================
-   THEME
-   ============================================================ */
-
-function setupTheme() {
-
-    const toggle =
-        document.getElementById("theme-toggle");
-
-    const icon =
-        toggle
-            ? toggle.querySelector(".theme-toggle-icon")
-            : null;
-
-    const label =
-        toggle
-            ? toggle.querySelector(".theme-toggle-label")
-            : null;
-
-
-    let savedTheme = null;
-
-    try {
-        savedTheme =
-            localStorage.getItem("dxk-theme");
-    } catch (error) {
-        savedTheme = null;
-    }
-
-
-    if (savedTheme === "dark") {
-        document.documentElement.dataset.theme = "dark";
-    }
-
-
-    function updateUI(isDark) {
-
-        if (icon) {
-            icon.textContent =
-                isDark ? "☾" : "☀";
-        }
-
-        if (label) {
-            label.textContent =
-                isDark ? "Dusk" : "Cream";
-        }
-
-        if (toggle) {
-            toggle.setAttribute(
-                "aria-pressed",
-                String(isDark)
-            );
-        }
-
-    }
-
-
-    updateUI(
-        document.documentElement.dataset.theme === "dark"
+    updateWorkshopStatus(
+        "workshop is open ✦"
     );
 
 
-    if (!toggle) {
-        return;
+    try {
+
+        const creations =
+            await loadCreations();
+
+        state.creations =
+            Array.isArray(creations)
+                ? creations
+                : [];
+
+
+        renderCreations();
+
+        updateCounts();
+
+        updateVisibleCount();
+
+    } catch (error) {
+
+        console.error(
+            "DXK workshop failed to load:",
+            error
+        );
+
+        showLoadError();
+
+        updateWorkshopStatus(
+            "something spilled on the desk..."
+        );
+
     }
-
-
-    toggle.addEventListener("click", () => {
-
-        const isDark =
-            document.documentElement.dataset.theme === "dark";
-
-
-        if (isDark) {
-
-            document.documentElement.removeAttribute(
-                "data-theme"
-            );
-
-            updateUI(false);
-
-            try {
-                localStorage.setItem(
-                    "dxk-theme",
-                    "light"
-                );
-            } catch (error) {}
-
-        }
-
-        else {
-
-            document.documentElement.dataset.theme =
-                "dark";
-
-            updateUI(true);
-
-            try {
-                localStorage.setItem(
-                    "dxk-theme",
-                    "dark"
-                );
-            } catch (error) {}
-
-        }
-
-    });
 
 }
 
 
 /* ============================================================
-   FLOATING SPARKLES
+   05. LOAD CREATIONS
    ============================================================ */
 
-function createSparkles() {
+async function loadCreations() {
 
-    const container =
-        document.querySelector(
-            ".confetti-container"
+    const response =
+        await fetch(
+            CONFIG.dataFile,
+            {
+                cache: "no-cache"
+            }
         );
 
 
-    if (!container) {
+    if (!response.ok) {
+
+        throw new Error(
+            `Could not load ${CONFIG.dataFile}`
+        );
+
+    }
+
+
+    return await response.json();
+
+}
+
+
+/* ============================================================
+   06. RENDER CREATIONS
+   ============================================================ */
+
+function renderCreations() {
+
+    const panel =
+        $("#tab-all");
+
+
+    if (!panel) {
         return;
     }
 
 
-    const symbols = [
-        "✿",
-        "✧",
-        "♡",
-        "✦",
-        "·"
+    panel.innerHTML = "";
+
+
+    if (!state.creations.length) {
+
+        panel.innerHTML =
+            createEmptyState(
+                "The shelves are empty",
+                "Nothing has been logged in the workshop yet. 🌱"
+            );
+
+        updateVisibleCount();
+
+        return;
+    }
+
+
+    state.creations.forEach(
+        (creation, index) => {
+
+            const entry =
+                createEntry(
+                    creation,
+                    index
+                );
+
+
+            panel.appendChild(entry);
+
+        }
+    );
+
+
+    applyFilters();
+
+}
+
+
+/* ============================================================
+   07. CREATE PROJECT ENTRY
+   ============================================================ */
+
+function createEntry(
+    creation,
+    index
+) {
+
+    const article =
+        document.createElement("article");
+
+
+    const status =
+        creation.status || "planned";
+
+
+    const isPlanned =
+        creation.isPlanned === true ||
+        status === "planned";
+
+
+    const statusClass =
+        isPlanned
+            ? "status-planned"
+            : "status-stable";
+
+
+    const statusLabel =
+        creation.statusLabel ||
+        (
+            isPlanned
+                ? "☁ sprouting"
+                : "✦ ready!"
+        );
+
+
+    const type =
+        getProjectType(creation);
+
+
+    const typeLabel =
+        creation.typeLabel ||
+        getTypeLabel(type);
+
+
+    article.className =
+        [
+            "entry",
+            isPlanned
+                ? "entry-planned"
+                : "entry-stable",
+            creation.featured
+                ? "entry-featured"
+                : ""
+        ]
+        .filter(Boolean)
+        .join(" ");
+
+
+    article.dataset.status =
+        isPlanned
+            ? "planned"
+            : "stable";
+
+
+    article.dataset.type =
+        type;
+
+
+    article.dataset.search =
+        buildSearchText(
+            creation,
+            typeLabel
+        );
+
+
+    article.innerHTML = `
+
+        <div class="entry-index">
+            ${formatIndex(index + 1)}
+        </div>
+
+
+        <div class="entry-body ${creation.previewImg ? "has-media" : ""}">
+
+            ${
+                creation.previewImg
+                    ? createMediaHTML(creation)
+                    : ""
+            }
+
+
+            <div class="entry-content">
+
+                <div class="entry-top">
+
+                    <div>
+
+                        <h3 class="entry-name">
+                            ${escapeHTML(
+                                creation.name ||
+                                "Untitled creation"
+                            )}
+                        </h3>
+
+                        <div class="entry-type">
+                            ${escapeHTML(typeLabel)}
+                        </div>
+
+                    </div>
+
+
+                    <span class="status-tag ${statusClass}">
+                        ${escapeHTML(statusLabel)}
+                    </span>
+
+                </div>
+
+
+                ${
+                    creation.meta
+                        ? `
+                            <p class="entry-meta">
+                                ${escapeHTML(
+                                    creation.meta
+                                )}
+                            </p>
+                        `
+                        : ""
+                }
+
+
+                <p class="entry-desc ${
+                    isPlanned
+                        ? "entry-desc-muted"
+                        : ""
+                }">
+                    ${
+                        escapeHTML(
+                            creation.desc ||
+                            "No description has been added yet."
+                        )
+                    }
+                </p>
+
+
+                ${
+                    createTagsHTML(creation)
+                }
+
+
+                ${
+                    createDetailsHTML(creation)
+                }
+
+
+                <div class="entry-actions">
+
+                    ${
+                        createPrimaryAction(
+                            creation
+                        )
+                    }
+
+                    ${
+                        createSecondaryAction(
+                            creation
+                        )
+                    }
+
+                    ${
+                        creation.hint
+                            ? `
+                                <span class="entry-hint">
+                                    ${sanitizeInlineHTML(
+                                        creation.hint
+                                    )}
+                                </span>
+                            `
+                            : ""
+                    }
+
+                </div>
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    return article;
+
+}
+
+
+/* ============================================================
+   08. MEDIA
+   ============================================================ */
+
+function createMediaHTML(
+    creation
+) {
+
+    const image =
+        creation.previewImg;
+
+
+    const caption =
+        creation.caption ||
+        "a little workshop treasure";
+
+
+    return `
+
+        <figure class="entry-media">
+
+            <img
+                src="${escapeAttribute(image)}"
+                alt="${escapeAttribute(
+                    creation.name || "Project preview"
+                )}"
+                loading="lazy"
+                onerror="this.closest('.entry-media').classList.add('media-error'); this.style.display='none';"
+            >
+
+
+            <div
+                class="entry-media-placeholder"
+                aria-hidden="true"
+            >
+                ✿
+            </div>
+
+
+            <figcaption class="media-caption">
+                ${escapeHTML(caption)}
+            </figcaption>
+
+
+            ${
+                creation.stamp
+                    ? `
+                        <span class="stamp-badge">
+                            ${escapeHTML(
+                                creation.stamp
+                            )}
+                        </span>
+                    `
+                    : ""
+            }
+
+        </figure>
+
+    `;
+
+}
+
+
+/* ============================================================
+   09. TAGS
+   ============================================================ */
+
+function createTagsHTML(
+    creation
+) {
+
+    const tags =
+        Array.isArray(creation.tags)
+            ? creation.tags
+            : [];
+
+
+    if (!tags.length) {
+        return "";
+    }
+
+
+    return `
+
+        <div class="entry-tags">
+
+            ${
+                tags
+                    .map(
+                        tag => `
+                            <span class="project-tag">
+                                ${escapeHTML(tag)}
+                            </span>
+                        `
+                    )
+                    .join("")
+            }
+
+        </div>
+
+    `;
+
+}
+
+
+/* ============================================================
+   10. DETAILS
+   ============================================================ */
+
+function createDetailsHTML(
+    creation
+) {
+
+    const hasCode =
+        Boolean(
+            creation.detailTitle &&
+            creation.codeBlock
+        );
+
+
+    const hasStack =
+        Array.isArray(
+            creation.stack
+        ) &&
+        creation.stack.length > 0;
+
+
+    if (!hasCode && !hasStack) {
+        return "";
+    }
+
+
+    return `
+
+        <details class="entry-detail">
+
+            <summary>
+                ${escapeHTML(
+                    creation.detailTitle ||
+                    "workshop notes"
+                )}
+            </summary>
+
+
+            ${
+                hasCode
+                    ? `
+                        <pre class="code-block"><code>${escapeHTML(
+                            creation.codeBlock
+                        )}</code></pre>
+                    `
+                    : ""
+            }
+
+
+            ${
+                hasStack
+                    ? `
+                        <ul class="stack-list">
+
+                            ${
+                                creation.stack
+                                    .map(
+                                        item => `
+                                            <li>
+                                                ${sanitizeInlineHTML(
+                                                    item
+                                                )}
+                                            </li>
+                                        `
+                                    )
+                                    .join("")
+                            }
+
+                        </ul>
+                    `
+                    : ""
+            }
+
+        </details>
+
+    `;
+
+}
+
+
+/* ============================================================
+   11. PRIMARY ACTION
+   ============================================================ */
+
+function createPrimaryAction(
+    creation
+) {
+
+    if (
+        creation.downloadUrl
+    ) {
+
+        return `
+
+            <a
+                class="btn-primary"
+                href="${escapeAttribute(
+                    creation.downloadUrl
+                )}"
+                download
+            >
+                ${escapeHTML(
+                    creation.downloadText ||
+                    "Get it ✿"
+                )}
+            </a>
+
+        `;
+
+    }
+
+
+    if (
+        creation.url
+    ) {
+
+        return `
+
+            <a
+                class="btn-primary"
+                href="${escapeAttribute(
+                    creation.url
+                )}"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                Open project ↗
+            </a>
+
+        `;
+
+    }
+
+
+    return "";
+
+}
+
+
+/* ============================================================
+   12. SECONDARY ACTION
+   ============================================================ */
+
+function createSecondaryAction(
+    creation
+) {
+
+    if (
+        !creation.github
+    ) {
+        return "";
+    }
+
+
+    return `
+
+        <a
+            class="btn-secondary"
+            href="${escapeAttribute(
+                creation.github
+            )}"
+            target="_blank"
+            rel="noopener noreferrer"
+        >
+            GitHub ↗
+        </a>
+
+    `;
+
+}
+
+
+/* ============================================================
+   13. PROJECT TYPE
+   ============================================================ */
+
+/*
+    New JSON entries can eventually contain:
+
+        "type": "extension"
+
+    or:
+
+        "type": "tool"
+        "type": "game"
+        "type": "experiment"
+
+    Existing entries without a type get a conservative
+    fallback based on their metadata.
+*/
+
+function getProjectType(
+    creation
+) {
+
+    if (creation.type) {
+
+        return String(
+            creation.type
+        ).toLowerCase();
+
+    }
+
+
+    const meta =
+        String(
+            creation.meta || ""
+        ).toLowerCase();
+
+
+    if (
+        meta.includes("browser extension") ||
+        meta.includes("extension")
+    ) {
+
+        return "extension";
+
+    }
+
+
+    return "experiment";
+
+}
+
+
+function getTypeLabel(
+    type
+) {
+
+    const labels = {
+
+        extension:
+            "🌸 Browser extension",
+
+        tool:
+            "🧰 Tool",
+
+        game:
+            "🎮 Game / game-dev",
+
+        experiment:
+            "🧪 Experiment"
+
+    };
+
+
+    return (
+        labels[type] ||
+        labels.experiment
+    );
+
+}
+
+
+/* ============================================================
+   14. SEARCH TEXT
+   ============================================================ */
+
+function buildSearchText(
+    creation,
+    typeLabel
+) {
+
+    const values = [
+
+        creation.name,
+
+        creation.desc,
+
+        creation.meta,
+
+        creation.statusLabel,
+
+        creation.type,
+
+        typeLabel,
+
+        ...(Array.isArray(creation.tags)
+            ? creation.tags
+            : [])
+
     ];
 
 
-    const particleCount = 14;
+    return values
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+}
 
 
-    for (
-        let i = 0;
-        i < particleCount;
-        i++
+/* ============================================================
+   15. FILTER TABS
+   ============================================================ */
+
+function setupTabs() {
+
+    const tabs =
+        $all(".tab-btn");
+
+
+    tabs.forEach(
+        tab => {
+
+            tab.addEventListener(
+                "click",
+                () => {
+
+                    const target =
+                        tab.dataset.target ||
+                        "tab-all";
+
+
+                    setActiveFilter(
+                        target
+                    );
+
+                }
+            );
+
+        }
+    );
+
+}
+
+
+function setActiveFilter(
+    filter
+) {
+
+    state.activeFilter =
+        normalizeFilter(filter);
+
+
+    $all(".tab-btn")
+        .forEach(
+            tab => {
+
+                const tabFilter =
+                    normalizeFilter(
+                        tab.dataset.target ||
+                        "all"
+                    );
+
+
+                const active =
+                    tabFilter ===
+                    state.activeFilter;
+
+
+                tab.classList.toggle(
+                    "active",
+                    active
+                );
+
+
+                tab.setAttribute(
+                    "aria-selected",
+                    String(active)
+                );
+
+            }
+        );
+
+
+    applyFilters();
+
+}
+
+
+/* ============================================================
+   16. NORMALIZE FILTER
+   ============================================================ */
+
+function normalizeFilter(
+    filter
+) {
+
+    if (!filter) {
+        return "all";
+    }
+
+
+    const value =
+        String(filter)
+            .toLowerCase()
+            .trim();
+
+
+    if (
+        value === "tab-all" ||
+        value === "all"
     ) {
 
-        const particle =
-            document.createElement("span");
+        return "all";
+
+    }
 
 
-        particle.className =
-            "sparkle-particle";
+    if (
+        value === "tab-stable" ||
+        value === "stable"
+    ) {
+
+        return "stable";
+
+    }
 
 
-        particle.textContent =
-            symbols[
-                Math.floor(
-                    Math.random() * symbols.length
-                )
-            ];
+    if (
+        value === "tab-planned" ||
+        value === "planned"
+    ) {
+
+        return "planned";
+
+    }
 
 
-        particle.style.left =
-            `${Math.random() * 100}vw`;
+    if (
+        value.startsWith("type-")
+    ) {
+
+        return value.replace(
+            "type-",
+            ""
+        );
+
+    }
 
 
-        particle.style.animationDelay =
-            `${Math.random() * 8}s`;
+    return value;
+
+}
 
 
-        particle.style.animationDuration =
-            `${7 + Math.random() * 7}s`;
+/* ============================================================
+   17. SEARCH
+   ============================================================ */
+
+function setupSearch() {
+
+    const input =
+        $("#project-search");
 
 
-        particle.style.fontSize =
-            `${0.6 + Math.random() * 0.5}rem`;
+    if (!input) {
+        return;
+    }
 
 
-        container.appendChild(particle);
+    let timeout;
+
+
+    input.addEventListener(
+        "input",
+        () => {
+
+            clearTimeout(
+                timeout
+            );
+
+
+            timeout =
+                setTimeout(
+                    () => {
+
+                        state.searchTerm =
+                            input.value
+                                .trim()
+                                .toLowerCase();
+
+
+                        applyFilters();
+
+                    },
+                    CONFIG.searchDelay
+                );
+
+        }
+    );
+
+
+    input.addEventListener(
+        "keydown",
+        event => {
+
+            if (
+                event.key ===
+                "Escape"
+            ) {
+
+                input.value = "";
+
+                state.searchTerm = "";
+
+                applyFilters();
+
+                input.blur();
+
+            }
+
+        }
+    );
+
+}
+
+
+/* ============================================================
+   18. APPLY FILTERS
+   ============================================================ */
+
+function applyFilters() {
+
+    const entries =
+        $all(".entry");
+
+
+    if (!entries.length) {
+
+        updateVisibleCount();
+
+        return;
+    }
+
+
+    entries.forEach(
+        entry => {
+
+            const matchesFilter =
+                matchesActiveFilter(
+                    entry
+                );
+
+
+            const matchesSearch =
+                matchesSearchTerm(
+                    entry
+                );
+
+
+            const visible =
+                matchesFilter &&
+                matchesSearch;
+
+
+            entry.hidden =
+                !visible;
+
+        }
+    );
+
+
+    updateVisibleCount();
+
+}
+
+
+/* ============================================================
+   19. FILTER MATCH
+   ============================================================ */
+
+function matchesActiveFilter(
+    entry
+) {
+
+    const filter =
+        state.activeFilter;
+
+
+    if (
+        filter === "all"
+    ) {
+
+        return true;
+
+    }
+
+
+    if (
+        filter === "stable" ||
+        filter === "planned"
+    ) {
+
+        return (
+            entry.dataset.status ===
+            filter
+        );
+
+    }
+
+
+    return (
+        entry.dataset.type ===
+        filter
+    );
+
+}
+
+
+/* ============================================================
+   20. SEARCH MATCH
+   ============================================================ */
+
+function matchesSearchTerm(
+    entry
+) {
+
+    if (
+        !state.searchTerm
+    ) {
+
+        return true;
+
+    }
+
+
+    return (
+        entry.dataset.search || ""
+    ).includes(
+        state.searchTerm
+    );
+
+}
+
+
+/* ============================================================
+   21. COUNTERS
+   ============================================================ */
+
+function updateCounts() {
+
+    const total =
+        state.creations.length;
+
+
+    const count =
+        $("#entry-count");
+
+
+    if (count) {
+
+        count.textContent =
+            String(total);
+
+    }
+
+}
+
+
+function updateVisibleCount() {
+
+    const entries =
+        $all(".entry");
+
+
+    const visible =
+        entries.filter(
+            entry => !entry.hidden
+        ).length;
+
+
+    const count =
+        $("#visible-count");
+
+
+    if (count) {
+
+        count.textContent =
+            String(visible);
+
+    }
+
+
+    const noResults =
+        $("#no-results");
+
+
+    if (noResults) {
+
+        noResults.hidden =
+            !entries.length ||
+            visible > 0;
 
     }
 
@@ -811,22 +1195,222 @@ function createSparkles() {
 
 
 /* ============================================================
-   MASCOT
+   22. LOAD ERROR
+   ============================================================ */
+
+function showLoadError() {
+
+    const panel =
+        $("#tab-all");
+
+
+    if (!panel) {
+        return;
+    }
+
+
+    panel.innerHTML = `
+
+        <div class="no-results">
+
+            <div class="no-results-icon">
+                🍓
+            </div>
+
+
+            <h3>
+                The shelves wouldn't open...
+            </h3>
+
+
+            <p>
+                Check that
+                <code>creations.json</code>
+                is in the same folder as this page.
+            </p>
+
+        </div>
+
+    `;
+
+}
+
+
+/* ============================================================
+   23. EMPTY STATE
+   ============================================================ */
+
+function createEmptyState(
+    title,
+    message
+) {
+
+    return `
+
+        <div class="no-results">
+
+            <div class="no-results-icon">
+                🌱
+            </div>
+
+
+            <h3>
+                ${escapeHTML(title)}
+            </h3>
+
+
+            <p>
+                ${escapeHTML(message)}
+            </p>
+
+        </div>
+
+    `;
+
+}
+
+
+/* ============================================================
+   24. THEME
+   ============================================================ */
+
+function applyTheme() {
+
+    const root =
+        document.documentElement;
+
+
+    const isDark =
+        state.theme === "dark";
+
+
+    if (isDark) {
+
+        root.setAttribute(
+            "data-theme",
+            "dark"
+        );
+
+    } else {
+
+        root.removeAttribute(
+            "data-theme"
+        );
+
+    }
+
+
+    updateThemeButton();
+
+}
+
+
+function setupThemeToggle() {
+
+    const button =
+        $("#theme-toggle");
+
+
+    if (!button) {
+        return;
+    }
+
+
+    button.addEventListener(
+        "click",
+        () => {
+
+            state.theme =
+                state.theme === "dark"
+                    ? "light"
+                    : "dark";
+
+
+            localStorage.setItem(
+                CONFIG.themeStorageKey,
+                state.theme
+            );
+
+
+            applyTheme();
+
+        }
+    );
+
+}
+
+
+function updateThemeButton() {
+
+    const button =
+        $("#theme-toggle");
+
+
+    if (!button) {
+        return;
+    }
+
+
+    const icon =
+        button.querySelector(
+            ".theme-toggle-icon"
+        );
+
+
+    const label =
+        button.querySelector(
+            ".theme-toggle-label"
+        );
+
+
+    const isDark =
+        state.theme === "dark";
+
+
+    if (icon) {
+
+        icon.textContent =
+            isDark
+                ? "☾"
+                : "☀";
+
+    }
+
+
+    if (label) {
+
+        label.textContent =
+            isDark
+                ? "Dusk"
+                : "Cream";
+
+    }
+
+
+    button.setAttribute(
+        "aria-pressed",
+        String(isDark)
+    );
+
+
+    button.setAttribute(
+        "title",
+        isDark
+            ? "Switch to Cream theme"
+            : "Switch to Dusk theme"
+    );
+
+}
+
+
+/* ============================================================
+   25. MASCOT
    ============================================================ */
 
 function setupMascot() {
 
-    const mascot =
-        document.querySelector(".hero-mascot");
-
-
-    if (!mascot) {
-        return;
-    }
-
-
     const bubble =
-        mascot.querySelector(".mascot-bubble");
+        $(".mascot-bubble");
 
 
     if (!bubble) {
@@ -835,51 +1419,349 @@ function setupMascot() {
 
 
     const messages = [
-        "welcome! ♡",
-        "have a look around ✿",
-        "something cute is brewing...",
-        "ooh, shiny! ✨",
-        "welcome to my workshop!",
-        "please don't break anything... ♡"
+
+        "welcome! ☁️",
+
+        "please enjoy the little workshop ✿",
+
+        "something cute is brewing... 🌱",
+
+        "don't touch the mysterious button ♡",
+
+        "welcome home, developer ✨",
+
+        "everything here was made with love",
+
+        "the shelves are open! 🌸"
+
     ];
 
 
-    mascot.addEventListener("mouseenter", () => {
-
-        const message =
-            messages[
-                Math.floor(
-                    Math.random() * messages.length
-                )
-            ];
+    let index = 0;
 
 
-        bubble.textContent =
-            message;
+    bubble.addEventListener(
+        "click",
+        () => {
 
-    });
+            index =
+                (
+                    index + 1
+                ) %
+                messages.length;
+
+
+            bubble.textContent =
+                messages[index];
+
+        }
+    );
 
 }
 
 
 /* ============================================================
-   HTML SAFETY HELPERS
+   26. SPARKLES
    ============================================================ */
 
-function escapeHTML(value) {
+function createSparkles() {
 
-    return String(value)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
+    const container =
+        $(".confetti-container");
+
+
+    if (!container) {
+        return;
+    }
+
+
+    const symbols = [
+        "✦",
+        "✧",
+        "✿",
+        "♡",
+        "·"
+    ];
+
+
+    for (
+        let i = 0;
+        i < CONFIG.sparkleCount;
+        i++
+    ) {
+
+        const sparkle =
+            document.createElement(
+                "span"
+            );
+
+
+        sparkle.className =
+            "sparkle-particle";
+
+
+        sparkle.textContent =
+            symbols[
+                Math.floor(
+                    Math.random() *
+                    symbols.length
+                )
+            ];
+
+
+        sparkle.style.left =
+            `${Math.random() * 100}%`;
+
+
+        sparkle.style.animationDuration =
+            `${10 + Math.random() * 15}s`;
+
+
+        sparkle.style.animationDelay =
+            `${Math.random() * -20}s`;
+
+
+        sparkle.style.fontSize =
+            `${0.55 + Math.random() * 0.65}rem`;
+
+
+        container.appendChild(
+            sparkle
+        );
+
+    }
 
 }
 
 
-function escapeAttribute(value) {
+/* ============================================================
+   27. WORKSHOP STATUS
+   ============================================================ */
 
-    return escapeHTML(value);
+function updateWorkshopStatus(
+    message
+) {
+
+    const status =
+        $("#system-status");
+
+
+    if (status) {
+
+        status.textContent =
+            message;
+
+    }
+
+
+    const deskStatus =
+        $("#desk-status");
+
+
+    if (deskStatus) {
+
+        deskStatus.textContent =
+            message;
+
+    }
+
+}
+
+
+/* ============================================================
+   28. INDEX FORMAT
+   ============================================================ */
+
+function formatIndex(
+    number
+) {
+
+    return String(
+        number
+    ).padStart(
+        2,
+        "0"
+    );
+
+}
+
+
+/* ============================================================
+   29. HTML ESCAPING
+   ============================================================ */
+
+/*
+    Regular text from JSON goes through these functions
+    before being inserted into HTML.
+
+    This is important because creations.json is editable
+    content and shouldn't be allowed to accidentally inject
+    arbitrary HTML.
+*/
+
+function escapeHTML(
+    value
+) {
+
+    if (
+        value === null ||
+        value === undefined
+    ) {
+
+        return "";
+
+    }
+
+
+    return String(value)
+        .replaceAll(
+            "&",
+            "&amp;"
+        )
+        .replaceAll(
+            "<",
+            "&lt;"
+        )
+        .replaceAll(
+            ">",
+            "&gt;"
+        )
+        .replaceAll(
+            '"',
+            "&quot;"
+        )
+        .replaceAll(
+            "'",
+            "&#039;"
+        );
+
+}
+
+
+function escapeAttribute(
+    value
+) {
+
+    return escapeHTML(
+        value
+    );
+
+}
+
+
+/* ============================================================
+   30. LIMITED INLINE HTML
+   ============================================================ */
+
+/*
+    Your current JSON deliberately contains things like:
+
+        <code>manifest.json</code>
+
+    in the stack.
+
+    We preserve only a tiny whitelist of formatting tags.
+    Everything else is escaped.
+
+    Allowed:
+        <code>
+        <strong>
+        <em>
+*/
+
+function sanitizeInlineHTML(
+    value
+) {
+
+    if (
+        value === null ||
+        value === undefined
+    ) {
+
+        return "";
+
+    }
+
+
+    const placeholderOpenCode =
+        "___DXK_CODE_OPEN___";
+
+    const placeholderCloseCode =
+        "___DXK_CODE_CLOSE___";
+
+    const placeholderOpenStrong =
+        "___DXK_STRONG_OPEN___";
+
+    const placeholderCloseStrong =
+        "___DXK_STRONG_CLOSE___";
+
+    const placeholderOpenEm =
+        "___DXK_EM_OPEN___";
+
+    const placeholderCloseEm =
+        "___DXK_EM_CLOSE___";
+
+
+    let text =
+        String(value);
+
+
+    text =
+        text
+            .replaceAll(
+                "<code>",
+                placeholderOpenCode
+            )
+            .replaceAll(
+                "</code>",
+                placeholderCloseCode
+            )
+            .replaceAll(
+                "<strong>",
+                placeholderOpenStrong
+            )
+            .replaceAll(
+                "</strong>",
+                placeholderCloseStrong
+            )
+            .replaceAll(
+                "<em>",
+                placeholderOpenEm
+            )
+            .replaceAll(
+                "</em>",
+                placeholderCloseEm
+            );
+
+
+    text =
+        escapeHTML(text);
+
+
+    return text
+        .replaceAll(
+            placeholderOpenCode,
+            "<code>"
+        )
+        .replaceAll(
+            placeholderCloseCode,
+            "</code>"
+        )
+        .replaceAll(
+            placeholderOpenStrong,
+            "<strong>"
+        )
+        .replaceAll(
+            placeholderCloseStrong,
+            "</strong>"
+        )
+        .replaceAll(
+            placeholderOpenEm,
+            "<em>"
+        )
+        .replaceAll(
+            placeholderCloseEm,
+            "</em>"
+        );
 
 }

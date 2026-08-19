@@ -6,6 +6,7 @@ const spreadLabels = ["I - II", "III - IV", "V - VI"];
 let audioCtx = null;
 let droneOsc1 = null;
 let droneOsc2 = null;
+let subOsc = null;
 let droneGain = null;
 let isAudioActive = false;
 
@@ -15,42 +16,52 @@ function initAudioEngine() {
     }
 }
 
-function toggleAmbientDrone() {
+async function toggleAmbientDrone() {
     initAudioEngine();
     const btn = document.getElementById('audio-toggle');
 
+    // Ensure audio context is unblocked
+    if (audioCtx.state === 'suspended') {
+        await audioCtx.resume();
+    }
+
     if (!isAudioActive) {
-        if (audioCtx.state === 'suspended') {
-            audioCtx.resume();
-        }
-
-        // Sub-bass dark foundation (55Hz / A1)
+        // 1. Root Oscillator (110Hz - A2 for clear speaker presence)
         droneOsc1 = audioCtx.createOscillator();
-        droneOsc2 = audioCtx.createOscillator();
-        const filter = audioCtx.createBiquadFilter();
-        droneGain = audioCtx.createGain();
-
         droneOsc1.type = 'sawtooth';
-        droneOsc1.frequency.setValueAtTime(55, audioCtx.currentTime); // 55Hz Low A
+        droneOsc1.frequency.setValueAtTime(110, audioCtx.currentTime);
 
-        droneOsc2.type = 'sine';
-        droneOsc2.frequency.setValueAtTime(54.4, audioCtx.currentTime); // Slight detune for eerie binaural pulse
+        // 2. Detuned Harmonic (109.2Hz for eerie slow-beating pulse)
+        droneOsc2 = audioCtx.createOscillator();
+        droneOsc2.type = 'triangle';
+        droneOsc2.frequency.setValueAtTime(109.2, audioCtx.currentTime);
 
-        // Dark lowpass filter to remove harshness
+        // 3. Deep Sub Foundation (55Hz)
+        subOsc = audioCtx.createOscillator();
+        subOsc.type = 'sine';
+        subOsc.frequency.setValueAtTime(55, audioCtx.currentTime);
+
+        // 4. Low-pass filter to keep it dark and warm
+        const filter = audioCtx.createBiquadFilter();
         filter.type = 'lowpass';
-        filter.frequency.setValueAtTime(140, audioCtx.currentTime);
+        filter.frequency.setValueAtTime(280, audioCtx.currentTime);
+        filter.Q.setValueAtTime(3.0, audioCtx.currentTime);
 
-        // Smooth fade-in
+        // 5. Main Master Gain (Boosted to 0.22 for audible presence)
+        droneGain = audioCtx.createGain();
         droneGain.gain.setValueAtTime(0.001, audioCtx.currentTime);
-        droneGain.gain.exponentialRampToValueAtTime(0.08, audioCtx.currentTime + 2.5);
+        droneGain.gain.exponentialRampToValueAtTime(0.22, audioCtx.currentTime + 1.5);
 
+        // Route Audio
         droneOsc1.connect(filter);
         droneOsc2.connect(filter);
+        subOsc.connect(filter);
         filter.connect(droneGain);
         droneGain.connect(audioCtx.destination);
 
         droneOsc1.start();
         droneOsc2.start();
+        subOsc.start();
 
         isAudioActive = true;
         if (btn) {
@@ -60,12 +71,13 @@ function toggleAmbientDrone() {
     } else {
         // Fade out
         if (droneGain) {
-            droneGain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 1.2);
+            droneGain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 1.0);
             setTimeout(() => {
                 if (droneOsc1) { droneOsc1.stop(); droneOsc1.disconnect(); }
                 if (droneOsc2) { droneOsc2.stop(); droneOsc2.disconnect(); }
+                if (subOsc) { subOsc.stop(); subOsc.disconnect(); }
                 isAudioActive = false;
-            }, 1200);
+            }, 1000);
         }
         if (btn) {
             btn.classList.remove('active');
@@ -76,9 +88,13 @@ function toggleAmbientDrone() {
 
 // Synthesized Parchment Page Rustle
 function playPageFlipSound() {
-    if (!isAudioActive || !audioCtx) return;
+    if (!audioCtx) return;
 
     try {
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+
         const bufferSize = audioCtx.sampleRate * 0.18;
         const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
         const output = noiseBuffer.getChannelData(0);
@@ -92,11 +108,11 @@ function playPageFlipSound() {
 
         const filter = audioCtx.createBiquadFilter();
         filter.type = 'bandpass';
-        filter.frequency.setValueAtTime(800, audioCtx.currentTime);
-        filter.Q.setValueAtTime(1.5, audioCtx.currentTime);
+        filter.frequency.setValueAtTime(700, audioCtx.currentTime);
+        filter.Q.setValueAtTime(2.0, audioCtx.currentTime);
 
         const gainNode = audioCtx.createGain();
-        gainNode.gain.setValueAtTime(0.04, audioCtx.currentTime);
+        gainNode.gain.setValueAtTime(0.08, audioCtx.currentTime);
         gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.18);
 
         whiteNoise.connect(filter);
@@ -105,7 +121,7 @@ function playPageFlipSound() {
 
         whiteNoise.start();
     } catch (e) {
-        // Fallback silently if audio context is blocked
+        // Fallback silently if audio is blocked
     }
 }
 
@@ -167,6 +183,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const sigil = document.getElementById('altar-sigil');
     if (sigil) {
         sigil.addEventListener('click', () => {
+            initAudioEngine();
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            playPageFlipSound();
+
             sigil.style.borderColor = '#9e1b1b';
             sigil.style.boxShadow = '0 0 25px rgba(158, 27, 27, 0.6)';
             const prompt = sigil.querySelector('.sigil-prompt');

@@ -1,3 +1,11 @@
+/*
+    GRIMOIRE ARCHIVE ENGINE
+    v3
+
+    The archive remembers.
+    The archive watches.
+*/
+
 let currentSpread = 0;
 const totalSpreads = 3;
 const spreadLabels = ["I - II", "III - IV", "V - VI"];
@@ -6,10 +14,9 @@ let audioCtx = null;
 let droneOsc1 = null;
 let droneOsc2 = null;
 let droneGain = null;
-let masterGain = null;
 let isAudioActive = false;
-let veilDisturbed = false;
-let presenceTimer = null;
+
+const ARCHIVE_KEY = "grimoire_archive_v3";
 
 const whispers = [
     "the archive remembers every hand that opens it",
@@ -17,81 +24,220 @@ const whispers = [
     "something moved between the pages",
     "do not close the archive yet",
     "the seal is warmer than it should be",
-    "there is no page seven"
+    "there is no page seven",
+    "the archive has recorded your presence",
+    "some entries are still being written",
+    "the workshop is not empty",
+    "something is waiting behind the seal"
 ];
 
-function initAudioEngine() {
-    if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+const defaultArchiveState = {
+    visits: 0,
+    pagesSeen: [],
+    discoveries: [],
+    veilDisturbed: false,
+    presenceBound: false,
+    curiosityOpened: false,
+    firstVisit: Date.now(),
+    lastVisit: Date.now()
+};
+
+let archiveState = loadArchiveState();
+
+
+/* =========================================================
+   ARCHIVE MEMORY
+========================================================= */
+
+function loadArchiveState() {
+
+    try {
+
+        const saved =
+            localStorage.getItem(ARCHIVE_KEY);
+
+        if (!saved) {
+            return {
+                ...defaultArchiveState
+            };
+        }
+
+        return {
+            ...defaultArchiveState,
+            ...JSON.parse(saved)
+        };
+
+    } catch {
+
+        return {
+            ...defaultArchiveState
+        };
+
     }
 }
 
+
+function saveArchiveState() {
+
+    try {
+
+        localStorage.setItem(
+            ARCHIVE_KEY,
+            JSON.stringify(archiveState)
+        );
+
+    } catch {
+        // Storage may be unavailable.
+    }
+}
+
+
+function registerVisit() {
+
+    archiveState.visits += 1;
+    archiveState.lastVisit = Date.now();
+
+    saveArchiveState();
+
+}
+
+
+function addDiscovery(id) {
+
+    if (
+        archiveState.discoveries.includes(id)
+    ) {
+        return false;
+    }
+
+    archiveState.discoveries.push(id);
+
+    saveArchiveState();
+
+    return true;
+}
+
+
+function hasDiscovery(id) {
+
+    return archiveState.discoveries.includes(id);
+
+}
+
+
+/* =========================================================
+   AUDIO ENGINE
+========================================================= */
+
+function initAudioEngine() {
+
+    if (!audioCtx) {
+
+        audioCtx =
+            new (
+                window.AudioContext ||
+                window.webkitAudioContext
+            )();
+
+    }
+
+}
+
+
 function toggleAmbientDrone() {
+
     initAudioEngine();
-    const btn = document.getElementById("audio-toggle");
+
+    const btn =
+        document.getElementById(
+            "audio-toggle"
+        );
 
     if (!isAudioActive) {
-        if (audioCtx.state === "suspended") audioCtx.resume();
 
-        const filter = audioCtx.createBiquadFilter();
-        masterGain = audioCtx.createGain();
-        droneGain = audioCtx.createGain();
+        if (
+            audioCtx.state === "suspended"
+        ) {
 
-        droneOsc1 = audioCtx.createOscillator();
-        droneOsc2 = audioCtx.createOscillator();
+            audioCtx.resume();
 
-        droneOsc1.type = "sawtooth";
+        }
+
+
+        droneOsc1 =
+            audioCtx.createOscillator();
+
+        droneOsc2 =
+            audioCtx.createOscillator();
+
+        const filter =
+            audioCtx.createBiquadFilter();
+
+        droneGain =
+            audioCtx.createGain();
+
+
+        droneOsc1.type =
+            "sawtooth";
+
         droneOsc1.frequency.setValueAtTime(
             55,
             audioCtx.currentTime
         );
 
-        droneOsc2.type = "sine";
+
+        droneOsc2.type =
+            "sine";
+
         droneOsc2.frequency.setValueAtTime(
-            54.35,
+            54.4,
             audioCtx.currentTime
         );
 
-        filter.type = "lowpass";
+
+        filter.type =
+            "lowpass";
+
         filter.frequency.setValueAtTime(
-            135,
+            140,
             audioCtx.currentTime
         );
-        filter.Q.setValueAtTime(
-            1.2,
-            audioCtx.currentTime
-        );
+
 
         droneGain.gain.setValueAtTime(
-            0.0001,
+            0.001,
             audioCtx.currentTime
         );
 
         droneGain.gain.exponentialRampToValueAtTime(
-            0.055,
-            audioCtx.currentTime + 2.8
+            0.08,
+            audioCtx.currentTime + 2.5
         );
 
-        masterGain.gain.setValueAtTime(
-            0.72,
-            audioCtx.currentTime
-        );
 
         droneOsc1.connect(filter);
         droneOsc2.connect(filter);
 
         filter.connect(droneGain);
-        droneGain.connect(masterGain);
-        masterGain.connect(audioCtx.destination);
+        droneGain.connect(
+            audioCtx.destination
+        );
+
 
         droneOsc1.start();
         droneOsc2.start();
 
+
         isAudioActive = true;
 
+
         if (btn) {
+
             btn.classList.add("active");
-            btn.textContent = "🕯 Resonance Bound (Active)";
+
+            btn.textContent =
+                "🕯️ Resonance Bound (Active)";
+
         }
 
     } else {
@@ -103,49 +249,82 @@ function toggleAmbientDrone() {
                 audioCtx.currentTime + 1.2
             );
 
+
             setTimeout(() => {
 
                 try {
-                    droneOsc1?.stop();
-                    droneOsc2?.stop();
-                } catch {}
 
-                droneOsc1?.disconnect();
-                droneOsc2?.disconnect();
-                droneGain?.disconnect();
+                    if (droneOsc1) {
+                        droneOsc1.stop();
+                        droneOsc1.disconnect();
+                    }
+
+                    if (droneOsc2) {
+                        droneOsc2.stop();
+                        droneOsc2.disconnect();
+                    }
+
+                } catch {}
 
                 isAudioActive = false;
 
-            }, 1250);
+            }, 1200);
+
         }
 
+
         if (btn) {
-            btn.classList.remove("active");
-            btn.textContent = "🕯 Kindle Ambient Resonance";
+
+            btn.classList.remove(
+                "active"
+            );
+
+            btn.textContent =
+                "🕯️ Kindle Ambient Resonance";
+
         }
+
     }
+
 }
 
 
+/* =========================================================
+   SIMPLE SYNTH SOUNDS
+========================================================= */
+
 function playTone(
-    freq,
-    duration = 0.12,
+    frequency,
+    duration = 0.15,
     type = "sine",
-    volume = 0.035
+    volume = 0.025
 ) {
-    if (!isAudioActive || !audioCtx) return;
+
+    if (
+        !isAudioActive ||
+        !audioCtx
+    ) {
+        return;
+    }
+
 
     try {
 
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
+        const oscillator =
+            audioCtx.createOscillator();
 
-        osc.type = type;
+        const gain =
+            audioCtx.createGain();
 
-        osc.frequency.setValueAtTime(
-            freq,
+
+        oscillator.type =
+            type;
+
+        oscillator.frequency.setValueAtTime(
+            frequency,
             audioCtx.currentTime
         );
+
 
         gain.gain.setValueAtTime(
             volume,
@@ -157,46 +336,71 @@ function playTone(
             audioCtx.currentTime + duration
         );
 
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
 
-        osc.start();
+        oscillator.connect(gain);
+        gain.connect(
+            audioCtx.destination
+        );
 
-        osc.stop(
-            audioCtx.currentTime + duration
+
+        oscillator.start();
+
+        oscillator.stop(
+            audioCtx.currentTime +
+            duration
         );
 
     } catch {}
+
 }
 
 
+/* =========================================================
+   PAGE RUSTLE
+========================================================= */
+
 function playPageFlipSound() {
 
-    if (!isAudioActive || !audioCtx) return;
+    if (
+        !isAudioActive ||
+        !audioCtx
+    ) {
+        return;
+    }
+
 
     try {
 
         const bufferSize =
-            Math.floor(audioCtx.sampleRate * 0.18);
+            Math.floor(
+                audioCtx.sampleRate *
+                0.18
+            );
 
-        const buffer =
+
+        const noiseBuffer =
             audioCtx.createBuffer(
                 1,
                 bufferSize,
                 audioCtx.sampleRate
             );
 
+
         const output =
-            buffer.getChannelData(0);
+            noiseBuffer.getChannelData(0);
+
 
         for (
             let i = 0;
             i < bufferSize;
             i++
         ) {
+
             output[i] =
                 Math.random() * 2 - 1;
+
         }
+
 
         const source =
             audioCtx.createBufferSource();
@@ -207,9 +411,13 @@ function playPageFlipSound() {
         const gain =
             audioCtx.createGain();
 
-        source.buffer = buffer;
 
-        filter.type = "bandpass";
+        source.buffer =
+            noiseBuffer;
+
+
+        filter.type =
+            "bandpass";
 
         filter.frequency.setValueAtTime(
             800,
@@ -221,8 +429,9 @@ function playPageFlipSound() {
             audioCtx.currentTime
         );
 
+
         gain.gain.setValueAtTime(
-            0.045,
+            0.04,
             audioCtx.currentTime
         );
 
@@ -231,19 +440,24 @@ function playPageFlipSound() {
             audioCtx.currentTime + 0.18
         );
 
+
         source.connect(filter);
         filter.connect(gain);
-        gain.connect(audioCtx.destination);
+        gain.connect(
+            audioCtx.destination
+        );
+
 
         source.start();
 
     } catch {}
+
 }
 
 
-/* =========================
+/* =========================================================
    PAGE NAVIGATION
-========================= */
+========================================================= */
 
 function turnToPage(index) {
 
@@ -254,62 +468,91 @@ function turnToPage(index) {
         return;
     }
 
+
     currentSpread = index;
 
+
     playPageFlipSound();
+
 
     playTone(
         110 + index * 22,
         0.16,
         "triangle",
-        0.02
+        0.018
     );
 
 
     document
-        .querySelectorAll(".tome-page-spread")
-        .forEach((spread, idx) => {
+        .querySelectorAll(
+            ".tome-page-spread"
+        )
+        .forEach(
+            (spread, idx) => {
 
-            spread.classList.toggle(
-                "active",
-                idx === currentSpread
-            );
+                spread.classList.toggle(
+                    "active",
+                    idx === currentSpread
+                );
 
-        });
+            }
+        );
 
 
     document
-        .querySelectorAll(".ribbon-btn")
-        .forEach((btn, idx) => {
+        .querySelectorAll(
+            ".ribbon-btn"
+        )
+        .forEach(
+            (btn, idx) => {
 
-            btn.classList.toggle(
-                "active",
-                idx === currentSpread
-            );
+                btn.classList.toggle(
+                    "active",
+                    idx === currentSpread
+                );
 
-        });
+            }
+        );
 
 
     const indicator =
-        document.getElementById("spread-count");
+        document.getElementById(
+            "spread-count"
+        );
+
 
     if (indicator) {
+
         indicator.textContent =
             spreadLabels[currentSpread];
+
     }
 
 
-    /*
-        Sometimes the archive whispers
-        when a page is turned.
-    */
+    if (
+        !archiveState.pagesSeen.includes(
+            currentSpread
+        )
+    ) {
 
-    if (Math.random() < 0.42) {
+        archiveState.pagesSeen.push(
+            currentSpread
+        );
+
+        saveArchiveState();
+
+    }
+
+
+    if (
+        Math.random() < 0.38
+    ) {
 
         showWhisper(
             whispers[
                 Math.floor(
-                    Math.random() * whispers.length
+                    Math.random() *
+                    whispers.length
                 )
             ]
         );
@@ -318,70 +561,102 @@ function turnToPage(index) {
 
 
     /*
-        The final spread is where
-        the archive becomes more active.
+        The final spread has a higher
+        chance of triggering an event.
     */
 
     if (
         currentSpread === 2 &&
-        Math.random() < 0.55
+        Math.random() < 0.5
     ) {
 
         disturbPresence();
 
     }
+
 }
 
 
 function nextPage() {
 
-    turnToPage(
-        (currentSpread + 1) % totalSpreads
-    );
+    if (
+        currentSpread <
+        totalSpreads - 1
+    ) {
+
+        turnToPage(
+            currentSpread + 1
+        );
+
+    } else {
+
+        turnToPage(0);
+
+    }
 
 }
 
 
 function prevPage() {
 
-    turnToPage(
-        (currentSpread - 1 + totalSpreads)
-        % totalSpreads
+    if (
+        currentSpread > 0
+    ) {
+
+        turnToPage(
+            currentSpread - 1
+        );
+
+    } else {
+
+        turnToPage(
+            totalSpreads - 1
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   WHISPERS
+========================================================= */
+
+function showWhisper(text) {
+
+    const el =
+        document.getElementById(
+            "whisper-text"
+        );
+
+
+    if (!el) {
+        return;
+    }
+
+
+    el.textContent =
+        `“${text}”`;
+
+
+    el.classList.remove(
+        "show"
+    );
+
+
+    void el.offsetWidth;
+
+
+    el.classList.add(
+        "show"
     );
 
 }
 
 
-/* =========================
-   WHISPERS
-========================= */
-
-function showWhisper(text) {
-
-    const el =
-        document.getElementById("whisper-text");
-
-    if (!el) return;
-
-    el.textContent =
-        `“${text}”`;
-
-    el.classList.remove("show");
-
-    /*
-        Force browser reflow so
-        the animation can restart.
-    */
-
-    void el.offsetWidth;
-
-    el.classList.add("show");
-}
-
-
-/* =========================
-   PRESENCE EFFECT
-========================= */
+/* =========================================================
+   PRESENCE
+========================================================= */
 
 function disturbPresence() {
 
@@ -389,11 +664,14 @@ function disturbPresence() {
         "presence-flash"
     );
 
+
     void document.body.offsetWidth;
+
 
     document.body.classList.add(
         "presence-flash"
     );
+
 
     setTimeout(() => {
 
@@ -402,12 +680,13 @@ function disturbPresence() {
         );
 
     }, 1900);
+
 }
 
 
-/* =========================
-   GLITCH EFFECT
-========================= */
+/* =========================================================
+   GLITCH
+========================================================= */
 
 function glitchArchive() {
 
@@ -415,7 +694,9 @@ function glitchArchive() {
         "glitching"
     );
 
+
     void document.body.offsetWidth;
+
 
     document.body.classList.add(
         "glitching"
@@ -423,10 +704,15 @@ function glitchArchive() {
 
 
     const status =
-        document.getElementById("status-text");
+        document.getElementById(
+            "status-text"
+        );
+
 
     const footer =
-        document.getElementById("footer-status");
+        document.getElementById(
+            "footer-status"
+        );
 
 
     const originalStatus =
@@ -459,60 +745,75 @@ function glitchArchive() {
 
         }
 
+
         if (footer) {
 
             footer.textContent =
-                veilDisturbed
+                archiveState.veilDisturbed
                     ? "the veil is thin"
                     : "something is listening";
 
         }
 
     }, 1300);
+
 }
 
 
-/* =========================
-   DISTURB THE VEIL
-========================= */
+/* =========================================================
+   VEIL
+========================================================= */
 
 function disturbTheVeil() {
 
-    veilDisturbed =
-        !veilDisturbed;
+    archiveState.veilDisturbed =
+        !archiveState.veilDisturbed;
+
+
+    saveArchiveState();
 
 
     document.body.classList.toggle(
         "veil-disturbed",
-        veilDisturbed
+        archiveState.veilDisturbed
     );
 
 
     const btn =
-        document.getElementById("veil-toggle");
+        document.getElementById(
+            "veil-toggle"
+        );
 
 
     if (btn) {
 
         btn.textContent =
-            veilDisturbed
+            archiveState.veilDisturbed
                 ? "◈ Veil Disturbed"
                 : "◈ Disturb the Veil";
 
 
         btn.classList.toggle(
             "active",
-            veilDisturbed
+            archiveState.veilDisturbed
         );
 
     }
 
 
-    if (veilDisturbed) {
+    if (
+        archiveState.veilDisturbed
+    ) {
+
+        addDiscovery(
+            "veil"
+        );
+
 
         showWhisper(
             "you should not have done that"
         );
+
 
         glitchArchive();
 
@@ -523,12 +824,13 @@ function disturbTheVeil() {
         );
 
     }
+
 }
 
 
-/* =========================
-   ALTAR / PRESENCE BINDING
-========================= */
+/* =========================================================
+   ALTAR SEAL
+========================================================= */
 
 function bindPresence() {
 
@@ -537,10 +839,52 @@ function bindPresence() {
             "altar-sigil"
         );
 
-    if (!sigil) return;
+
+    if (!sigil) {
+        return;
+    }
+
+
+    /*
+        Restore previous state.
+    */
+
+    if (
+        archiveState.presenceBound
+    ) {
+
+        sigil.classList.add(
+            "bound"
+        );
+
+        const prompt =
+            sigil.querySelector(
+                ".sigil-prompt"
+            );
+
+        if (prompt) {
+
+            prompt.textContent =
+                "✦ PRESENCE BOUND · THE ARCHIVE KNOWS YOU ✦";
+
+        }
+
+    }
 
 
     const bind = () => {
+
+        archiveState.presenceBound =
+            true;
+
+
+        addDiscovery(
+            "presence"
+        );
+
+
+        saveArchiveState();
+
 
         sigil.classList.add(
             "bound"
@@ -559,7 +903,7 @@ function bindPresence() {
                 "✦ PRESENCE BOUND · THE ARCHIVE KNOWS YOU ✦";
 
             prompt.style.color =
-                "#8d1119";
+                "#9e1b1b";
 
         }
 
@@ -580,18 +924,7 @@ function bindPresence() {
         disturbPresence();
 
 
-        const count =
-            document.getElementById(
-                "visitor-count"
-            );
-
-
-        if (count) {
-
-            count.textContent =
-                "002";
-
-        }
+        updateArchiveLedger();
 
     };
 
@@ -604,14 +937,14 @@ function bindPresence() {
 
     sigil.addEventListener(
         "keydown",
-        e => {
+        event => {
 
             if (
-                e.key === "Enter" ||
-                e.key === " "
+                event.key === "Enter" ||
+                event.key === " "
             ) {
 
-                e.preventDefault();
+                event.preventDefault();
 
                 bind();
 
@@ -619,12 +952,13 @@ function bindPresence() {
 
         }
     );
+
 }
 
 
-/* =========================
+/* =========================================================
    SEALED CURIOSITY
-========================= */
+========================================================= */
 
 function bindSealedCuriosity() {
 
@@ -633,24 +967,51 @@ function bindSealedCuriosity() {
             "sealed-curio"
         );
 
-    if (!card) return;
+
+    if (!card) {
+        return;
+    }
+
+
+    if (
+        archiveState.curiosityOpened
+    ) {
+
+        card.classList.add(
+            "revealed"
+        );
+
+    }
 
 
     const reveal = () => {
 
-        card.classList.toggle(
-            "revealed"
-        );
-
-
         const revealed =
-            card.classList.contains(
+            card.classList.toggle(
                 "revealed"
             );
 
 
-        const p =
-            card.querySelector("p");
+        archiveState.curiosityOpened =
+            revealed;
+
+
+        if (revealed) {
+
+            addDiscovery(
+                "curiosity"
+            );
+
+        }
+
+
+        saveArchiveState();
+
+
+        const text =
+            card.querySelector(
+                "p"
+            );
 
 
         const status =
@@ -661,9 +1022,9 @@ function bindSealedCuriosity() {
 
         if (revealed) {
 
-            if (p) {
+            if (text) {
 
-                p.textContent =
+                text.textContent =
                     "You found it. It was already open.";
 
             }
@@ -686,9 +1047,9 @@ function bindSealedCuriosity() {
 
         } else {
 
-            if (p) {
+            if (text) {
 
-                p.textContent =
+                text.textContent =
                     "There is an entry here that was not written by you.";
 
             }
@@ -703,6 +1064,9 @@ function bindSealedCuriosity() {
 
         }
 
+
+        updateArchiveLedger();
+
     };
 
 
@@ -714,14 +1078,14 @@ function bindSealedCuriosity() {
 
     card.addEventListener(
         "keydown",
-        e => {
+        event => {
 
             if (
-                e.key === "Enter" ||
-                e.key === " "
+                event.key === "Enter" ||
+                event.key === " "
             ) {
 
-                e.preventDefault();
+                event.preventDefault();
 
                 reveal();
 
@@ -729,16 +1093,358 @@ function bindSealedCuriosity() {
 
         }
     );
+
 }
 
 
-/* =========================
+/* =========================================================
+   ARCHIVE LEDGER
+========================================================= */
+
+function updateArchiveLedger() {
+
+    const visitCounter =
+        document.getElementById(
+            "visitor-count"
+        );
+
+
+    if (visitCounter) {
+
+        visitCounter.textContent =
+            String(
+                archiveState.visits
+            ).padStart(3, "0");
+
+    }
+
+
+    const discoveryCounter =
+        document.getElementById(
+            "discovery-count"
+        );
+
+
+    if (discoveryCounter) {
+
+        discoveryCounter.textContent =
+            String(
+                archiveState.discoveries.length
+            );
+
+    }
+
+
+    const releaseCounter =
+        document.getElementById(
+            "released-count"
+        );
+
+
+    if (releaseCounter) {
+
+        releaseCounter.textContent =
+            "001";
+
+    }
+
+
+    const conceptCounter =
+        document.getElementById(
+            "concept-count"
+        );
+
+
+    if (conceptCounter) {
+
+        conceptCounter.textContent =
+            "001";
+
+    }
+
+}
+
+
+/* =========================================================
+   AUTONOMOUS ARCHIVE
+========================================================= */
+
+let presenceTimer = null;
+
+
+function startArchiveActivity() {
+
+    presenceTimer =
+        setInterval(() => {
+
+            if (
+                document.hidden
+            ) {
+                return;
+            }
+
+
+            /*
+                The archive occasionally
+                acknowledges the visitor.
+            */
+
+            if (
+                Math.random() < 0.16
+            ) {
+
+                showWhisper(
+                    whispers[
+                        Math.floor(
+                            Math.random() *
+                            whispers.length
+                        )
+                    ]
+                );
+
+            }
+
+
+            /*
+                Very rare visual disturbance.
+            */
+
+            if (
+                Math.random() < 0.08
+            ) {
+
+                glitchArchive();
+
+            }
+
+        }, 18000);
+
+}
+
+
+/* =========================================================
+   MOUSE RESPONSE
+========================================================= */
+
+function bindTomeMotion() {
+
+    const tome =
+        document.getElementById(
+            "tome"
+        );
+
+
+    if (!tome) {
+        return;
+    }
+
+
+    const reducedMotion =
+        window.matchMedia(
+            "(prefers-reduced-motion: reduce)"
+        );
+
+
+    if (
+        reducedMotion.matches
+    ) {
+        return;
+    }
+
+
+    document.addEventListener(
+        "pointermove",
+        event => {
+
+            const rect =
+                tome.getBoundingClientRect();
+
+
+            const inside =
+                event.clientX >= rect.left &&
+                event.clientX <= rect.right &&
+                event.clientY >= rect.top &&
+                event.clientY <= rect.bottom;
+
+
+            if (!inside) {
+
+                tome.style.transform =
+                    "";
+
+                return;
+
+            }
+
+
+            const x =
+                (
+                    (event.clientX - rect.left) /
+                    rect.width
+                    - 0.5
+                ) * 2;
+
+
+            const y =
+                (
+                    (event.clientY - rect.top) /
+                    rect.height
+                    - 0.5
+                ) * 2;
+
+
+            tome.style.transform =
+                `perspective(1800px)
+                 rotateY(${x * 0.7}deg)
+                 rotateX(${-y * 0.45}deg)`;
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   CURSOR SIGIL
+========================================================= */
+
+function bindCursorSigil() {
+
+    const cursor =
+        document.getElementById(
+            "cursor-sigil"
+        );
+
+
+    if (!cursor) {
+        return;
+    }
+
+
+    const reducedMotion =
+        window.matchMedia(
+            "(prefers-reduced-motion: reduce)"
+        );
+
+
+    if (
+        reducedMotion.matches
+    ) {
+        return;
+    }
+
+
+    document.addEventListener(
+        "pointermove",
+        event => {
+
+            cursor.style.left =
+                `${event.clientX}px`;
+
+            cursor.style.top =
+                `${event.clientY}px`;
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   KEYBOARD NAVIGATION
+========================================================= */
+
+function bindKeyboard() {
+
+    document.addEventListener(
+        "keydown",
+        event => {
+
+            if (
+                event.key ===
+                "ArrowRight"
+            ) {
+
+                nextPage();
+
+            }
+
+
+            if (
+                event.key ===
+                "ArrowLeft"
+            ) {
+
+                prevPage();
+
+            }
+
+
+            if (
+                event.key.toLowerCase() ===
+                "v"
+            ) {
+
+                disturbTheVeil();
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =========================================================
    INITIALIZATION
-========================= */
+========================================================= */
 
 document.addEventListener(
     "DOMContentLoaded",
     () => {
+
+        registerVisit();
+
+
+        updateArchiveLedger();
+
+
+        /*
+            Restore veil state.
+        */
+
+        if (
+            archiveState.veilDisturbed
+        ) {
+
+            document.body.classList.add(
+                "veil-disturbed"
+            );
+
+
+            const veilButton =
+                document.getElementById(
+                    "veil-toggle"
+                );
+
+
+            if (veilButton) {
+
+                veilButton.textContent =
+                    "◈ Veil Disturbed";
+
+                veilButton.classList.add(
+                    "active"
+                );
+
+            }
+
+        }
+
+
+        /*
+            Audio.
+        */
 
         const audioButton =
             document.getElementById(
@@ -755,6 +1461,10 @@ document.addEventListener(
 
         }
 
+
+        /*
+            Veil button.
+        */
 
         const veilButton =
             document.getElementById(
@@ -776,178 +1486,62 @@ document.addEventListener(
 
         bindSealedCuriosity();
 
+        bindKeyboard();
 
-        /* =====================
-           KEYBOARD NAVIGATION
-        ===================== */
+        bindTomeMotion();
 
-        document.addEventListener(
-            "keydown",
-            e => {
+        bindCursorSigil();
 
-                if (
-                    e.key === "ArrowRight"
-                ) {
-
-                    nextPage();
-
-                }
+        startArchiveActivity();
 
 
-                if (
-                    e.key === "ArrowLeft"
-                ) {
+        /*
+            First visit message.
+        */
 
-                    prevPage();
+        if (
+            archiveState.visits === 1
+        ) {
 
-                }
+            setTimeout(() => {
 
-
-                if (
-                    e.key.toLowerCase() === "v"
-                ) {
-
-                    disturbTheVeil();
-
-                }
-
-            }
-        );
-
-
-        /* =====================
-           AUTONOMOUS ARCHIVE
-        ===================== */
-
-        presenceTimer =
-            setInterval(() => {
-
-                /*
-                    Do nothing if the tab isn't visible.
-                */
-
-                if (document.hidden) {
-                    return;
-                }
-
-
-                /*
-                    Small chance that the archive
-                    decides to acknowledge the visitor.
-                */
-
-                if (
-                    Math.random() < 0.18
-                ) {
-
-                    showWhisper(
-                        whispers[
-                            Math.floor(
-                                Math.random() *
-                                whispers.length
-                            )
-                        ]
-                    );
-
-
-                    if (
-                        Math.random() < 0.25
-                    ) {
-
-                        glitchArchive();
-
-                    }
-
-                }
-
-            }, 18000);
-
-
-        /* =====================
-           TOME MOUSE RESPONSE
-        ===================== */
-
-        const tome =
-            document.getElementById(
-                "tome"
-            );
-
-
-        document.addEventListener(
-            "pointermove",
-            e => {
-
-                if (
-                    !tome ||
-                    window.matchMedia(
-                        "(prefers-reduced-motion: reduce)"
-                    ).matches
-                ) {
-
-                    return;
-
-                }
-
-
-                const rect =
-                    tome.getBoundingClientRect();
-
-
-                const x =
-                    (
-                        (e.clientX - rect.left)
-                        / rect.width
-                        - 0.5
-                    ) * 2;
-
-
-                const y =
-                    (
-                        (e.clientY - rect.top)
-                        / rect.height
-                        - 0.5
-                    ) * 2;
-
-
-                const inside =
-                    e.clientX >= rect.left &&
-                    e.clientX <= rect.right &&
-                    e.clientY >= rect.top &&
-                    e.clientY <= rect.bottom;
-
-
-                if (inside) {
-
-                    tome.style.transform =
-                        `perspective(1800px)
-                         rotateY(${x * 0.7}deg)
-                         rotateX(${-y * 0.45}deg)`;
-
-                } else {
-
-                    tome.style.transform =
-                        "";
-
-                }
-
-            }
-        );
-
-
-        /* =====================
-           CLEANUP
-        ===================== */
-
-        window.addEventListener(
-            "beforeunload",
-            () => {
-
-                clearInterval(
-                    presenceTimer
+                showWhisper(
+                    "the archive acknowledges your arrival"
                 );
 
-            }
-        );
+            }, 2600);
+
+        } else {
+
+            setTimeout(() => {
+
+                showWhisper(
+                    "welcome back, archivist"
+                );
+
+            }, 2200);
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   CLEANUP
+========================================================= */
+
+window.addEventListener(
+    "beforeunload",
+    () => {
+
+        if (presenceTimer) {
+
+            clearInterval(
+                presenceTimer
+            );
+
+        }
 
     }
 );

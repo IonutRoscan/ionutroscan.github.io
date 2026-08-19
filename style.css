@@ -36,38 +36,58 @@ body {
     overflow-x: hidden;
 }
 
-/* ================= ARCANE SCROLLBAR ================= */
-/* Firefox Support */
-* {
+/* ================= ARCANE SCROLLBAR (BRAVE / CHROMIUM / FIREFOX) ================= */
+
+/* Firefox & Standard Engine */
+html, body {
     scrollbar-width: thin;
-    scrollbar-color: var(--crimson) var(--altar-void);
+    scrollbar-color: #9e1b1b #080607;
 }
 
-/* Chrome, Brave, Edge, Safari Support */
+/* Chromium (Brave / Chrome / Edge) Viewport */
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
 ::-webkit-scrollbar {
-    width: 10px;
+    width: 12px;
+    height: 12px;
 }
 
-/* The dark background track */
+/* Background Track */
+html::-webkit-scrollbar-track,
+body::-webkit-scrollbar-track,
 ::-webkit-scrollbar-track {
-    background: var(--altar-void);
-    border-left: 1px solid var(--leather-border);
+    background: #080607;
+    border-left: 1px solid #3b2318;
 }
 
-/* The sliding thumb */
+/* The Sliding Thumb */
+html::-webkit-scrollbar-thumb,
+body::-webkit-scrollbar-thumb,
 ::-webkit-scrollbar-thumb {
-    background: #2b171a;
-    border: 1px solid var(--leather-border);
-    border-radius: 2px;
-    box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.8);
+    background-color: #2b171a;
+    border: 2px solid #080607;
+    border-radius: 4px;
 }
 
-/* Glowing Crimson when hovered or dragged */
-::-webkit-scrollbar-thumb:hover,
+/* Hover & Active States */
+html::-webkit-scrollbar-thumb:hover,
+body::-webkit-scrollbar-thumb:hover,
+::-webkit-scrollbar-thumb:hover {
+    background-color: #9e1b1b;
+    box-shadow: 0 0 10px rgba(158, 27, 27, 0.7);
+}
+
+html::-webkit-scrollbar-thumb:active,
+body::-webkit-scrollbar-thumb:active,
 ::-webkit-scrollbar-thumb:active {
-    background: var(--crimson);
-    border-color: var(--gold);
-    box-shadow: 0 0 10px var(--crimson-glow);
+    background-color: #b8860b;
+}
+
+/* Removes standard button arrows at the ends for a sleek look */
+::-webkit-scrollbar-button {
+    display: none;
+    width: 0;
+    height: 0;
 }
 
 /* Atmospheric Glows */

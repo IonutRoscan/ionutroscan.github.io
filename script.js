@@ -22,6 +22,23 @@ const CONFIG = {
 
 
 /* ============================================================
+   MASCOT MESSAGES
+   ============================================================ */
+
+const MASCOT_MESSAGES = [
+    "welcome! ☁️",
+    "please enjoy the little workshop ✿",
+    "something cute is brewing... 🌱",
+    "don't touch the mysterious button ♡",
+    "welcome home, developer ✨",
+    "everything here was made with love",
+    "the shelves are open! 🌸",
+    "take your time looking around ♡",
+    "a quiet corner for little tools ☁️"
+];
+
+
+/* ============================================================
    02. GLOBAL STATE
    ============================================================ */
 
@@ -35,7 +52,10 @@ const state = {
     theme:
         localStorage.getItem(
             CONFIG.themeStorageKey
-        ) || CONFIG.defaultTheme
+        ) || CONFIG.defaultTheme,
+
+    /* Used so closing the scrapbook returns focus */
+    lastFocusedCard: null
 };
 
 
@@ -276,6 +296,13 @@ function createEntry(
             creation,
             typeLabel
         );
+
+
+    /* Stable ID for scrapbook lookup (preferred over array index) */
+    if (creation.id) {
+        article.dataset.id =
+            String(creation.id);
+    }
 
 
     article.innerHTML = `
@@ -1010,6 +1037,58 @@ function setupSearch() {
         }
     );
 
+
+    /* Global "/" focuses the search box (when not typing) */
+    document.addEventListener(
+        "keydown",
+        event => {
+
+            if (
+                event.key !== "/" ||
+                event.metaKey ||
+                event.ctrlKey ||
+                event.altKey
+            ) {
+                return;
+            }
+
+
+            const active =
+                document.activeElement;
+
+
+            const isTyping =
+                active &&
+                (
+                    active.tagName === "INPUT" ||
+                    active.tagName === "TEXTAREA" ||
+                    active.isContentEditable
+                );
+
+
+            if (isTyping) {
+                return;
+            }
+
+
+            /* Don't steal focus while scrapbook is open */
+            if (
+                scrapbookOverlay &&
+                !scrapbookOverlay.hidden
+            ) {
+                return;
+            }
+
+
+            event.preventDefault();
+
+            input.focus();
+
+            input.select();
+
+        }
+    );
+
 }
 
 
@@ -1418,26 +1497,16 @@ function setupMascot() {
     }
 
 
-    const messages = [
-
-        "welcome! ☁️",
-
-        "please enjoy the little workshop ✿",
-
-        "something cute is brewing... 🌱",
-
-        "don't touch the mysterious button ♡",
-
-        "welcome home, developer ✨",
-
-        "everything here was made with love",
-
-        "the shelves are open! 🌸"
-
-    ];
+    /* Random greeting on every visit */
+    let index =
+        Math.floor(
+            Math.random() *
+            MASCOT_MESSAGES.length
+        );
 
 
-    let index = 0;
+    bubble.textContent =
+        MASCOT_MESSAGES[index];
 
 
     bubble.addEventListener(
@@ -1448,11 +1517,11 @@ function setupMascot() {
                 (
                     index + 1
                 ) %
-                messages.length;
+                MASCOT_MESSAGES.length;
 
 
             bubble.textContent =
-                messages[index];
+                MASCOT_MESSAGES[index];
 
         }
     );
@@ -2095,6 +2164,24 @@ function closeScrapbook() {
                 document.body.dataset.previousOverflow ||
                 "";
 
+
+            /* Return focus to the card that opened the viewer */
+            if (
+                state.lastFocusedCard &&
+                document.body.contains(
+                    state.lastFocusedCard
+                )
+            ) {
+
+                state.lastFocusedCard.focus({
+                    preventScroll: true
+                });
+
+            }
+
+
+            state.lastFocusedCard = null;
+
         },
         220
     );
@@ -2318,6 +2405,36 @@ function populateScrapbookMedia(
 
             figure.classList.add(
                 "preview-error"
+            );
+
+
+            image.style.display =
+                "none";
+
+
+            const fallback =
+                document.createElement(
+                    "div"
+                );
+
+
+            fallback.className =
+                "scrapbook-preview-fallback";
+
+
+            fallback.setAttribute(
+                "aria-hidden",
+                "true"
+            );
+
+
+            fallback.textContent =
+                "✿";
+
+
+            figure.insertBefore(
+                fallback,
+                figure.firstChild
             );
 
         }
@@ -2692,6 +2809,53 @@ function populateScrapbookActions(
    MAKE PROJECTS CLICKABLE
    ------------------------------------------------------------ */
 
+function findCreationForEntry(entry) {
+
+    /* Prefer stable ID when present */
+    const id =
+        entry.dataset.id;
+
+
+    if (id) {
+
+        const byId =
+            state.creations.find(
+                c =>
+                    String(c.id) ===
+                    String(id)
+            );
+
+
+        if (byId) {
+            return byId;
+        }
+
+    }
+
+
+    /* Fallback to array index (legacy / missing id) */
+    const index =
+        parseInt(
+            entry.dataset.index,
+            10
+        );
+
+
+    if (
+        !Number.isNaN(index) &&
+        state.creations[index]
+    ) {
+
+        return state.creations[index];
+
+    }
+
+
+    return null;
+
+}
+
+
 function setupScrapbookCards() {
 
     const entries =
@@ -2727,26 +2891,7 @@ function setupScrapbookCards() {
             );
 
 
-            const index =
-                parseInt(
-                    entry.dataset.index,
-                    10
-                );
-
-
-            const creation =
-                state.creations[
-                    index
-                ];
-
-
-            if (!creation) {
-                return;
-            }
-
-
-            entry.addEventListener(
-                "click",
+            const openFromCard =
                 event => {
 
                     /*
@@ -2766,11 +2911,31 @@ function setupScrapbookCards() {
                     }
 
 
+                    const creation =
+                        findCreationForEntry(
+                            entry
+                        );
+
+
+                    if (!creation) {
+                        return;
+                    }
+
+
+                    state.lastFocusedCard =
+                        entry;
+
+
                     openScrapbook(
                         creation
                     );
 
-                }
+                };
+
+
+            entry.addEventListener(
+                "click",
+                openFromCard
             );
 
 
@@ -2801,10 +2966,7 @@ function setupScrapbookCards() {
 
                     event.preventDefault();
 
-
-                    openScrapbook(
-                        creation
-                    );
+                    openFromCard(event);
 
                 }
             );
@@ -2816,13 +2978,13 @@ function setupScrapbookCards() {
 
 
 /* ============================================================
-   32. PATCH RENDERER FOR SCRAPBOOK INDEX
+   32. PATCH RENDERER
    ============================================================ */
 
 /*
-    We need the original creation's array index on each
-    rendered card so the viewer can retrieve the exact JSON
-    object later.
+    Keep a lightweight patch so each card still carries
+    its original array index as a fallback, while the
+    preferred lookup is now by creation.id.
 */
 
 const originalCreateEntry =
@@ -2850,10 +3012,6 @@ createEntry =
 
     };
 
-
-/* ============================================================
-   33. PATCH RENDERING
-   ============================================================ */
 
 const originalRenderCreations =
     renderCreations;

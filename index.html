@@ -1,266 +1,110 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Grimoire of DXK</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DXK — Index</title>
+<meta name="description" content="DXK, aka SaltSaaalt — a running index of extensions, tools, and small utilities.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- Ambient Floating Runes & Candlelight Backdrop -->
-    <div class="altar-background">
-        <div class="candle-glow left"></div>
-        <div class="candle-glow right"></div>
-    </div>
+    <div class="grain" aria-hidden="true"></div>
 
-    <!-- Header / Status Bar -->
-    <header class="altar-header">
-        <div class="status-indicator" id="status-indicator">
-            <span class="pulse-dot"></span> <span id="status-text">TOME UNSEALED · ARCHIVE ONLINE</span>
-        </div>
-        <div class="archive-meta">
-            <span>ARCHIVE ID: DXK-001</span>
-            <span>VISITS: <strong id="visit-count">001</strong></span>
-            <span>DISCOVERIES: <strong id="discovery-count">000</strong></span>
-        </div>
-        <h1 class="tome-title">GRIMOIRE OF DXK</h1>
-        <p class="tome-subtitle">Artifacts, Digital Curiosities & Sound Invocations</p>
-        <div class="whisper-line" aria-live="polite"><span id="whisper-text">The archive is quiet.</span></div>
-        <div class="archive-core" aria-label="Archive condition">
-            <span>INTEGRITY <strong id="integrity-value">100%</strong></span>
-            <span class="core-track"><i id="integrity-fill"></i></span>
-            <span>CORRUPTION <strong id="corruption-value">0%</strong></span>
-        </div>
-        <div class="header-controls">
-            <button id="audio-toggle" class="audio-toggle-btn">🕯️ Kindle Ambient Resonance</button>
-            <button id="veil-toggle" class="audio-toggle-btn">◈ Disturb the Veil</button>
-            <button id="terminal-toggle" class="audio-toggle-btn terminal-toggle">⌘ Open Archive Terminal</button>
+    <header class="site-header">
+        <a class="mark" href="#top">DXK</a>
+        <div class="header-status">
+            <span class="dot" aria-hidden="true"></span>
+            <span id="system-status">1 STABLE · 1 PLANNED</span>
         </div>
     </header>
 
-    <!-- Tome Controller (Bookmark Ribbons) -->
-    <nav class="bookmark-ribbons">
-        <button class="ribbon-btn active" onclick="turnToPage(0)">I. Inscription</button>
-        <button class="ribbon-btn" onclick="turnToPage(1)">II. The Forge & Mana</button>
-        <button class="ribbon-btn" onclick="turnToPage(2)">III. Curiosities</button>
-    </nav>
+    <main id="top">
 
-    <!-- THE 3D INTERACTIVE TOME -->
-    <div class="book-viewport">
-        <div class="tome-wrapper" id="tome">
-            
-            <!-- Spine Binding -->
-            <div class="book-spine"></div>
+        <!-- ============ HERO ============ -->
+        <section class="hero">
+            <p class="reveal eyebrow">INDEX <span class="cursor" aria-hidden="true">▍</span></p>
+            <h1 class="reveal wordmark">DXK</h1>
+            <p class="reveal alias">aka <span class="handle">SaltSaaalt</span></p>
+            <p class="reveal lede">
+                A running index of browser extensions, developer tools, and small
+                utilities — each one built to solve one specific, narrow problem.
+            </p>
+        </section>
 
-            <!-- ================= PAGE 1 (INSCRIPTION & ARCHIVIST) ================= -->
-            <section class="tome-page-spread active" id="spread-0">
-                <!-- Left Leaf -->
-                <div class="parchment-leaf left-leaf">
-                    <div class="leaf-corner top-left"></div>
-                    <div class="leaf-content">
-                        <div class="page-num">Folio I · Frontispiece</div>
-                        <div class="sigil-emblem">🜁 ✦ 🜂</div>
-                        <h2 class="leaf-heading">The Digital Codex</h2>
-                        <p class="illuminated-p">
-                            <span class="first-letter">W</span>ithin these bound pages rest the artifacts, tools, and synthesized frequencies crafted by <strong>Ionuț Roșcan</strong>. 
-                        </p>
-                        <p>
-                            Treat each script as an invocation—coded to bend browsers, process arcane structures, and shape sonic airwaves.
-                        </p>
-                        <div class="seal-box">
-                            <p class="cursed-whisper" title="Nothing comes from nothing. Do not linger.">
-                            ✦ NON OMNIS MORIAR · NIHIL FIT EX NIHILO ✦
-                        </p>
-                            <span class="seal-icon">🜔</span>
-                            <div class="seal-text">
-                                <strong>RESTRICTION:</strong> UNRESTRICTED<br>
-                                <strong>ORIGIN:</strong> VAULT OF ROSCAN
-                            </div>
-                        </div>
+        <!-- ============ REGISTRY ============ -->
+        <section class="registry" aria-labelledby="registry-heading">
+            <div class="registry-head">
+                <h2 id="registry-heading">Registry</h2>
+                <span class="registry-count"><span id="entry-count">2</span> entries logged</span>
+            </div>
+            <div class="hairline"></div>
+
+            <!-- ---- ENTRY 001 ---- -->
+            <article class="entry" data-status="stable">
+                <div class="entry-index">001</div>
+
+                <div class="entry-body">
+                    <div class="entry-top">
+                        <h3 class="entry-name">Clank Lorebook Importer</h3>
+                        <span class="status-tag status-stable">Stable</span>
                     </div>
-                </div>
 
-                <!-- Right Leaf -->
-                <div class="parchment-leaf right-leaf">
-                    <div class="leaf-corner top-right"></div>
-                    <div class="leaf-content">
-                        <div class="page-num">Folio II · The Archivist</div>
-                        <h2 class="leaf-heading">About The Crafter</h2>
-                        <p>
-                            I am a programmer, sound designer, and music producer obsessed with creating strange, tangible things that bridge the gap between utility and imagination.
-                        </p>
-                        <p>
-                            If an idea can be constructed, automated, visualized, or sculpted into raw sonic resonance, chances are I'll build it.
-                        </p>
-                        <div class="archivist-scroll">
-                            <h4>Current Endeavors:</h4>
-                            <ul>
-                                <li>Manipulating browser environments via extensions.</li>
-                                <li>Synthesizing aggressive, immersive audio landscapes.</li>
-                                <li>Developing curious mechanics & interactive tools.</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </section>
+                    <p class="entry-meta">Browser extension · Brave / Chromium · Manifest V3</p>
 
-           <!-- ================= SPREAD 2: CLANK LOREBOOK IMPORTER ================= -->
-            <section class="tome-page-spread" id="spread-1">
-                <!-- Left Leaf: The Visual Relic Plate (Full Screenshot) -->
-                <div class="parchment-leaf left-leaf relic-plate">
-                    <div class="leaf-corner top-left"></div>
-                    <div class="page-num">Folio III · Visual Manifestation</div>
-                    
-                    <div class="full-relic-frame">
-                        <img src="clank-preview.png" alt="Grimoire - Clank Lorebook Importer UI" class="relic-full-img">
-                    </div>
-                    <span class="plate-caption">✦ Figure 1.1: The Inscription Interface ✦</span>
-                </div>
+                    <p class="entry-desc">
+                        Automates lorebook entry ingestion on Clank.world. Bypasses the
+                        site's reactive input barriers by piping text directly through
+                        the Chrome DevTools Protocol instead of simulating keystrokes.
+                    </p>
 
-                <!-- Right Leaf: Overview, Invocation & Architecture -->
-                <div class="parchment-leaf right-leaf">
-                    <div class="leaf-corner top-right"></div>
-                    <div class="leaf-content">
-                        <div class="page-num">Folio IV · Dossier & Invocation</div>
-                        <div class="badge-tag">PRIMARY ARTIFACT</div>
-                        <h2 class="leaf-heading">Clank Lorebook Importer</h2>
-                        <span class="sub-label">Browser Extension · Brave / Chromium · by SaltSaaalt</span>
-                        
-                        <p class="artifact-summary">
-                            Forged to automate lorebook ingestion on Clank.world. Bypasses reactive state barriers by piping raw input via the Chrome DevTools Protocol (<code>chrome.debugger</code>).
-                        </p>
-
-                        <div class="rune-scroll">
-                            <strong>Invocation Protocol:</strong><br>
-                            <code>Download .ZIP → Extract → brave://extensions → "Load unpacked"</code>
-                        </div>
-
-                        <div class="leaf-actions">
-                            <a href="clank-lorebook-importer.zip" class="grimoire-btn" download>
-                                ⚔ Equip Artifact (.ZIP)
-                            </a>
-                        </div>
-
-                        <div class="tech-dossier" style="margin-top: 15px;">
-                            <div class="code-breakdown">
-                                <strong>Accepted Text Payload (.md / .txt):</strong>
-                                <pre><code>Title: [Entry Name]
+                    <details class="entry-detail">
+                        <summary>Accepted payload format</summary>
+                        <pre class="code-block"><code>Title: [Entry Name]
 Keywords: [tag1, tag2]
 Content: [Lore description...]</code></pre>
-                            </div>
+                        <ul class="stack-list">
+                            <li><code>manifest.json</code> — Manifest V3, CDP debugger permission</li>
+                            <li><code>background.js</code> — dispatches <code>Input.insertText</code> streams</li>
+                            <li><code>content.js</code> — DOM automation, drop-zone parser &amp; sequencer</li>
+                        </ul>
+                    </details>
 
-                            <div class="core-components">
-                                <h4>Architecture:</h4>
-                                <ul>
-                                    <li><code>manifest.json</code>: Manifest V3 with CDP debugger permissions.</li>
-                                    <li><code>background.js</code>: Dispatches OS-level <code>Input.insertText</code> streams.</li>
-                                    <li><code>content.js</code>: DOM automation, drop-zone parser & sequencer.</li>
-                                </ul>
-                            </div>
-                        </div>
+                    <div class="entry-actions">
+                        <a class="btn-primary" href="clank-lorebook-importer.zip" download>Download .zip</a>
+                        <span class="entry-hint">Extract → <code>brave://extensions</code> → Load unpacked</span>
                     </div>
                 </div>
-            </section>
-            <!-- ================= PAGE 3 (CURIOSITIES & SEAL) ================= -->
-            <section class="tome-page-spread" id="spread-2">
-                <!-- Left Leaf -->
-                <div class="parchment-leaf left-leaf">
-                    <div class="leaf-corner top-left"></div>
-                    <div class="leaf-content">
-                        <div class="page-num">Folio V · Utilities</div>
-                        <h2 class="leaf-heading">The Worktable</h2>
-                        <div class="curio-card artifact-card operational">
-                            <div class="card-kicker">ARTIFACT 001 · OPERATIONAL</div>
-                            <h3>⚔ Clank Lorebook Importer</h3>
-                            <p>The only artifact currently released for use. A Chromium/Brave browser extension for importing lorebook entries into Clank.world.</p>
-                            <div class="artifact-status"><span class="status-dot"></span> STABLE / RELEASED</div>
-                            <a href="clank-lorebook-importer.zip" class="grimoire-btn small-btn" download>Invoke Artifact</a>
-                        </div>
-                        <div class="curio-card concept-card" style="margin-top: 15px;" id="sealed-curio" tabindex="0" role="button" aria-label="Open sealed concept">
-                            <div class="card-kicker">ARTIFACT 002 · CONCEPT</div>
-                            <h3>🧪 The JSON Cleansing Engine</h3>
-                            <p>Not forged yet. A planned utility for cleaning, structuring, and validating malformed JSON payloads.</p>
-                            <div class="artifact-status"><span class="status-dot muted"></span> CONCEPT / NOT RELEASED</div>
-                            <span class="status-pill">Click to inspect restricted note</span>
-                        </div>
+            </article>
+
+            <div class="hairline"></div>
+
+            <!-- ---- ENTRY 002 (EMPTY STATE) ---- -->
+            <article class="entry entry-empty" data-status="planned">
+                <div class="entry-index">002</div>
+                <div class="entry-body">
+                    <div class="entry-top">
+                        <h3 class="entry-name entry-name-muted">Next build</h3>
+                        <span class="status-tag status-planned">Planned</span>
                     </div>
+                    <p class="entry-desc entry-desc-muted">
+                        Nothing catalogued here yet. Future extensions, tools, and
+                        plugins will appear in this slot as they're built.
+                    </p>
                 </div>
+            </article>
 
-                <!-- Right Leaf -->
-                <div class="parchment-leaf right-leaf">
-                    <div class="leaf-corner top-right"></div>
-                    <div class="leaf-content">
-                        <div class="page-num">Folio VI · The Seal</div>
-                        <h2 class="leaf-heading">The Vault Gate</h2>
-                        <p>The archive grows as real artifacts are forged. Ideas may be recorded here before they are built.</p>
-                        <div class="archive-ledger">
-                            <div><span>RELEASED</span><strong id="released-count">001</strong></div>
-                            <div><span>CONCEPTS</span><strong id="concept-count">001</strong></div>
-                            <div><span>SEALED</span><strong id="sealed-count">000</strong></div>
-                        </div>
-
-                        <div class="archive-condition">
-                            <div class="condition-heading"><span>ARCHIVE CONDITION</span><strong id="condition-label">STABLE</strong></div>
-                            <div class="condition-track"><i id="corruption-fill"></i></div>
-                            <p id="condition-note">No structural anomalies detected.</p>
-                        </div>
-                        
-                        <div class="altar-sigil-box" id="altar-sigil" tabindex="0" role="button" aria-label="Bind your presence to the archive">
-                            <div class="inner-sigil">🜂 🜔 🜁</div>
-                            <p class="sigil-prompt">Click the seal to bind your presence</p>
-                        </div>
-
-                        <div class="tome-links">
-                            <a href="https://github.com/ionutroscan" target="_blank">📜 GitHub Vault</a>
-                            <button class="archive-action" id="calm-archive" type="button">✦ Soothe the Archive</button>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-        </div>
-    </div>
-
-    <!-- Page Flip Controls -->
-    <div class="tome-page-turners">
-        <button class="turner-btn" id="prev-btn" onclick="prevPage()">⟵ Turn Back</button>
-        <span class="spread-indicator" id="spread-count">I - II</span>
-        <button class="turner-btn" id="next-btn" onclick="nextPage()">Turn Leaf ⟶</button>
-    </div>
-
-    <div class="archive-toast" id="archive-toast" role="status" aria-live="polite"></div>
-
-    <!-- ================= ARCHIVE TERMINAL ================= -->
-    <div class="terminal-overlay" id="terminal-overlay" aria-hidden="true">
-        <section class="archive-terminal" role="dialog" aria-modal="true" aria-labelledby="terminal-title">
-            <div class="terminal-header">
-                <div>
-                    <span class="terminal-kicker">RESTRICTED INTERFACE</span>
-                    <h2 id="terminal-title">THE ARCHIVE TERMINAL</h2>
-                </div>
-                <button class="terminal-close" id="terminal-close" type="button" aria-label="Close terminal">×</button>
-            </div>
-            <div class="terminal-screen" id="terminal-screen" aria-live="polite">
-                <div class="terminal-line terminal-system">ROSCAN ARCHIVE OS · v0.5</div>
-                <div class="terminal-line terminal-system">Type <span class="terminal-command">help</span> for available commands.</div>
-            </div>
-            <form class="terminal-input-row" id="terminal-form" autocomplete="off">
-                <label for="terminal-input">&gt;</label>
-                <input id="terminal-input" type="text" spellcheck="false" aria-label="Archive terminal command" placeholder="enter command...">
-            </form>
-            <div class="terminal-hint">LOCAL SESSION · COMMANDS ARE RECORDED IN MEMORY</div>
+            <div class="hairline"></div>
         </section>
-    </div>
 
-    <div class="grain-layer" aria-hidden="true"></div>
-    <div class="sigil-cursor" id="sigil-cursor" aria-hidden="true">✦</div>
-    <div class="candle-flame" id="candle-flame" aria-hidden="true"></div>
-    <div class="hidden-rune" id="hidden-rune" tabindex="0" role="button" aria-label="A hidden rune">∴</div>
+    </main>
 
-    <footer class="altar-footer">
-        <span id="footer-status">THE ARCHIVE REMAINS OPEN TO THOSE WHO SEEK · IONUȚ ROȘCAN</span>
+    <footer class="site-footer">
+        <span>DXK — SaltSaaalt</span>
+        <a href="https://github.com/ionutroscan" target="_blank" rel="noopener">GitHub ↗</a>
     </footer>
 
     <script src="script.js"></script>

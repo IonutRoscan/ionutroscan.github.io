@@ -1765,3 +1765,1113 @@ function sanitizeInlineHTML(
         );
 
 }
+
+/* ============================================================
+   31. SCRAPBOOK PROJECT VIEWER
+   ============================================================ */
+
+let scrapbookOverlay = null;
+
+
+/* ------------------------------------------------------------
+   CREATE VIEWER
+   ------------------------------------------------------------ */
+
+function createScrapbookViewer() {
+
+    if (document.querySelector(".scrapbook-overlay")) {
+        return;
+    }
+
+
+    const overlay =
+        document.createElement("div");
+
+
+    overlay.className =
+        "scrapbook-overlay";
+
+
+    overlay.hidden = true;
+
+
+    overlay.innerHTML = `
+
+        <div
+            class="scrapbook-backdrop"
+            data-scrapbook-close
+        ></div>
+
+
+        <section
+            class="scrapbook-window"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="scrapbook-title"
+            tabindex="-1"
+        >
+
+            <button
+                class="scrapbook-close"
+                type="button"
+                aria-label="Close project"
+                data-scrapbook-close
+            >
+                ×
+            </button>
+
+
+            <div class="scrapbook-paper">
+
+
+                <div class="scrapbook-header">
+
+                    <div class="scrapbook-eyebrow">
+                        <span
+                            id="scrapbook-type"
+                        >
+                            🧪 PROJECT
+                        </span>
+
+                        <span
+                            id="scrapbook-status"
+                        >
+                            ✦ ready!
+                        </span>
+                    </div>
+
+
+                    <h2
+                        id="scrapbook-title"
+                        class="scrapbook-title"
+                    >
+                        Project
+                    </h2>
+
+
+                    <p
+                        id="scrapbook-meta"
+                        class="scrapbook-meta"
+                    ></p>
+
+                </div>
+
+
+                <div class="scrapbook-content">
+
+
+                    <div
+                        id="scrapbook-media"
+                        class="scrapbook-media"
+                    >
+                    </div>
+
+
+                    <div
+                        id="scrapbook-description"
+                        class="scrapbook-description"
+                    >
+                    </div>
+
+
+                    <div
+                        id="scrapbook-tags"
+                        class="scrapbook-tags"
+                    >
+                    </div>
+
+
+                    <div
+                        id="scrapbook-details"
+                        class="scrapbook-details"
+                    >
+                    </div>
+
+
+                    <div
+                        id="scrapbook-stack"
+                        class="scrapbook-stack"
+                    >
+                    </div>
+
+
+                    <div
+                        id="scrapbook-actions"
+                        class="scrapbook-actions"
+                    >
+                    </div>
+
+
+                </div>
+
+
+                <div class="scrapbook-footer">
+
+                    <span>
+                        ✿ little workshop archive ✿
+                    </span>
+
+                </div>
+
+
+            </div>
+
+        </section>
+
+    `;
+
+
+    document.body.appendChild(
+        overlay
+    );
+
+
+    scrapbookOverlay =
+        overlay;
+
+
+    setupScrapbookEvents();
+
+}
+
+
+/* ------------------------------------------------------------
+   EVENTS
+   ------------------------------------------------------------ */
+
+function setupScrapbookEvents() {
+
+    if (!scrapbookOverlay) {
+        return;
+    }
+
+
+    scrapbookOverlay.addEventListener(
+        "click",
+        event => {
+
+            const closeTarget =
+                event.target.closest(
+                    "[data-scrapbook-close]"
+                );
+
+
+            if (closeTarget) {
+
+                closeScrapbook();
+
+            }
+
+        }
+    );
+
+
+    document.addEventListener(
+        "keydown",
+        event => {
+
+            if (
+                event.key === "Escape" &&
+                !scrapbookOverlay.hidden
+            ) {
+
+                closeScrapbook();
+
+            }
+
+        }
+    );
+
+}
+
+
+/* ------------------------------------------------------------
+   OPEN PROJECT
+   ------------------------------------------------------------ */
+
+function openScrapbook(
+    creation
+) {
+
+    if (!creation) {
+        return;
+    }
+
+
+    if (!scrapbookOverlay) {
+
+        createScrapbookViewer();
+
+    }
+
+
+    populateScrapbook(
+        creation
+    );
+
+
+    scrapbookOverlay.hidden =
+        false;
+
+
+    document.body.classList.add(
+        "scrapbook-open"
+    );
+
+
+    requestAnimationFrame(
+        () => {
+
+            scrapbookOverlay.classList.add(
+                "is-visible"
+            );
+
+        }
+    );
+
+
+    const windowElement =
+        scrapbookOverlay.querySelector(
+            ".scrapbook-window"
+        );
+
+
+    if (windowElement) {
+
+        windowElement.focus();
+
+    }
+
+
+    document.body.dataset.previousOverflow =
+        document.body.style.overflow;
+
+
+    document.body.style.overflow =
+        "hidden";
+
+}
+
+
+/* ------------------------------------------------------------
+   CLOSE PROJECT
+   ------------------------------------------------------------ */
+
+function closeScrapbook() {
+
+    if (
+        !scrapbookOverlay ||
+        scrapbookOverlay.hidden
+    ) {
+
+        return;
+
+    }
+
+
+    scrapbookOverlay.classList.remove(
+        "is-visible"
+    );
+
+
+    setTimeout(
+        () => {
+
+            if (!scrapbookOverlay) {
+                return;
+            }
+
+
+            scrapbookOverlay.hidden =
+                true;
+
+
+            document.body.classList.remove(
+                "scrapbook-open"
+            );
+
+
+            document.body.style.overflow =
+                document.body.dataset.previousOverflow ||
+                "";
+
+        },
+        220
+    );
+
+}
+
+
+/* ------------------------------------------------------------
+   POPULATE VIEWER
+   ------------------------------------------------------------ */
+
+function populateScrapbook(
+    creation
+) {
+
+    const type =
+        creation.type ||
+        getProjectType(
+            creation
+        );
+
+
+    const typeLabel =
+        creation.typeLabel ||
+        getTypeLabel(
+            type
+        );
+
+
+    const status =
+        creation.status ||
+        "planned";
+
+
+    const isPlanned =
+        creation.isPlanned === true ||
+        status === "planned";
+
+
+    const statusLabel =
+        creation.statusLabel ||
+        (
+            isPlanned
+                ? "☁ sprouting"
+                : "✦ ready!"
+        );
+
+
+    const title =
+        $("#scrapbook-title");
+
+
+    const typeElement =
+        $("#scrapbook-type");
+
+
+    const statusElement =
+        $("#scrapbook-status");
+
+
+    const meta =
+        $("#scrapbook-meta");
+
+
+    if (title) {
+
+        title.textContent =
+            creation.name ||
+            "Untitled creation";
+
+    }
+
+
+    if (typeElement) {
+
+        typeElement.textContent =
+            typeLabel;
+
+    }
+
+
+    if (statusElement) {
+
+        statusElement.textContent =
+            statusLabel;
+
+
+        statusElement.classList.toggle(
+            "scrapbook-status-planned",
+            isPlanned
+        );
+
+    }
+
+
+    if (meta) {
+
+        meta.textContent =
+            creation.meta ||
+            "";
+
+        meta.hidden =
+            !creation.meta;
+
+    }
+
+
+    populateScrapbookMedia(
+        creation
+    );
+
+
+    populateScrapbookDescription(
+        creation
+    );
+
+
+    populateScrapbookTags(
+        creation
+    );
+
+
+    populateScrapbookDetails(
+        creation
+    );
+
+
+    populateScrapbookStack(
+        creation
+    );
+
+
+    populateScrapbookActions(
+        creation
+    );
+
+}
+
+
+/* ------------------------------------------------------------
+   MEDIA
+   ------------------------------------------------------------ */
+
+function populateScrapbookMedia(
+    creation
+) {
+
+    const container =
+        $("#scrapbook-media");
+
+
+    if (!container) {
+        return;
+    }
+
+
+    container.innerHTML =
+        "";
+
+
+    if (!creation.previewImg) {
+
+        container.hidden =
+            true;
+
+        return;
+
+    }
+
+
+    container.hidden =
+        false;
+
+
+    const figure =
+        document.createElement(
+            "figure"
+        );
+
+
+    figure.className =
+        "scrapbook-preview";
+
+
+    figure.innerHTML = `
+
+        <img
+            src="${escapeAttribute(
+                creation.previewImg
+            )}"
+            alt="${escapeAttribute(
+                creation.name ||
+                "Project preview"
+            )}"
+        >
+
+        ${
+            creation.caption
+                ? `
+                    <figcaption>
+                        ${escapeHTML(
+                            creation.caption
+                        )}
+                    </figcaption>
+                `
+                : ""
+        }
+
+    `;
+
+
+    const image =
+        figure.querySelector(
+            "img"
+        );
+
+
+    image.addEventListener(
+        "error",
+        () => {
+
+            figure.classList.add(
+                "preview-error"
+            );
+
+        }
+    );
+
+
+    container.appendChild(
+        figure
+    );
+
+}
+
+
+/* ------------------------------------------------------------
+   DESCRIPTION
+   ------------------------------------------------------------ */
+
+function populateScrapbookDescription(
+    creation
+) {
+
+    const container =
+        $("#scrapbook-description");
+
+
+    if (!container) {
+        return;
+    }
+
+
+    const description =
+        creation.desc ||
+        "";
+
+
+    container.innerHTML =
+        description
+            ? `
+                <div class="scrapbook-section-label">
+                    about this creation
+                </div>
+
+                <p>
+                    ${escapeHTML(
+                        description
+                    )}
+                </p>
+            `
+            : "";
+
+
+    container.hidden =
+        !description;
+
+}
+
+
+/* ------------------------------------------------------------
+   TAGS
+   ------------------------------------------------------------ */
+
+function populateScrapbookTags(
+    creation
+) {
+
+    const container =
+        $("#scrapbook-tags");
+
+
+    if (!container) {
+        return;
+    }
+
+
+    const tags =
+        Array.isArray(
+            creation.tags
+        )
+            ? creation.tags
+            : [];
+
+
+    if (!tags.length) {
+
+        container.innerHTML =
+            "";
+
+        container.hidden =
+            true;
+
+        return;
+
+    }
+
+
+    container.hidden =
+        false;
+
+
+    container.innerHTML = `
+
+        <div class="scrapbook-section-label">
+            little labels
+        </div>
+
+
+        <div class="scrapbook-tag-list">
+
+            ${
+                tags
+                    .map(
+                        tag => `
+                            <span>
+                                ${escapeHTML(
+                                    tag
+                                )}
+                            </span>
+                        `
+                    )
+                    .join("")
+            }
+
+        </div>
+
+    `;
+
+}
+
+
+/* ------------------------------------------------------------
+   DETAILS / CODE
+   ------------------------------------------------------------ */
+
+function populateScrapbookDetails(
+    creation
+) {
+
+    const container =
+        $("#scrapbook-details");
+
+
+    if (!container) {
+        return;
+    }
+
+
+    const title =
+        creation.detailTitle ||
+        "workshop notes";
+
+
+    const code =
+        creation.codeBlock ||
+        "";
+
+
+    if (!code) {
+
+        container.innerHTML =
+            "";
+
+        container.hidden =
+            true;
+
+        return;
+
+    }
+
+
+    container.hidden =
+        false;
+
+
+    container.innerHTML = `
+
+        <div class="scrapbook-section-label">
+            ${escapeHTML(
+                title
+            )}
+        </div>
+
+
+        <pre class="scrapbook-code"><code>${escapeHTML(
+            code
+        )}</code></pre>
+
+    `;
+
+}
+
+
+/* ------------------------------------------------------------
+   STACK
+   ------------------------------------------------------------ */
+
+function populateScrapbookStack(
+    creation
+) {
+
+    const container =
+        $("#scrapbook-stack");
+
+
+    if (!container) {
+        return;
+    }
+
+
+    const stack =
+        Array.isArray(
+            creation.stack
+        )
+            ? creation.stack
+            : [];
+
+
+    if (!stack.length) {
+
+        container.innerHTML =
+            "";
+
+        container.hidden =
+            true;
+
+        return;
+
+    }
+
+
+    container.hidden =
+        false;
+
+
+    container.innerHTML = `
+
+        <div class="scrapbook-section-label">
+            made with
+        </div>
+
+
+        <ul>
+
+            ${
+                stack
+                    .map(
+                        item => `
+                            <li>
+                                ${sanitizeInlineHTML(
+                                    item
+                                )}
+                            </li>
+                        `
+                    )
+                    .join("")
+            }
+
+        </ul>
+
+    `;
+
+}
+
+
+/* ------------------------------------------------------------
+   ACTION BUTTONS
+   ------------------------------------------------------------ */
+
+function populateScrapbookActions(
+    creation
+) {
+
+    const container =
+        $("#scrapbook-actions");
+
+
+    if (!container) {
+        return;
+    }
+
+
+    const buttons = [];
+
+
+    if (creation.downloadUrl) {
+
+        buttons.push(`
+
+            <a
+                class="scrapbook-action scrapbook-action-primary"
+                href="${escapeAttribute(
+                    creation.downloadUrl
+                )}"
+                download
+            >
+                ${escapeHTML(
+                    creation.downloadText ||
+                    "Download 🌸"
+                )}
+            </a>
+
+        `);
+
+    }
+
+
+    if (creation.github) {
+
+        buttons.push(`
+
+            <a
+                class="scrapbook-action scrapbook-action-secondary"
+                href="${escapeAttribute(
+                    creation.github
+                )}"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                GitHub ↗
+            </a>
+
+        `);
+
+    }
+
+
+    if (creation.url) {
+
+        buttons.push(`
+
+            <a
+                class="scrapbook-action scrapbook-action-secondary"
+                href="${escapeAttribute(
+                    creation.url
+                )}"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                Open project ↗
+            </a>
+
+        `);
+
+    }
+
+
+    if (creation.hint) {
+
+        buttons.push(`
+
+            <div class="scrapbook-hint">
+                ${sanitizeInlineHTML(
+                    creation.hint
+                )}
+            </div>
+
+        `);
+
+    }
+
+
+    container.innerHTML =
+        buttons.join("");
+
+
+    container.hidden =
+        buttons.length === 0;
+
+}
+
+
+/* ------------------------------------------------------------
+   MAKE PROJECTS CLICKABLE
+   ------------------------------------------------------------ */
+
+function setupScrapbookCards() {
+
+    const entries =
+        $all(".entry");
+
+
+    entries.forEach(
+        entry => {
+
+            if (
+                entry.dataset.scrapbookReady ===
+                "true"
+            ) {
+
+                return;
+
+            }
+
+
+            entry.dataset.scrapbookReady =
+                "true";
+
+
+            entry.setAttribute(
+                "role",
+                "button"
+            );
+
+
+            entry.setAttribute(
+                "tabindex",
+                "0"
+            );
+
+
+            const index =
+                parseInt(
+                    entry.dataset.index,
+                    10
+                );
+
+
+            const creation =
+                state.creations[
+                    index
+                ];
+
+
+            if (!creation) {
+                return;
+            }
+
+
+            entry.addEventListener(
+                "click",
+                event => {
+
+                    /*
+                        Don't intercept clicks on real
+                        links, buttons, or expandable
+                        details.
+                    */
+
+                    if (
+                        event.target.closest(
+                            "a, button, summary, details"
+                        )
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    openScrapbook(
+                        creation
+                    );
+
+                }
+            );
+
+
+            entry.addEventListener(
+                "keydown",
+                event => {
+
+                    if (
+                        event.key !== "Enter" &&
+                        event.key !== " "
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    if (
+                        event.target.closest(
+                            "a, button, summary, details"
+                        )
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    event.preventDefault();
+
+
+                    openScrapbook(
+                        creation
+                    );
+
+                }
+            );
+
+        }
+    );
+
+}
+
+
+/* ============================================================
+   32. PATCH RENDERER FOR SCRAPBOOK INDEX
+   ============================================================ */
+
+/*
+    We need the original creation's array index on each
+    rendered card so the viewer can retrieve the exact JSON
+    object later.
+*/
+
+const originalCreateEntry =
+    createEntry;
+
+
+createEntry =
+    function (
+        creation,
+        index
+    ) {
+
+        const article =
+            originalCreateEntry(
+                creation,
+                index
+            );
+
+
+        article.dataset.index =
+            String(index);
+
+
+        return article;
+
+    };
+
+
+/* ============================================================
+   33. PATCH RENDERING
+   ============================================================ */
+
+const originalRenderCreations =
+    renderCreations;
+
+
+renderCreations =
+    function () {
+
+        originalRenderCreations();
+
+
+        createScrapbookViewer();
+
+        setupScrapbookCards();
+
+    };
+
+
+/* ============================================================
+   END SCRAPBOOK VIEWER
+   ============================================================ */

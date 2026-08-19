@@ -36,6 +36,7 @@
         <div class="header-controls">
             <button id="audio-toggle" class="audio-toggle-btn">🕯️ Kindle Ambient Resonance</button>
             <button id="veil-toggle" class="audio-toggle-btn">◈ Disturb the Veil</button>
+            <button id="terminal-toggle" class="audio-toggle-btn terminal-toggle">⌘ Open Archive Terminal</button>
         </div>
     </header>
 
@@ -230,6 +231,29 @@ Content: [Lore description...]</code></pre>
     </div>
 
     <div class="archive-toast" id="archive-toast" role="status" aria-live="polite"></div>
+
+    <!-- ================= ARCHIVE TERMINAL ================= -->
+    <div class="terminal-overlay" id="terminal-overlay" aria-hidden="true">
+        <section class="archive-terminal" role="dialog" aria-modal="true" aria-labelledby="terminal-title">
+            <div class="terminal-header">
+                <div>
+                    <span class="terminal-kicker">RESTRICTED INTERFACE</span>
+                    <h2 id="terminal-title">THE ARCHIVE TERMINAL</h2>
+                </div>
+                <button class="terminal-close" id="terminal-close" type="button" aria-label="Close terminal">×</button>
+            </div>
+            <div class="terminal-screen" id="terminal-screen" aria-live="polite">
+                <div class="terminal-line terminal-system">ROSCan ARCHIVE OS · v0.5</div>
+                <div class="terminal-line terminal-system">Type <span class="terminal-command">help</span> for available commands.</div>
+            </div>
+            <form class="terminal-input-row" id="terminal-form" autocomplete="off">
+                <label for="terminal-input">&gt;</label>
+                <input id="terminal-input" type="text" spellcheck="false" aria-label="Archive terminal command" placeholder="enter command...">
+            </form>
+            <div class="terminal-hint">LOCAL SESSION · COMMANDS ARE RECORDED IN MEMORY</div>
+        </section>
+    </div>
+
     <div class="grain-layer" aria-hidden="true"></div>
     <div class="sigil-cursor" id="sigil-cursor" aria-hidden="true">✦</div>
     <div class="candle-flame" id="candle-flame" aria-hidden="true"></div>

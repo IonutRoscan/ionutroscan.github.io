@@ -356,6 +356,46 @@ a {
     padding-top: 4px;
 }
 
+/* ---- entry body with a media panel (portrait screenshots etc.) ---- */
+
+.entry-body.has-media {
+    display: flex;
+    align-items: flex-start;
+    gap: 26px;
+    flex-wrap: wrap;
+}
+
+.entry-media {
+    flex: 0 0 176px;
+    max-width: 176px;
+    margin: 0 auto;
+}
+
+.entry-media img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 18px;
+    box-shadow: 0 8px 22px var(--shadow);
+    border: 1px solid var(--hairline);
+}
+
+.media-caption {
+    display: block;
+    margin-top: 9px;
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.02em;
+    color: var(--text-faint);
+    text-align: center;
+    font-style: italic;
+}
+
+.entry-content {
+    flex: 1 1 300px;
+    min-width: 240px;
+}
+
 .entry-top {
     display: flex;
     align-items: center;
@@ -568,6 +608,15 @@ a {
 
     .header-right {
         gap: 8px;
+    }
+
+    .entry-body.has-media {
+        flex-direction: column;
+    }
+
+    .entry-media {
+        flex-basis: auto;
+        max-width: 150px;
     }
 
     .theme-toggle-label {

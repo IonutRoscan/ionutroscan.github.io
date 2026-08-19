@@ -2,13 +2,23 @@ let currentSpread = 0;
 const totalSpreads = 3;
 const spreadLabels = ["I - II", "III - IV", "V - VI"];
 
-// ================= SYNTHETIC AUDIO ENGINE (WEB AUDIO API) =================
 let audioCtx = null;
 let droneOsc1 = null;
 let droneOsc2 = null;
-let subOsc = null;
 let droneGain = null;
+let masterGain = null;
 let isAudioActive = false;
+let veilDisturbed = false;
+let presenceTimer = null;
+
+const whispers = [
+    "the archive remembers every hand that opens it",
+    "you were not the first visitor",
+    "something moved between the pages",
+    "do not close the archive yet",
+    "the seal is warmer than it should be",
+    "there is no page seven"
+];
 
 function initAudioEngine() {
     if (!audioCtx) {
@@ -16,192 +26,928 @@ function initAudioEngine() {
     }
 }
 
-async function toggleAmbientDrone() {
+function toggleAmbientDrone() {
     initAudioEngine();
-    const btn = document.getElementById('audio-toggle');
-
-    // Ensure audio context is unblocked
-    if (audioCtx.state === 'suspended') {
-        await audioCtx.resume();
-    }
+    const btn = document.getElementById("audio-toggle");
 
     if (!isAudioActive) {
-        // 1. Root Oscillator (110Hz - A2 for clear speaker presence)
-        droneOsc1 = audioCtx.createOscillator();
-        droneOsc1.type = 'sawtooth';
-        droneOsc1.frequency.setValueAtTime(110, audioCtx.currentTime);
+        if (audioCtx.state === "suspended") audioCtx.resume();
 
-        // 2. Detuned Harmonic (109.2Hz for eerie slow-beating pulse)
-        droneOsc2 = audioCtx.createOscillator();
-        droneOsc2.type = 'triangle';
-        droneOsc2.frequency.setValueAtTime(109.2, audioCtx.currentTime);
-
-        // 3. Deep Sub Foundation (55Hz)
-        subOsc = audioCtx.createOscillator();
-        subOsc.type = 'sine';
-        subOsc.frequency.setValueAtTime(55, audioCtx.currentTime);
-
-        // 4. Low-pass filter to keep it dark and warm
         const filter = audioCtx.createBiquadFilter();
-        filter.type = 'lowpass';
-        filter.frequency.setValueAtTime(280, audioCtx.currentTime);
-        filter.Q.setValueAtTime(3.0, audioCtx.currentTime);
-
-        // 5. Main Master Gain (Boosted to 0.22 for audible presence)
+        masterGain = audioCtx.createGain();
         droneGain = audioCtx.createGain();
-        droneGain.gain.setValueAtTime(0.001, audioCtx.currentTime);
-        droneGain.gain.exponentialRampToValueAtTime(0.22, audioCtx.currentTime + 1.5);
 
-        // Route Audio
+        droneOsc1 = audioCtx.createOscillator();
+        droneOsc2 = audioCtx.createOscillator();
+
+        droneOsc1.type = "sawtooth";
+        droneOsc1.frequency.setValueAtTime(
+            55,
+            audioCtx.currentTime
+        );
+
+        droneOsc2.type = "sine";
+        droneOsc2.frequency.setValueAtTime(
+            54.35,
+            audioCtx.currentTime
+        );
+
+        filter.type = "lowpass";
+        filter.frequency.setValueAtTime(
+            135,
+            audioCtx.currentTime
+        );
+        filter.Q.setValueAtTime(
+            1.2,
+            audioCtx.currentTime
+        );
+
+        droneGain.gain.setValueAtTime(
+            0.0001,
+            audioCtx.currentTime
+        );
+
+        droneGain.gain.exponentialRampToValueAtTime(
+            0.055,
+            audioCtx.currentTime + 2.8
+        );
+
+        masterGain.gain.setValueAtTime(
+            0.72,
+            audioCtx.currentTime
+        );
+
         droneOsc1.connect(filter);
         droneOsc2.connect(filter);
-        subOsc.connect(filter);
+
         filter.connect(droneGain);
-        droneGain.connect(audioCtx.destination);
+        droneGain.connect(masterGain);
+        masterGain.connect(audioCtx.destination);
 
         droneOsc1.start();
         droneOsc2.start();
-        subOsc.start();
 
         isAudioActive = true;
+
         if (btn) {
-            btn.classList.add('active');
-            btn.textContent = "🕯️ Resonance Bound (Active)";
+            btn.classList.add("active");
+            btn.textContent = "🕯 Resonance Bound (Active)";
         }
+
     } else {
-        // Fade out
+
         if (droneGain) {
-            droneGain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 1.0);
+
+            droneGain.gain.exponentialRampToValueAtTime(
+                0.0001,
+                audioCtx.currentTime + 1.2
+            );
+
             setTimeout(() => {
-                if (droneOsc1) { droneOsc1.stop(); droneOsc1.disconnect(); }
-                if (droneOsc2) { droneOsc2.stop(); droneOsc2.disconnect(); }
-                if (subOsc) { subOsc.stop(); subOsc.disconnect(); }
+
+                try {
+                    droneOsc1?.stop();
+                    droneOsc2?.stop();
+                } catch {}
+
+                droneOsc1?.disconnect();
+                droneOsc2?.disconnect();
+                droneGain?.disconnect();
+
                 isAudioActive = false;
-            }, 1000);
+
+            }, 1250);
         }
+
         if (btn) {
-            btn.classList.remove('active');
-            btn.textContent = "🕯️ Kindle Ambient Resonance";
+            btn.classList.remove("active");
+            btn.textContent = "🕯 Kindle Ambient Resonance";
         }
     }
 }
 
-// Synthesized Parchment Page Rustle
-function playPageFlipSound() {
-    if (!audioCtx) return;
+
+function playTone(
+    freq,
+    duration = 0.12,
+    type = "sine",
+    volume = 0.035
+) {
+    if (!isAudioActive || !audioCtx) return;
 
     try {
-        if (audioCtx.state === 'suspended') {
-            audioCtx.resume();
-        }
 
-        const bufferSize = audioCtx.sampleRate * 0.18;
-        const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-        const output = noiseBuffer.getChannelData(0);
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
 
-        for (let i = 0; i < bufferSize; i++) {
-            output[i] = Math.random() * 2 - 1;
-        }
+        osc.type = type;
 
-        const whiteNoise = audioCtx.createBufferSource();
-        whiteNoise.buffer = noiseBuffer;
+        osc.frequency.setValueAtTime(
+            freq,
+            audioCtx.currentTime
+        );
 
-        const filter = audioCtx.createBiquadFilter();
-        filter.type = 'bandpass';
-        filter.frequency.setValueAtTime(700, audioCtx.currentTime);
-        filter.Q.setValueAtTime(2.0, audioCtx.currentTime);
+        gain.gain.setValueAtTime(
+            volume,
+            audioCtx.currentTime
+        );
 
-        const gainNode = audioCtx.createGain();
-        gainNode.gain.setValueAtTime(0.08, audioCtx.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.18);
+        gain.gain.exponentialRampToValueAtTime(
+            0.0001,
+            audioCtx.currentTime + duration
+        );
 
-        whiteNoise.connect(filter);
-        filter.connect(gainNode);
-        gainNode.connect(audioCtx.destination);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
 
-        whiteNoise.start();
-    } catch (e) {
-        // Fallback silently if audio is blocked
-    }
+        osc.start();
+
+        osc.stop(
+            audioCtx.currentTime + duration
+        );
+
+    } catch {}
 }
 
-// ================= PAGE TURN LOGIC =================
+
+function playPageFlipSound() {
+
+    if (!isAudioActive || !audioCtx) return;
+
+    try {
+
+        const bufferSize =
+            Math.floor(audioCtx.sampleRate * 0.18);
+
+        const buffer =
+            audioCtx.createBuffer(
+                1,
+                bufferSize,
+                audioCtx.sampleRate
+            );
+
+        const output =
+            buffer.getChannelData(0);
+
+        for (
+            let i = 0;
+            i < bufferSize;
+            i++
+        ) {
+            output[i] =
+                Math.random() * 2 - 1;
+        }
+
+        const source =
+            audioCtx.createBufferSource();
+
+        const filter =
+            audioCtx.createBiquadFilter();
+
+        const gain =
+            audioCtx.createGain();
+
+        source.buffer = buffer;
+
+        filter.type = "bandpass";
+
+        filter.frequency.setValueAtTime(
+            800,
+            audioCtx.currentTime
+        );
+
+        filter.Q.setValueAtTime(
+            1.5,
+            audioCtx.currentTime
+        );
+
+        gain.gain.setValueAtTime(
+            0.045,
+            audioCtx.currentTime
+        );
+
+        gain.gain.exponentialRampToValueAtTime(
+            0.0001,
+            audioCtx.currentTime + 0.18
+        );
+
+        source.connect(filter);
+        filter.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        source.start();
+
+    } catch {}
+}
+
+
+/* =========================
+   PAGE NAVIGATION
+========================= */
+
 function turnToPage(index) {
-    if (index < 0 || index >= totalSpreads) return;
+
+    if (
+        index < 0 ||
+        index >= totalSpreads
+    ) {
+        return;
+    }
 
     currentSpread = index;
+
     playPageFlipSound();
 
-    // Update spread visibility
-    document.querySelectorAll('.tome-page-spread').forEach((spread, idx) => {
-        if (idx === currentSpread) {
-            spread.classList.add('active');
-        } else {
-            spread.classList.remove('active');
-        }
-    });
+    playTone(
+        110 + index * 22,
+        0.16,
+        "triangle",
+        0.02
+    );
 
-    // Update Ribbon buttons
-    document.querySelectorAll('.ribbon-btn').forEach((btn, idx) => {
-        if (idx === currentSpread) {
-            btn.classList.add('active');
-        } else {
-            btn.classList.remove('active');
-        }
-    });
 
-    // Update indicator
-    const indicator = document.getElementById('spread-count');
-    if (indicator) indicator.textContent = spreadLabels[currentSpread];
+    document
+        .querySelectorAll(".tome-page-spread")
+        .forEach((spread, idx) => {
+
+            spread.classList.toggle(
+                "active",
+                idx === currentSpread
+            );
+
+        });
+
+
+    document
+        .querySelectorAll(".ribbon-btn")
+        .forEach((btn, idx) => {
+
+            btn.classList.toggle(
+                "active",
+                idx === currentSpread
+            );
+
+        });
+
+
+    const indicator =
+        document.getElementById("spread-count");
+
+    if (indicator) {
+        indicator.textContent =
+            spreadLabels[currentSpread];
+    }
+
+
+    /*
+        Sometimes the archive whispers
+        when a page is turned.
+    */
+
+    if (Math.random() < 0.42) {
+
+        showWhisper(
+            whispers[
+                Math.floor(
+                    Math.random() * whispers.length
+                )
+            ]
+        );
+
+    }
+
+
+    /*
+        The final spread is where
+        the archive becomes more active.
+    */
+
+    if (
+        currentSpread === 2 &&
+        Math.random() < 0.55
+    ) {
+
+        disturbPresence();
+
+    }
 }
+
 
 function nextPage() {
-    if (currentSpread < totalSpreads - 1) {
-        turnToPage(currentSpread + 1);
-    } else {
-        turnToPage(0);
-    }
+
+    turnToPage(
+        (currentSpread + 1) % totalSpreads
+    );
+
 }
+
 
 function prevPage() {
-    if (currentSpread > 0) {
-        turnToPage(currentSpread - 1);
+
+    turnToPage(
+        (currentSpread - 1 + totalSpreads)
+        % totalSpreads
+    );
+
+}
+
+
+/* =========================
+   WHISPERS
+========================= */
+
+function showWhisper(text) {
+
+    const el =
+        document.getElementById("whisper-text");
+
+    if (!el) return;
+
+    el.textContent =
+        `“${text}”`;
+
+    el.classList.remove("show");
+
+    /*
+        Force browser reflow so
+        the animation can restart.
+    */
+
+    void el.offsetWidth;
+
+    el.classList.add("show");
+}
+
+
+/* =========================
+   PRESENCE EFFECT
+========================= */
+
+function disturbPresence() {
+
+    document.body.classList.remove(
+        "presence-flash"
+    );
+
+    void document.body.offsetWidth;
+
+    document.body.classList.add(
+        "presence-flash"
+    );
+
+    setTimeout(() => {
+
+        document.body.classList.remove(
+            "presence-flash"
+        );
+
+    }, 1900);
+}
+
+
+/* =========================
+   GLITCH EFFECT
+========================= */
+
+function glitchArchive() {
+
+    document.body.classList.remove(
+        "glitching"
+    );
+
+    void document.body.offsetWidth;
+
+    document.body.classList.add(
+        "glitching"
+    );
+
+
+    const status =
+        document.getElementById("status-text");
+
+    const footer =
+        document.getElementById("footer-status");
+
+
+    const originalStatus =
+        status?.textContent ||
+        "TOME UNSEALED · ARCHIVE ONLINE";
+
+
+    if (status) {
+
+        status.textContent =
+            "TOME OBSERVING · ARCHIVE AWAKE";
+
+    }
+
+
+    if (footer) {
+
+        footer.textContent =
+            "it knows you are here";
+
+    }
+
+
+    setTimeout(() => {
+
+        if (status) {
+
+            status.textContent =
+                originalStatus;
+
+        }
+
+        if (footer) {
+
+            footer.textContent =
+                veilDisturbed
+                    ? "the veil is thin"
+                    : "something is listening";
+
+        }
+
+    }, 1300);
+}
+
+
+/* =========================
+   DISTURB THE VEIL
+========================= */
+
+function disturbTheVeil() {
+
+    veilDisturbed =
+        !veilDisturbed;
+
+
+    document.body.classList.toggle(
+        "veil-disturbed",
+        veilDisturbed
+    );
+
+
+    const btn =
+        document.getElementById("veil-toggle");
+
+
+    if (btn) {
+
+        btn.textContent =
+            veilDisturbed
+                ? "◈ Veil Disturbed"
+                : "◈ Disturb the Veil";
+
+
+        btn.classList.toggle(
+            "active",
+            veilDisturbed
+        );
+
+    }
+
+
+    if (veilDisturbed) {
+
+        showWhisper(
+            "you should not have done that"
+        );
+
+        glitchArchive();
+
     } else {
-        turnToPage(totalSpreads - 1);
+
+        showWhisper(
+            "the veil settles"
+        );
+
     }
 }
 
-// ================= DOM INITIALIZATION =================
-document.addEventListener('DOMContentLoaded', () => {
-    // Bind Audio Button
-    const audioBtn = document.getElementById('audio-toggle');
-    if (audioBtn) {
-        audioBtn.addEventListener('click', toggleAmbientDrone);
-    }
 
-    // Altar Sigil Click Reaction
-    const sigil = document.getElementById('altar-sigil');
-    if (sigil) {
-        sigil.addEventListener('click', () => {
-            initAudioEngine();
-            if (audioCtx && audioCtx.state === 'suspended') {
-                audioCtx.resume();
+/* =========================
+   ALTAR / PRESENCE BINDING
+========================= */
+
+function bindPresence() {
+
+    const sigil =
+        document.getElementById(
+            "altar-sigil"
+        );
+
+    if (!sigil) return;
+
+
+    const bind = () => {
+
+        sigil.classList.add(
+            "bound"
+        );
+
+
+        const prompt =
+            sigil.querySelector(
+                ".sigil-prompt"
+            );
+
+
+        if (prompt) {
+
+            prompt.textContent =
+                "✦ PRESENCE BOUND · THE ARCHIVE KNOWS YOU ✦";
+
+            prompt.style.color =
+                "#8d1119";
+
+        }
+
+
+        playTone(
+            73.4,
+            0.6,
+            "sine",
+            0.035
+        );
+
+
+        showWhisper(
+            "your presence has been recorded"
+        );
+
+
+        disturbPresence();
+
+
+        const count =
+            document.getElementById(
+                "visitor-count"
+            );
+
+
+        if (count) {
+
+            count.textContent =
+                "002";
+
+        }
+
+    };
+
+
+    sigil.addEventListener(
+        "click",
+        bind
+    );
+
+
+    sigil.addEventListener(
+        "keydown",
+        e => {
+
+            if (
+                e.key === "Enter" ||
+                e.key === " "
+            ) {
+
+                e.preventDefault();
+
+                bind();
+
             }
-            playPageFlipSound();
 
-            sigil.style.borderColor = '#9e1b1b';
-            sigil.style.boxShadow = '0 0 25px rgba(158, 27, 27, 0.6)';
-            const prompt = sigil.querySelector('.sigil-prompt');
-            if (prompt) {
-                prompt.textContent = "✦ PRESENCE BOUND IN BLOOD & FREQUENCY ✦";
-                prompt.style.color = '#9e1b1b';
+        }
+    );
+}
+
+
+/* =========================
+   SEALED CURIOSITY
+========================= */
+
+function bindSealedCuriosity() {
+
+    const card =
+        document.getElementById(
+            "sealed-curio"
+        );
+
+    if (!card) return;
+
+
+    const reveal = () => {
+
+        card.classList.toggle(
+            "revealed"
+        );
+
+
+        const revealed =
+            card.classList.contains(
+                "revealed"
+            );
+
+
+        const p =
+            card.querySelector("p");
+
+
+        const status =
+            card.querySelector(
+                ".status-pill"
+            );
+
+
+        if (revealed) {
+
+            if (p) {
+
+                p.textContent =
+                    "You found it. It was already open.";
+
             }
-        });
-    }
 
-    // Keyboard Navigation
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'ArrowRight') nextPage();
-        if (e.key === 'ArrowLeft') prevPage();
-    });
-});
+
+            if (status) {
+
+                status.textContent =
+                    "Classification: YOU";
+
+            }
+
+
+            showWhisper(
+                "this entry was waiting for you"
+            );
+
+
+            glitchArchive();
+
+        } else {
+
+            if (p) {
+
+                p.textContent =
+                    "There is an entry here that was not written by you.";
+
+            }
+
+
+            if (status) {
+
+                status.textContent =
+                    "Classification: █████";
+
+            }
+
+        }
+
+    };
+
+
+    card.addEventListener(
+        "click",
+        reveal
+    );
+
+
+    card.addEventListener(
+        "keydown",
+        e => {
+
+            if (
+                e.key === "Enter" ||
+                e.key === " "
+            ) {
+
+                e.preventDefault();
+
+                reveal();
+
+            }
+
+        }
+    );
+}
+
+
+/* =========================
+   INITIALIZATION
+========================= */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+
+        const audioButton =
+            document.getElementById(
+                "audio-toggle"
+            );
+
+
+        if (audioButton) {
+
+            audioButton.addEventListener(
+                "click",
+                toggleAmbientDrone
+            );
+
+        }
+
+
+        const veilButton =
+            document.getElementById(
+                "veil-toggle"
+            );
+
+
+        if (veilButton) {
+
+            veilButton.addEventListener(
+                "click",
+                disturbTheVeil
+            );
+
+        }
+
+
+        bindPresence();
+
+        bindSealedCuriosity();
+
+
+        /* =====================
+           KEYBOARD NAVIGATION
+        ===================== */
+
+        document.addEventListener(
+            "keydown",
+            e => {
+
+                if (
+                    e.key === "ArrowRight"
+                ) {
+
+                    nextPage();
+
+                }
+
+
+                if (
+                    e.key === "ArrowLeft"
+                ) {
+
+                    prevPage();
+
+                }
+
+
+                if (
+                    e.key.toLowerCase() === "v"
+                ) {
+
+                    disturbTheVeil();
+
+                }
+
+            }
+        );
+
+
+        /* =====================
+           AUTONOMOUS ARCHIVE
+        ===================== */
+
+        presenceTimer =
+            setInterval(() => {
+
+                /*
+                    Do nothing if the tab isn't visible.
+                */
+
+                if (document.hidden) {
+                    return;
+                }
+
+
+                /*
+                    Small chance that the archive
+                    decides to acknowledge the visitor.
+                */
+
+                if (
+                    Math.random() < 0.18
+                ) {
+
+                    showWhisper(
+                        whispers[
+                            Math.floor(
+                                Math.random() *
+                                whispers.length
+                            )
+                        ]
+                    );
+
+
+                    if (
+                        Math.random() < 0.25
+                    ) {
+
+                        glitchArchive();
+
+                    }
+
+                }
+
+            }, 18000);
+
+
+        /* =====================
+           TOME MOUSE RESPONSE
+        ===================== */
+
+        const tome =
+            document.getElementById(
+                "tome"
+            );
+
+
+        document.addEventListener(
+            "pointermove",
+            e => {
+
+                if (
+                    !tome ||
+                    window.matchMedia(
+                        "(prefers-reduced-motion: reduce)"
+                    ).matches
+                ) {
+
+                    return;
+
+                }
+
+
+                const rect =
+                    tome.getBoundingClientRect();
+
+
+                const x =
+                    (
+                        (e.clientX - rect.left)
+                        / rect.width
+                        - 0.5
+                    ) * 2;
+
+
+                const y =
+                    (
+                        (e.clientY - rect.top)
+                        / rect.height
+                        - 0.5
+                    ) * 2;
+
+
+                const inside =
+                    e.clientX >= rect.left &&
+                    e.clientX <= rect.right &&
+                    e.clientY >= rect.top &&
+                    e.clientY <= rect.bottom;
+
+
+                if (inside) {
+
+                    tome.style.transform =
+                        `perspective(1800px)
+                         rotateY(${x * 0.7}deg)
+                         rotateX(${-y * 0.45}deg)`;
+
+                } else {
+
+                    tome.style.transform =
+                        "";
+
+                }
+
+            }
+        );
+
+
+        /* =====================
+           CLEANUP
+        ===================== */
+
+        window.addEventListener(
+            "beforeunload",
+            () => {
+
+                clearInterval(
+                    presenceTimer
+                );
+
+            }
+        );
+
+    }
+);

@@ -3,222 +3,225 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Archive of Ionuț Roșcan | Arcane Artifacts & Tools</title>
+    <title>The Grimoire of Ionuț Roșcan</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;800&family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
 </head>
-<body class="crt-overlay">
-    <!-- Ambient Background Sigil -->
-    <div class="sigil-container" aria-hidden="true">
-        <div class="arcane-sigil"></div>
+<body>
+
+    <!-- Ambient Floating Runes & Candlelight Backdrop -->
+    <div class="altar-background">
+        <div class="candle-glow left"></div>
+        <div class="candle-glow right"></div>
     </div>
 
-    <!-- 01: HERO & TITLE -->
-    <header class="grimoire-hero">
-        <div class="status-badge pulse">
-            <span class="status-dot"></span> ARCHIVE ONLINE · SEALS ACTIVE
+    <!-- Header / Status Bar -->
+    <header class="altar-header">
+        <div class="status-indicator">
+            <span class="pulse-dot"></span> TOME UNSEALED · ARCHIVE ONLINE
         </div>
-        <h1 class="hero-title">Ionuț Roșcan</h1>
-        <p class="hero-subtitle">Digital Artifacts · Forbidden Tools · Arcane Extensions · Experiments</p>
-        
-        <div class="sigil-divider">
-            <span>☽</span> ✦ <span>🜁</span> ✦ <span>🜂</span> ✦ <span>☾</span>
-        </div>
+        <h1 class="tome-title">GRIMOIRE OF IONUȚ ROȘCAN</h1>
+        <p class="tome-subtitle">Artifacts, Digital Curiosities & Sound Invocations</p>
     </header>
 
-    <!-- 02: TOME NAVIGATION / TABS -->
-    <nav class="tome-nav">
-        <button class="nav-tab active" data-filter="all">All Artifacts</button>
-        <button class="nav-tab" data-filter="extension">Extensions</button>
-        <button class="nav-tab" data-filter="tool">Tools</button>
-        <button class="nav-tab" data-filter="experiment">Experiments</button>
+    <!-- Tome Controller (Bookmark Ribbons) -->
+    <nav class="bookmark-ribbons">
+        <button class="ribbon-btn active" onclick="turnToPage(0)">I. Inscription</button>
+        <button class="ribbon-btn" onclick="turnToPage(1)">II. The Forge & Mana</button>
+        <button class="ribbon-btn" onclick="turnToPage(2)">III. Curiosities</button>
     </nav>
 
-    <main class="archive-container">
+    <!-- THE 3D INTERACTIVE TOME -->
+    <div class="book-viewport">
+        <div class="tome-wrapper" id="tome">
+            
+            <!-- Spine Binding -->
+            <div class="book-spine"></div>
 
-        <!-- 04: FEATURED ARTIFACT (BOSS ENCOUNTER) -->
-        <section class="section-block featured-section">
-            <div class="section-tag">✦ PRIMARY ARTIFACT ✦</div>
-            <div class="featured-card">
-                <div class="card-ornament top-left"></div>
-                <div class="card-ornament top-right"></div>
-                <div class="featured-content">
-                    <div class="badge-row">
-                        <span class="badge badge-crimson">BROWSER EXTENSION</span>
-                        <span class="badge badge-gold">STABLE v1.0</span>
-                        <span class="badge">BRAVE / CHROMIUM</span>
-                    </div>
-                    <h2>The Clank Lorebook Importer</h2>
-                    <p class="description">
-                        An arcane bridge forged to extract, convert, and weave narrative lore directly into Clank.world worlds. Eliminates tedious transcription through direct data binding.
-                    </p>
-                    
-                    <div class="install-rune-box">
-                        <code>Installation: Download .ZIP → Extract → brave://extensions → "Load unpacked"</code>
-                    </div>
-
-                    <div class="action-row">
-                        <a href="clank-lorebook-importer.zip" class="btn btn-primary" download>
-                            <span>⚔ Equip Artifact (.ZIP)</span>
-                        </a>
-                        <a href="https://github.com/ionutroscan" target="_blank" class="btn btn-secondary">
-                            <span>📜 Inspect Source</span>
-                        </a>
+            <!-- ================= PAGE 1 (INSCRIPTION & ARCHIVIST) ================= -->
+            <section class="tome-page-spread active" id="spread-0">
+                <!-- Left Leaf -->
+                <div class="parchment-leaf left-leaf">
+                    <div class="leaf-corner top-left"></div>
+                    <div class="leaf-content">
+                        <div class="page-num">Folio I · Frontispiece</div>
+                        <div class="sigil-emblem">🜁 ✦ 🜂</div>
+                        <h2 class="leaf-heading">The Digital Codex</h2>
+                        <p class="illuminated-p">
+                            <span class="first-letter">W</span>ithin these bound pages rest the artifacts, tools, and synthesized frequencies crafted by <strong>Ionuț Roșcan</strong>. 
+                        </p>
+                        <p>
+                            Treat each script as an invocation—coded to bend browsers, process arcane structures, and shape sonic airwaves.
+                        </p>
+                        <div class="seal-box">
+                            <span class="seal-icon">🜔</span>
+                            <div class="seal-text">
+                                <strong>RESTRICTION:</strong> UNRESTRICTED<br>
+                                <strong>ORIGIN:</strong> VAULT OF ROSCAN
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </section>
 
-        <!-- 03 & 05: ARTIFACTS GRID -->
-        <section class="section-block">
-            <h2 class="section-heading"><span>📜</span> Catalogue of Curiosities</h2>
-            <div class="artifact-grid">
-                
-                <!-- Tool Item -->
-                <article class="artifact-card" data-category="tool">
-                    <div class="card-header">
-                        <span class="artifact-type">🧪 Utility</span>
-                        <span class="badge badge-emerald">Operational</span>
-                    </div>
-                    <h3>JSON Grimoire Formatter</h3>
-                    <p>Cleanse, sanitize, and validate tangled payload runes into readable structures.</p>
-                    <div class="card-footer">
-                        <span class="tech-tag">JavaScript</span>
-                        <a href="#" class="inline-link">Invoke →</a>
-                    </div>
-                </article>
-
-                <!-- Experiment Item -->
-                <article class="artifact-card" data-category="experiment">
-                    <div class="card-header">
-                        <span class="artifact-type">☠️ Prototype</span>
-                        <span class="badge badge-purple">Volatile</span>
-                    </div>
-                    <h3>Shadow Node Visualizer</h3>
-                    <p>Experimental canvas engine mapping state transitions into dynamic occult constellations.</p>
-                    <div class="card-footer">
-                        <span class="tech-tag">WebGL</span>
-                        <a href="#" class="inline-link">Inspect →</a>
-                    </div>
-                </article>
-
-                <!-- Tool Item -->
-                <article class="artifact-card" data-category="tool">
-                    <div class="card-header">
-                        <span class="artifact-type">⚙️ Script</span>
-                        <span class="badge badge-emerald">Operational</span>
-                    </div>
-                    <h3>Audio Frequency Carver</h3>
-                    <p>Automated spectral cleaner for ambient drone loops and ritual soundscapes.</p>
-                    <div class="card-footer">
-                        <span class="tech-tag">Python</span>
-                        <a href="#" class="inline-link">Invoke →</a>
-                    </div>
-                </article>
-
-            </div>
-        </section>
-
-        <!-- 07: THE ARSENAL (SKILLS) -->
-        <section class="section-block">
-            <h2 class="section-heading"><span>🧠</span> The Arcane Arsenal</h2>
-            <div class="arsenal-grid">
-                <div class="arsenal-item">
-                    <div class="arsenal-meta">
-                        <span>Web Sorcery (JS / CSS / HTML)</span>
-                        <span class="potency">85% Potency</span>
-                    </div>
-                    <div class="mana-bar-track">
-                        <div class="mana-bar-fill" style="width: 85%;"></div>
+                <!-- Right Leaf -->
+                <div class="parchment-leaf right-leaf">
+                    <div class="leaf-corner top-right"></div>
+                    <div class="leaf-content">
+                        <div class="page-num">Folio II · The Archivist</div>
+                        <h2 class="leaf-heading">About The Crafter</h2>
+                        <p>
+                            I am a programmer, sound designer, and music producer obsessed with creating strange, tangible things that bridge the gap between utility and imagination.
+                        </p>
+                        <p>
+                            If an idea can be constructed, automated, visualized, or sculpted into raw sonic resonance, chances are I'll build it.
+                        </p>
+                        <div class="archivist-scroll">
+                            <h4>Current Endeavors:</h4>
+                            <ul>
+                                <li>Manipulating browser environments via extensions.</li>
+                                <li>Synthesizing aggressive, immersive audio landscapes.</li>
+                                <li>Developing curious mechanics & interactive tools.</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
-                <div class="arsenal-item">
-                    <div class="arsenal-meta">
-                        <span>Systems & Scripting (Python / Automation)</span>
-                        <span class="potency">80% Potency</span>
-                    </div>
-                    <div class="mana-bar-track">
-                        <div class="mana-bar-fill" style="width: 80%;"></div>
-                    </div>
-                </div>
-                <div class="arsenal-item">
-                    <div class="arsenal-meta">
-                        <span>Game Engine Alchemy (Godot / Mechanics)</span>
-                        <span class="potency">75% Potency</span>
-                    </div>
-                    <div class="mana-bar-track">
-                        <div class="mana-bar-fill" style="width: 75%;"></div>
-                    </div>
-                </div>
-                <div class="arsenal-item">
-                    <div class="arsenal-meta">
-                        <span>Audio Resonance (Synthesis & Sound Design)</span>
-                        <span class="potency">75% Potency</span>
-                    </div>
-                    <div class="mana-bar-track">
-                        <div class="mana-bar-fill" style="width: 75%;"></div>
-                    </div>
-                </div>
-            </div>
-        </section>
+            </section>
 
-        <!-- 11: ARTIFACT TERMINAL CONSOLE -->
-        <section class="section-block">
-            <h2 class="section-heading"><span>🖥️</span> Arcane Comm Terminal</h2>
-            <div class="terminal-window">
-                <div class="terminal-bar">
-                    <span class="term-dot red"></span>
-                    <span class="term-dot yellow"></span>
-                    <span class="term-dot green"></span>
-                    <span class="term-title">ionut@archive-vault:~</span>
+            <!-- ================= PAGE 2 (FEATURED RELIC & ARSENAL) ================= -->
+            <section class="tome-page-spread" id="spread-1">
+                <!-- Left Leaf: The Clank Lorebook Importer -->
+                <div class="parchment-leaf left-leaf">
+                    <div class="leaf-corner top-left"></div>
+                    <div class="leaf-content">
+                        <div class="page-num">Folio III · Relic</div>
+                        <div class="badge-tag">PRIMARY ARTIFACT</div>
+                        <h2 class="leaf-heading">Clank Lorebook Importer</h2>
+                        <span class="sub-label">Browser Extension · Brave / Chromium</span>
+                        
+                        <p class="artifact-summary">
+                            An arcane bridge forged to import and seamlessly weave narrative lorebooks directly into Clank.world worlds without tedious transcription.
+                        </p>
+
+                        <div class="rune-scroll">
+                            <strong>Invocation Protocol:</strong><br>
+                            <code>Download .ZIP → Extract → brave://extensions → "Load unpacked"</code>
+                        </div>
+
+                        <div class="leaf-actions">
+                            <a href="clank-lorebook-importer.zip" class="grimoire-btn" download>
+                                ⚔ Equip Artifact (.ZIP)
+                            </a>
+                        </div>
+                    </div>
                 </div>
-                <div class="terminal-body" id="terminal-output">
-                    <div class="term-line system-msg">Arcane Terminal Interface [Version 2.0.4]</div>
-                    <div class="term-line">Type <span class="highlight">'help'</span> to invoke recognized protocols.</div>
+
+                <!-- Right Leaf: The Arsenal -->
+                <div class="parchment-leaf right-leaf">
+                    <div class="leaf-corner top-right"></div>
+                    <div class="leaf-content">
+                        <div class="page-num">Folio IV · The Arsenal</div>
+                        <h2 class="leaf-heading">Arcane Potencies</h2>
+                        <p class="sub-note">Observed mastery across core creative disciplines:</p>
+
+                        <div class="mana-container">
+                            <div class="mana-item">
+                                <div class="mana-info">
+                                    <span>Audio Resonance (Synthesis & Sound Design)</span>
+                                    <span class="gold-val">100%</span>
+                                </div>
+                                <div class="mana-track">
+                                    <div class="mana-fill maxed" style="width: 100%;"></div>
+                                </div>
+                            </div>
+
+                            <div class="mana-item">
+                                <div class="mana-info">
+                                    <span>Web Sorcery (JS / CSS / HTML)</span>
+                                    <span class="gold-val">70%</span>
+                                </div>
+                                <div class="mana-track">
+                                    <div class="mana-fill" style="width: 70%;"></div>
+                                </div>
+                            </div>
+
+                            <div class="mana-item">
+                                <div class="mana-info">
+                                    <span>Systems & Scripting (Python / Automation)</span>
+                                    <span class="gold-val">80%</span>
+                                </div>
+                                <div class="mana-track">
+                                    <div class="mana-fill" style="width: 80%;"></div>
+                                </div>
+                            </div>
+
+                            <div class="mana-item">
+                                <div class="mana-info">
+                                    <span>Game Engine Alchemy (Godot / Mechanics)</span>
+                                    <span class="gold-val">75%</span>
+                                </div>
+                                <div class="mana-track">
+                                    <div class="mana-fill" style="width: 75%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="terminal-prompt">
-                    <span class="prompt-sigil">🜁 ionut@archive:~$</span>
-                    <input type="text" id="terminal-input" autocomplete="off" spellcheck="false">
+            </section>
+
+            <!-- ================= PAGE 3 (CURIOSITIES & SEAL) ================= -->
+            <section class="tome-page-spread" id="spread-2">
+                <!-- Left Leaf -->
+                <div class="parchment-leaf left-leaf">
+                    <div class="leaf-corner top-left"></div>
+                    <div class="leaf-content">
+                        <div class="page-num">Folio V · Utilities</div>
+                        <h2 class="leaf-heading">The Worktable</h2>
+                        <div class="curio-card">
+                            <h3>🧪 JSON Formatter</h3>
+                            <p>Cleanses, structures, and validates entangled rune payloads.</p>
+                            <span class="status-pill">Ready for Inscription</span>
+                        </div>
+                        <div class="curio-card" style="margin-top: 15px;">
+                            <h3>📦 Upcoming Relics</h3>
+                            <p>Additional extensions and sonic toolkits are forged regularly in the private laboratory.</p>
+                            <span class="status-pill">In Progress</span>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </section>
 
-        <!-- 08: ABOUT THE ARCHIVIST -->
-        <section class="section-block about-box">
-            <h2 class="section-heading"><span>🕯️</span> About the Archivist</h2>
-            <p>
-                <strong>Ionuț Roșcan</strong> is a programmer, sonic crafter, and digital architect dedicated to constructing curiosities that tread the line between functional utilities and strange digital artifacts. 
-            </p>
-            <p>
-                If something can be automated, visualized, decomposed, or distilled into interactive mechanics, it belongs in this tome.
-            </p>
-        </section>
+                <!-- Right Leaf -->
+                <div class="parchment-leaf right-leaf">
+                    <div class="leaf-corner top-right"></div>
+                    <div class="leaf-content">
+                        <div class="page-num">Folio VI · The Seal</div>
+                        <h2 class="leaf-heading">The Vault Gate</h2>
+                        <p>The archive grows as new curiosities and spells are cast.</p>
+                        
+                        <div class="altar-sigil-box" id="altar-sigil">
+                            <div class="inner-sigil">🜂 🜔 🜁</div>
+                            <p class="sigil-prompt">Click the seal to bind your presence</p>
+                        </div>
 
-    </main>
+                        <div class="tome-links">
+                            <a href="https://github.com/ionutroscan" target="_blank">📜 GitHub Vault</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
-    <!-- 14: FOOTER -->
-    <footer class="grimoire-footer">
-        <div class="sigil-divider">✦ ✦ ✦</div>
-        <p class="footer-quote">THE ARCHIVE REMAINS OPEN TO THOSE WHO SEEK.</p>
-        <p class="footer-meta">Crafted by Ionuț Roșcan · Powered by Curiosity & Arcane Logic</p>
-        <div class="footer-links">
-            <a href="https://github.com/ionutroscan" target="_blank">GitHub</a>
-            <a href="#" id="summon-trigger">Invoke Seal</a>
-        </div>
-        <div class="archive-status">
-            VAULT STATUS: <span class="gold">STABLE</span> · CATALOGUED: <span>19 · VIII · 2026</span>
-        </div>
-    </footer>
-
-    <!-- Secret Summon Modal -->
-    <div id="secret-modal" class="modal-backdrop">
-        <div class="modal-content">
-            <h3>🜂 THE SEAL HAS BEEN BROKEN 🜂</h3>
-            <p>You have unlocked the hidden chambers of the repository.</p>
-            <code>Access Granted: Level 9 Arch-Sorcerer</code>
-            <button class="btn btn-primary" onclick="closeSecretModal()">Close Chamber</button>
         </div>
     </div>
+
+    <!-- Page Flip Controls -->
+    <div class="tome-page-turners">
+        <button class="turner-btn" id="prev-btn" onclick="prevPage()">⟵ Turn Back</button>
+        <span class="spread-indicator" id="spread-count">I - II</span>
+        <button class="turner-btn" id="next-btn" onclick="nextPage()">Turn Leaf ⟶</button>
+    </div>
+
+    <footer class="altar-footer">
+        THE ARCHIVE REMAINS OPEN TO THOSE WHO SEEK · IONUȚ ROȘCAN
+    </footer>
 
     <script src="script.js"></script>
 </body>

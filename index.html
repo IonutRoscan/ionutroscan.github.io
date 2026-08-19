@@ -5,20 +5,43 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DXK — Index</title>
 <meta name="description" content="DXK, aka SaltSaaalt — a running index of extensions, tools, and small utilities.">
+
+<!-- applied before paint so switching themes never flashes the wrong one -->
+<script>
+    (function () {
+        try {
+            var saved = localStorage.getItem("dxk-theme");
+            if (saved === "dark") {
+                document.documentElement.setAttribute("data-theme", "dark");
+            }
+        } catch (e) {}
+    })();
+</script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Nunito:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div class="grain" aria-hidden="true"></div>
+    <div class="blob blob-a" aria-hidden="true"></div>
+    <div class="blob blob-b" aria-hidden="true"></div>
+    <div class="blob blob-c" aria-hidden="true"></div>
 
     <header class="site-header">
-        <a class="mark" href="#top">DXK</a>
-        <div class="header-status">
-            <span class="dot" aria-hidden="true"></span>
-            <span id="system-status">1 STABLE · 1 PLANNED</span>
+        <a class="mark" href="#top">DXK <span class="mark-dot">✿</span></a>
+
+        <div class="header-right">
+            <div class="header-status">
+                <span class="dot" aria-hidden="true"></span>
+                <span id="system-status">1 stable · 1 planned</span>
+            </div>
+
+            <button class="theme-toggle" id="theme-toggle" type="button" aria-pressed="false">
+                <span class="theme-toggle-icon" aria-hidden="true">☀</span>
+                <span class="theme-toggle-label">Cream</span>
+            </button>
         </div>
     </header>
 
@@ -26,12 +49,12 @@
 
         <!-- ============ HERO ============ -->
         <section class="hero">
-            <p class="reveal eyebrow">INDEX <span class="cursor" aria-hidden="true">▍</span></p>
+            <p class="reveal eyebrow">✿ index</p>
             <h1 class="reveal wordmark">DXK</h1>
             <p class="reveal alias">aka <span class="handle">SaltSaaalt</span></p>
             <p class="reveal lede">
                 A running index of browser extensions, developer tools, and small
-                utilities — each one built to solve one specific, narrow problem.
+                utilities — each one built to solve one specific, gentle little problem.
             </p>
         </section>
 
@@ -41,7 +64,6 @@
                 <h2 id="registry-heading">Registry</h2>
                 <span class="registry-count"><span id="entry-count">2</span> entries logged</span>
             </div>
-            <div class="hairline"></div>
 
             <!-- ---- ENTRY 001 ---- -->
             <article class="entry" data-status="stable">
@@ -50,7 +72,7 @@
                 <div class="entry-body">
                     <div class="entry-top">
                         <h3 class="entry-name">Clank Lorebook Importer</h3>
-                        <span class="status-tag status-stable">Stable</span>
+                        <span class="status-tag status-stable">✓ stable</span>
                     </div>
 
                     <p class="entry-meta">Browser extension · Brave / Chromium · Manifest V3</p>
@@ -80,15 +102,13 @@ Content: [Lore description...]</code></pre>
                 </div>
             </article>
 
-            <div class="hairline"></div>
-
             <!-- ---- ENTRY 002 (EMPTY STATE) ---- -->
             <article class="entry entry-empty" data-status="planned">
                 <div class="entry-index">002</div>
                 <div class="entry-body">
                     <div class="entry-top">
                         <h3 class="entry-name entry-name-muted">Next build</h3>
-                        <span class="status-tag status-planned">Planned</span>
+                        <span class="status-tag status-planned">◌ planned</span>
                     </div>
                     <p class="entry-desc entry-desc-muted">
                         Nothing catalogued here yet. Future extensions, tools, and
@@ -96,8 +116,6 @@ Content: [Lore description...]</code></pre>
                     </p>
                 </div>
             </article>
-
-            <div class="hairline"></div>
         </section>
 
     </main>

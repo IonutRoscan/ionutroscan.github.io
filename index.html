@@ -1,179 +1,587 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DXK — Magical Index ✿</title>
-<meta name="description" content="DXK, aka SaltSaaalt — a cozy running index of extensions, tools, and small utilities.">
+    <meta charset="UTF-8">
 
-<!-- applied before paint so switching themes never flashes the wrong one -->
-<script>
-    (function () {
-        try {
-            var saved = localStorage.getItem("dxk-theme");
-            if (saved === "dark") {
-                document.documentElement.setAttribute("data-theme", "dark");
-            }
-        } catch (e) {}
-    })();
-</script>
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Nunito:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+    <title>DXK — Little Workshop ✿</title>
+
+    <meta
+        name="description"
+        content="DXK — a cozy little workshop filled with browser extensions, tools, experiments, game-dev projects and other digital creations."
+    >
+
+    <meta
+        name="theme-color"
+        content="#fbf1ea"
+    >
+
+    <!-- --------------------------------------------------------
+         APPLY SAVED THEME BEFORE PAINT
+         -------------------------------------------------------- -->
+
+    <script>
+        (function () {
+            try {
+                var saved = localStorage.getItem("dxk-theme");
+
+                if (saved === "dark") {
+                    document.documentElement.setAttribute(
+                        "data-theme",
+                        "dark"
+                    );
+                }
+            } catch (e) {}
+        })();
+    </script>
+
+
+    <!-- --------------------------------------------------------
+         FONTS
+         -------------------------------------------------------- -->
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Nunito:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet"
+    >
+
+
+    <!-- --------------------------------------------------------
+         STYLES
+         -------------------------------------------------------- -->
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+
 </head>
+
+
 <body>
 
-    <!-- Floating Confetti Container -->
-    <div class="confetti-container" aria-hidden="true"></div>
+    <!-- ========================================================
+         DECORATIVE BACKGROUND
+         ======================================================== -->
 
-    <div class="blob blob-a" aria-hidden="true"></div>
-    <div class="blob blob-b" aria-hidden="true"></div>
-    <div class="blob blob-c" aria-hidden="true"></div>
+    <div
+        class="confetti-container"
+        aria-hidden="true"
+    ></div>
+
+    <div
+        class="blob blob-a"
+        aria-hidden="true"
+    ></div>
+
+    <div
+        class="blob blob-b"
+        aria-hidden="true"
+    ></div>
+
+    <div
+        class="blob blob-c"
+        aria-hidden="true"
+    ></div>
+
+
+    <!-- ========================================================
+         HEADER
+         ======================================================== -->
 
     <header class="site-header">
-        <a class="mark" href="#top">DXK <span class="mark-dot">✿</span></a>
+
+        <a
+            class="mark"
+            href="#top"
+            aria-label="DXK — return to top"
+        >
+            DXK
+            <span
+                class="mark-dot"
+                aria-hidden="true"
+            >✿</span>
+        </a>
+
 
         <div class="header-right">
-            <div class="header-status">
-                <span class="dot" aria-hidden="true"></span>
-                <span id="system-status">1 stable · 1 planned</span>
+
+            <div
+                class="header-status"
+                title="Workshop status"
+            >
+                <span
+                    class="dot"
+                    aria-hidden="true"
+                ></span>
+
+                <span id="system-status">
+                    opening workshop...
+                </span>
             </div>
 
-            <button class="theme-toggle" id="theme-toggle" type="button" aria-pressed="false">
-                <span class="theme-toggle-icon" aria-hidden="true">☀</span>
-                <span class="theme-toggle-label">Cream</span>
+
+            <button
+                class="theme-toggle"
+                id="theme-toggle"
+                type="button"
+                aria-label="Toggle between cream and dusk themes"
+                aria-pressed="false"
+            >
+                <span
+                    class="theme-toggle-icon"
+                    aria-hidden="true"
+                >☀</span>
+
+                <span class="theme-toggle-label">
+                    Cream
+                </span>
             </button>
+
         </div>
+
     </header>
+
+
+    <!-- ========================================================
+         MAIN
+         ======================================================== -->
 
     <main id="top">
 
-        <!-- ============ HERO ============ -->
-        <section class="hero">
+
+        <!-- ====================================================
+             HERO
+             ==================================================== -->
+
+        <section
+            class="hero"
+            aria-labelledby="hero-title"
+        >
+
             <div class="hero-content">
-                <p class="reveal eyebrow">✦ cozy workshop index ✦</p>
-                <h1 class="reveal wordmark">DXK</h1>
-                <p class="reveal alias">aka <span class="handle">SaltSaaalt</span></p>
-                <p class="reveal lede">
-                    A dreamy digital nook filled with browser extensions, custom tools, and tiny utilities — each crafted with love to solve a gentle little problem.
+
+                <p class="reveal eyebrow">
+                    ✦ welcome to the little workshop ✦
                 </p>
+
+
+                <h1
+                    class="reveal wordmark"
+                    id="hero-title"
+                >
+                    DXK
+                </h1>
+
+
+                <p class="reveal alias">
+                    aka
+                    <span class="handle">
+                        SaltSaaalt
+                    </span>
+                </p>
+
+
+                <p class="reveal lede">
+                    A cozy collection of things I've made,
+                    things I'm tinkering with, and tiny
+                    experiments that seemed worth keeping.
+                </p>
+
+
+                <div class="reveal hero-links">
+
+                    <a
+                        class="hero-link hero-link-primary"
+                        href="#workshop"
+                    >
+                        ✿ browse the workshop
+                    </a>
+
+                    <a
+                        class="hero-link"
+                        href="https://github.com/ionutroscan"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        ♡ GitHub
+                    </a>
+
+                </div>
+
             </div>
-            
-            <!-- Cute anime mascot element -->
-            <div class="reveal hero-mascot" aria-hidden="true">
-                <div class="mascot-bubble">welcome! ☁️</div>
-                <img src="mascot.png" alt="Cute anime mascot illustration" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                <div class="mascot-fallback" style="display:none;">🐰</div>
+
+
+            <!-- ------------------------------------------------
+                 MASCOT
+                 ------------------------------------------------ -->
+
+            <div
+                class="reveal hero-mascot"
+                aria-label="Workshop mascot"
+            >
+
+                <div
+                    class="mascot-bubble"
+                    aria-live="polite"
+                >
+                    welcome! ☁️
+                </div>
+
+
+                <img
+                    src="mascot.png"
+                    alt="Cute anime workshop mascot"
+                    onerror="
+                        this.style.display='none';
+                        this.nextElementSibling.style.display='flex';
+                    "
+                >
+
+
+                <div
+                    class="mascot-fallback"
+                    aria-hidden="true"
+                    style="display:none;"
+                >
+                    🐰
+                </div>
+
             </div>
+
         </section>
-        <!-- ============ REGISTRY WITH NOTEBOOK TABS ============ -->
-        <section class="registry" aria-labelledby="registry-heading">
-            <div class="registry-head">
-                <h2 id="registry-heading">Treasures & Registry</h2>
-                <span class="registry-count"><span id="entry-count">0</span> magical items logged</span>
+
+
+
+        <!-- ====================================================
+             CURRENTLY ON THE DESK
+             ==================================================== -->
+
+        <section
+            class="desk"
+            aria-labelledby="desk-heading"
+        >
+
+            <div class="desk-card">
+
+                <div class="desk-decoration" aria-hidden="true">
+                    ✿
+                </div>
+
+
+                <div class="desk-content">
+
+                    <p class="section-kicker">
+                        🧺 currently on the desk
+                    </p>
+
+
+                    <h2 id="desk-heading">
+                        A few things are still brewing...
+                    </h2>
+
+
+                    <p>
+                        Some projects aren't ready for the shelves
+                        yet. They're being poked, polished,
+                        experimented with, or occasionally abandoned
+                        and rediscovered three weeks later.
+                    </p>
+
+                </div>
+
+
+                <div class="desk-note">
+
+                    <span class="desk-note-icon">
+                        ☁
+                    </span>
+
+                    <span>
+                        <strong>workshop status</strong><br>
+                        <span id="desk-status">
+                            little things are growing
+                        </span>
+                    </span>
+
+                </div>
+
             </div>
 
-            <!-- Notebook Tab Navigation -->
-            <div class="notebook-tabs" role="tablist">
-                <button class="tab-btn active" role="tab" aria-selected="true" data-target="tab-all">
-                    <span>🌸 All Treasures</span>
-                </button>
-                <button class="tab-btn" role="tab" aria-selected="false" data-target="tab-stable">
-                    <span>✨ Stable</span>
-                </button>
-                <button class="tab-btn" role="tab" aria-selected="false" data-target="tab-planned">
-                    <span>☁ Sprouting</span>
-                </button>
-            </div>
-
-            <!-- Tab Content Panel (Dynamically populated via script.js) -->
-            <div class="notebook-panel active" id="tab-all" role="tabpanel">
-            </div>
         </section>
 
-        <!-- ============ REGISTRY WITH NOTEBOOK TABS ============ -->
-        <section class="registry" aria-labelledby="registry-heading">
+
+
+        <!-- ====================================================
+             WORKSHOP / PROJECT REGISTRY
+             ==================================================== -->
+
+        <section
+            class="registry"
+            id="workshop"
+            aria-labelledby="registry-heading"
+        >
+
+
+            <!-- ------------------------------------------------
+                 SECTION HEADING
+                 ------------------------------------------------ -->
+
             <div class="registry-head">
-                <h2 id="registry-heading">Treasures & Registry</h2>
-                <span class="registry-count"><span id="entry-count">2</span> magical items logged</span>
+
+                <div>
+
+                    <p class="section-kicker">
+                        ✿ the shelves
+                    </p>
+
+                    <h2 id="registry-heading">
+                        Workshop Treasures
+                    </h2>
+
+                </div>
+
+
+                <span class="registry-count">
+                    <span id="entry-count">0</span>
+                    creations logged
+                </span>
+
             </div>
 
-            <!-- Notebook Tab Navigation -->
-            <div class="notebook-tabs" role="tablist">
-                <button class="tab-btn active" role="tab" aria-selected="true" data-target="tab-all">
-                    <span>🌸 All Treasures</span>
-                </button>
-                <button class="tab-btn" role="tab" aria-selected="false" data-target="tab-stable">
-                    <span>✨ Stable (1)</span>
-                </button>
-                <button class="tab-btn" role="tab" aria-selected="false" data-target="tab-planned">
-                    <span>☁ Sprouting (1)</span>
-                </button>
+
+
+            <!-- ------------------------------------------------
+                 SEARCH
+                 ------------------------------------------------ -->
+
+            <div class="workshop-tools">
+
+                <label
+                    class="search-box"
+                    for="project-search"
+                >
+
+                    <span
+                        class="search-icon"
+                        aria-hidden="true"
+                    >
+                        🔍
+                    </span>
+
+
+                    <input
+                        id="project-search"
+                        type="search"
+                        placeholder="search the workshop..."
+                        autocomplete="off"
+                        spellcheck="false"
+                    >
+
+
+                    <span
+                        class="search-hint"
+                        aria-hidden="true"
+                    >
+                        ↵
+                    </span>
+
+                </label>
+
+
+                <div
+                    class="visible-count"
+                    aria-live="polite"
+                >
+                    showing
+                    <strong id="visible-count">0</strong>
+                </div>
+
             </div>
 
-            <!-- Tab Content Panels -->
-            <div class="notebook-panel active" id="tab-all" role="tabpanel">
-                
-                <!-- ---- ENTRY 001 ---- -->
-                <article class="entry" data-status="stable">
-                    <div class="entry-index">001</div>
 
-                    <div class="entry-body has-media">
-                        <figure class="entry-media">
-                            <img src="clank-preview.png" alt="Screenshot of the Clank Lorebook Importer interface — a dark ritual-styled panel titled Grimoire with a lore text field and a Bind Lore button.">
-                            <span class="stamp-badge">Verified</span>
-                            <figcaption class="media-caption">the importer, mid-incantation ✨</figcaption>
-                        </figure>
 
-                        <div class="entry-content">
-                            <div class="entry-top">
-                                <h3 class="entry-name">Clank Lorebook Importer</h3>
-                                <span class="status-tag status-stable">✦ ready!</span>
-                            </div>
+            <!-- ------------------------------------------------
+                 CATEGORY TABS
+                 ------------------------------------------------ -->
 
-                            <p class="entry-meta">Browser extension · Brave / Chromium · Manifest V3</p>
+            <div
+                class="notebook-tabs"
+                role="tablist"
+                aria-label="Workshop filters"
+            >
 
-                            <p class="entry-desc">
-                                Automates lorebook entry ingestion on Clank.world. Bypasses the
-                                site's reactive input barriers by piping text directly through
-                                the Chrome DevTools Protocol instead of simulating keystrokes.
-                            </p>
+                <button
+                    class="tab-btn active"
+                    id="tab-button-all"
+                    role="tab"
+                    aria-selected="true"
+                    aria-controls="tab-all"
+                    data-target="tab-all"
+                    type="button"
+                >
+                    🌸 All
+                </button>
 
-                            <details class="entry-detail">
-                                <summary>Accepted payload format</summary>
-                                <pre class="code-block"><code>Title: [Entry Name]
-Keywords: [tag1, tag2]
-Content: [Lore description...]</code></pre>
-                                <ul class="stack-list">
-                                    <li><code>manifest.json</code> — Manifest V3, CDP debugger permission</li>
-                                    <li><code>background.js</code> — dispatches <code>Input.insertText</code> streams</li>
-                                    <li><code>content.js</code> — DOM automation, drop-zone parser &amp; sequencer</li>
-                                </ul>
-                            </details>
 
-                            <div class="entry-actions">
-                                <a class="btn-primary" href="clank-lorebook-importer.zip" download>Download .zip 🌸</a>
-                                <span class="entry-hint">Extract → <code>brave://extensions</code> → Load unpacked</span>
-                            </div>
-                        </div>
-                    </div>
-                </article>
+                <button
+                    class="tab-btn"
+                    id="tab-button-stable"
+                    role="tab"
+                    aria-selected="false"
+                    aria-controls="tab-all"
+                    data-target="tab-stable"
+                    type="button"
+                >
+                    ✨ Stable
+                </button>
 
-                <!-- ---- ENTRY 002 (EMPTY STATE) ---- -->
-                <article class="entry entry-empty" data-status="planned">
-                    <div class="entry-index">002</div>
-                    <div class="entry-body">
-                        <div class="entry-top">
-                            <h3 class="entry-name entry-name-muted">Next cute creation</h3>
-                            <span class="status-tag status-planned">☁ sprouting</span>
-                        </div>
-                        <p class="entry-desc entry-desc-muted">
-                            This little patch is waiting to bloom. Future tools, plugins, and experiments will sprout here when they're ready.
-                        </p>
-                    </div>
-                </article>
+
+                <button
+                    class="tab-btn"
+                    id="tab-button-planned"
+                    role="tab"
+                    aria-selected="false"
+                    aria-controls="tab-all"
+                    data-target="tab-planned"
+                    type="button"
+                >
+                    ☁ Sprouting
+                </button>
+
+
+                <span
+                    class="tab-divider"
+                    aria-hidden="true"
+                ></span>
+
+
+                <button
+                    class="tab-btn tab-type"
+                    role="tab"
+                    aria-selected="false"
+                    aria-controls="tab-all"
+                    data-target="type-extension"
+                    type="button"
+                >
+                    🌸 Extensions
+                </button>
+
+
+                <button
+                    class="tab-btn tab-type"
+                    role="tab"
+                    aria-selected="false"
+                    aria-controls="tab-all"
+                    data-target="type-tool"
+                    type="button"
+                >
+                    🧰 Tools
+                </button>
+
+
+                <button
+                    class="tab-btn tab-type"
+                    role="tab"
+                    aria-selected="false"
+                    aria-controls="tab-all"
+                    data-target="type-game"
+                    type="button"
+                >
+                    🎮 Games
+                </button>
+
+
+                <button
+                    class="tab-btn tab-type"
+                    role="tab"
+                    aria-selected="false"
+                    aria-controls="tab-all"
+                    data-target="type-experiment"
+                    type="button"
+                >
+                    🧪 Experiments
+                </button>
+
+            </div>
+
+
+
+            <!-- ------------------------------------------------
+                 PROJECT LIST
+                 ------------------------------------------------ -->
+
+            <div
+                class="notebook-panel active"
+                id="tab-all"
+                role="tabpanel"
+                aria-labelledby="tab-button-all"
+            >
+
+                <!--
+                    Projects are generated here by script.js
+                    from creations.json.
+                -->
+
+                <div class="registry-loading">
+
+                    <span
+                        class="loading-sparkle"
+                        aria-hidden="true"
+                    >
+                        ✦
+                    </span>
+
+                    <span>
+                        opening the workshop shelves...
+                    </span>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- ------------------------------------------------
+                 NO RESULTS
+                 ------------------------------------------------ -->
+
+            <div
+                class="no-results"
+                id="no-results"
+                hidden
+            >
+
+                <div
+                    class="no-results-icon"
+                    aria-hidden="true"
+                >
+                    🌱
+                </div>
+
+
+                <h3>
+                    Nothing grew here yet...
+                </h3>
+
+
+                <p>
+                    Try another search or wander through
+                    another shelf.
+                </p>
 
             </div>
 
@@ -181,11 +589,52 @@ Content: [Lore description...]</code></pre>
 
     </main>
 
+
+
+    <!-- ========================================================
+         FOOTER
+         ======================================================== -->
+
     <footer class="site-footer">
-        <span>DXK — SaltSaaalt ✿ Made with cozy vibes</span>
-        <a href="https://github.com/ionutroscan" target="_blank" rel="noopener">GitHub ↗</a>
+
+        <div class="footer-left">
+
+            <span>
+                DXK — SaltSaaalt
+            </span>
+
+            <span
+                class="footer-flower"
+                aria-hidden="true"
+            >
+                ✿
+            </span>
+
+            <span>
+                made with cozy vibes
+            </span>
+
+        </div>
+
+
+        <a
+            href="https://github.com/ionutroscan"
+            target="_blank"
+            rel="noopener noreferrer"
+        >
+            GitHub ↗
+        </a>
+
     </footer>
 
+
+
+    <!-- ========================================================
+         JAVASCRIPT
+         ======================================================== -->
+
     <script src="script.js"></script>
+
 </body>
+
 </html>

@@ -1244,6 +1244,291 @@ function bindCalmArchive() {
     );
 }
 
+/* ================================================================
+   ARCHIVE TERMINAL — COMMAND ENGINE
+   ================================================================ */
+
+const discoveryLabels = {
+    returning: "Return Visitor Detected",
+    audio: "Resonance Kindled",
+    veil: "Veil Disturbed",
+    seal: "Presence Bound",
+    "concept-note": "Restricted Note Opened",
+    rune: "Hidden Rune Found",
+    artifact: "Artifact Record Opened",
+    worktable: "Worktable Accessed",
+    terminal: "Terminal Accessed"
+};
+
+const terminalUnknownReplies = [
+    "the archive does not recognize that shape",
+    "no such invocation is recorded",
+    "that command has no place here",
+    "the record holds nothing by that name"
+];
+
+function bindTerminal() {
+
+    const toggleBtn = document.getElementById("terminal-toggle");
+    const overlay = document.getElementById("terminal-overlay");
+    const closeBtn = document.getElementById("terminal-close");
+    const screen = document.getElementById("terminal-screen");
+    const form = document.getElementById("terminal-form");
+    const input = document.getElementById("terminal-input");
+
+    if (!toggleBtn || !overlay || !closeBtn || !screen || !form || !input) {
+        return;
+    }
+
+    const printLine = (text, cls = "terminal-output") => {
+
+        const line = document.createElement("div");
+
+        line.className = `terminal-line ${cls}`;
+        line.textContent = text;
+
+        screen.appendChild(line);
+
+        screen.scrollTop = screen.scrollHeight;
+    };
+
+    const openTerminal = () => {
+
+        overlay.classList.add("open");
+        overlay.setAttribute("aria-hidden", "false");
+
+        document.body.classList.add("terminal-open");
+
+        if (!hasDiscovery("terminal")) {
+
+            discover(
+                "terminal",
+                "ARCHIVE TERMINAL ACCESSED · a new layer of the record opens"
+            );
+
+            addCorruption(2);
+        }
+
+        setTimeout(() => input.focus(), 60);
+    };
+
+    const closeTerminal = () => {
+
+        overlay.classList.remove("open");
+        overlay.setAttribute("aria-hidden", "true");
+
+        document.body.classList.remove("terminal-open");
+
+        toggleBtn.focus();
+    };
+
+    toggleBtn.addEventListener("click", openTerminal);
+    closeBtn.addEventListener("click", closeTerminal);
+
+    overlay.addEventListener("click", e => {
+        if (e.target === overlay) {
+            closeTerminal();
+        }
+    });
+
+    document.addEventListener("keydown", e => {
+        if (e.key === "Escape" && overlay.classList.contains("open")) {
+            closeTerminal();
+        }
+    });
+
+    const COMMAND_LIST = [
+        ["help", "list available commands"],
+        ["status", "show integrity, corruption & candle readings"],
+        ["discoveries", "list what has been found so far"],
+        ["artifacts", "list catalogued artifacts"],
+        ["whoami", "read the archivist's dossier"],
+        ["goto <1-3>", "turn to a given folio spread"],
+        ["veil", "disturb or settle the veil"],
+        ["bind", "bind your presence to the archive"],
+        ["soothe", "calm the archive's corruption"],
+        ["github", "open the GitHub vault"],
+        ["clear", "clear the terminal screen"]
+    ];
+
+    function runCommand(raw) {
+
+        const trimmed = raw.trim();
+
+        if (!trimmed) {
+            return;
+        }
+
+        printLine(`> ${trimmed}`, "terminal-command");
+
+        const [cmd, ...args] = trimmed.toLowerCase().split(/\s+/);
+
+        switch (cmd) {
+
+            case "help": {
+
+                printLine("AVAILABLE COMMANDS:", "terminal-system");
+
+                COMMAND_LIST.forEach(([name, desc]) => {
+                    printLine(`  ${name.padEnd(12, " ")} — ${desc}`, "terminal-output");
+                });
+
+                break;
+            }
+
+            case "status": {
+
+                const integrity = 100 - archiveState.corruption;
+
+                printLine(`INTEGRITY ${integrity}%  ·  CORRUPTION ${archiveState.corruption}%`, "terminal-output");
+                printLine(`CANDLE ENERGY ${archiveState.candleEnergy}%  ·  VISITS ${archiveState.visits}`, "terminal-output");
+                printLine(`VEIL ${archiveState.veil ? "DISTURBED" : "SETTLED"}  ·  PRESENCE ${archiveState.bound ? "BOUND" : "UNBOUND"}`, "terminal-output");
+
+                break;
+            }
+
+            case "discoveries": {
+
+                const total = Object.keys(discoveryLabels).length;
+                const found = archiveState.discoveries;
+
+                printLine(`${found.length} / ${total} DISCOVERIES RECORDED`, "terminal-system");
+
+                if (found.length === 0) {
+                    printLine("  nothing has been found yet.", "terminal-output");
+                } else {
+                    found.forEach(id => {
+                        printLine(`  ✦ ${discoveryLabels[id] || id}`, "terminal-success");
+                    });
+                }
+
+                break;
+            }
+
+            case "artifacts": {
+
+                printLine("CATALOGUE:", "terminal-system");
+
+                artifacts.forEach(a => {
+                    const cls = a.released ? "terminal-success" : "terminal-warning";
+                    printLine(`  [${a.id}] ${a.name} — ${a.status}`, cls);
+                });
+
+                break;
+            }
+
+            case "whoami":
+            case "about": {
+
+                printLine("Ionuț Roșcan — programmer, sound designer, music producer.", "terminal-output");
+                printLine("Builds strange, tangible things between utility and imagination.", "terminal-output");
+
+                break;
+            }
+
+            case "goto":
+            case "page": {
+
+                const n = parseInt(args[0], 10);
+
+                if (!Number.isInteger(n) || n < 1 || n > totalSpreads) {
+                    printLine(`invalid folio. use goto 1-${totalSpreads}.`, "terminal-error");
+                } else {
+                    turnToPage(n - 1);
+                    printLine(`turned to folio ${n}.`, "terminal-success");
+                }
+
+                break;
+            }
+
+            case "veil": {
+
+                disturbTheVeil();
+
+                printLine(
+                    archiveState.veil ? "the veil has been disturbed." : "the veil has settled.",
+                    "terminal-warning"
+                );
+
+                break;
+            }
+
+            case "bind": {
+
+                if (archiveState.bound) {
+                    printLine("your presence is already bound.", "terminal-output");
+                } else {
+                    const sigil = document.getElementById("altar-sigil");
+                    if (sigil) {
+                        sigil.click();
+                    }
+                    printLine("presence bound to the archive.", "terminal-success");
+                }
+
+                break;
+            }
+
+            case "soothe":
+            case "calm": {
+
+                const button = document.getElementById("calm-archive");
+
+                if (button) {
+                    button.click();
+                }
+
+                printLine("the archive settles, slightly.", "terminal-success");
+
+                break;
+            }
+
+            case "github":
+            case "links": {
+
+                printLine("opening the GitHub vault in a new tab...", "terminal-output");
+
+                window.open("https://github.com/ionutroscan", "_blank", "noopener");
+
+                break;
+            }
+
+            case "clear": {
+
+                screen.innerHTML = "";
+
+                printLine("ROSCAN ARCHIVE OS · v0.5", "terminal-system");
+
+                break;
+            }
+
+            default: {
+
+                printLine(
+                    terminalUnknownReplies[
+                        Math.floor(Math.random() * terminalUnknownReplies.length)
+                    ],
+                    "terminal-error"
+                );
+
+                printLine('type "help" for available commands.', "terminal-output");
+
+                break;
+            }
+        }
+    }
+
+    form.addEventListener("submit", e => {
+
+        e.preventDefault();
+
+        const value = input.value;
+
+        input.value = "";
+
+        runCommand(value);
+    });
+}
+
 function updateCandle() {
 
     const energy =
@@ -1561,6 +1846,8 @@ document.addEventListener(
         bindHiddenRune();
 
         bindCalmArchive();
+
+        bindTerminal();
 
         initMouseSigil();
 

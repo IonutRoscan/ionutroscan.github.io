@@ -960,3 +960,146 @@ body.presence-flash::after {
     .header-controls { flex-direction: column; align-items: center; }
     .archive-ledger { grid-template-columns: 1fr; }
 }
+
+
+/* ================================================================
+   ARCHIVE CORE / CORRUPTION SYSTEM v4
+   ================================================================ */
+.archive-core {
+    width: min(620px, 92vw);
+    margin: 12px auto 0;
+    display: grid;
+    grid-template-columns: auto minmax(120px, 1fr) auto;
+    align-items: center;
+    gap: 9px;
+    color: #78645a;
+    font: .58rem/1 var(--font-mono);
+    letter-spacing: 1px;
+    opacity: .9;
+}
+.archive-core strong { color: var(--gold); font-weight: 600; }
+.core-track {
+    height: 5px;
+    border: 1px solid rgba(184,134,11,.28);
+    background: rgba(0,0,0,.35);
+    overflow: hidden;
+}
+.core-track i {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold), var(--crimson));
+    transform-origin: left;
+    transition: width .6s ease, filter .6s ease;
+}
+
+.archive-condition {
+    margin-top: 18px;
+    padding: 10px 12px;
+    border: 1px solid rgba(0,0,0,.14);
+    background: rgba(0,0,0,.035);
+}
+.condition-heading {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    font: .62rem/1 var(--font-mono);
+    color: var(--ink-faded);
+    letter-spacing: .8px;
+}
+.condition-heading strong { color: var(--crimson); }
+.condition-track {
+    height: 5px;
+    margin-top: 8px;
+    background: rgba(0,0,0,.14);
+    overflow: hidden;
+}
+.condition-track i {
+    display: block;
+    width: 0;
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold), var(--crimson));
+    transition: width .7s ease;
+}
+.archive-condition p {
+    margin: 7px 0 0;
+    color: #6e5950;
+    font: italic .76rem/1.35 var(--font-body);
+}
+
+.archive-action {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 7px 10px;
+    border: 1px solid rgba(184,134,11,.45);
+    background: transparent;
+    color: var(--gold);
+    font: .68rem var(--font-heading);
+    cursor: pointer;
+    transition: all .25s ease;
+}
+.archive-action:hover,
+.archive-action:focus-visible {
+    border-color: var(--gold);
+    background: rgba(184,134,11,.08);
+    box-shadow: 0 0 12px rgba(184,134,11,.16);
+    outline: none;
+}
+
+.candle-flame {
+    position: fixed;
+    left: 16px;
+    bottom: 18px;
+    width: 10px;
+    height: 24px;
+    z-index: 98;
+    pointer-events: none;
+    opacity: .75;
+    background: radial-gradient(ellipse at center bottom, #ffbd4a 0 18%, #c33a22 48%, transparent 72%);
+    filter: blur(.25px) drop-shadow(0 0 12px rgba(255,86,25,.55));
+    transform-origin: 50% 100%;
+    animation: flameLiving 1.1s ease-in-out infinite alternate;
+    transition: opacity .8s ease, transform .8s ease, filter .8s ease;
+}
+@keyframes flameLiving {
+    0% { transform: scale(.85, 1) rotate(-2deg); }
+    100% { transform: scale(1.08, 1.18) rotate(3deg); }
+}
+body.candle-fading .candle-flame { opacity: .18; transform: scale(.55,.55); }
+body.candle-extinguished .candle-flame { opacity: 0; transform: scale(.2,.2); }
+
+.hidden-rune {
+    position: fixed;
+    right: 20px;
+    bottom: 18px;
+    z-index: 97;
+    color: rgba(184,134,11,.12);
+    font: 18px var(--font-heading);
+    cursor: pointer;
+    transition: color .4s, text-shadow .4s, transform .4s;
+}
+.hidden-rune:hover,
+.hidden-rune:focus-visible {
+    color: rgba(184,134,11,.65);
+    text-shadow: 0 0 12px rgba(184,134,11,.35);
+    transform: rotate(12deg) scale(1.15);
+    outline: none;
+}
+
+body.corruption-high .parchment-leaf {
+    box-shadow: inset 0 0 30px rgba(100,0,0,.1), inset -15px 0 25px rgba(0,0,0,.15);
+}
+body.corruption-high .tome-title { letter-spacing: 5px; }
+body.corruption-critical .tome-title { animation: titleUnease 2.8s steps(2,end) infinite; }
+@keyframes titleUnease {
+    0%, 92%, 100% { transform: translateX(0); }
+    94% { transform: translateX(-2px); }
+    96% { transform: translateX(2px); }
+}
+
+@media (max-width: 600px) {
+    .archive-core { grid-template-columns: 1fr auto; }
+    .archive-core .core-track { grid-column: 1 / -1; grid-row: 2; }
+    .archive-action { margin: 8px 0 0; }
+    .candle-flame { left: 8px; bottom: 8px; }
+}

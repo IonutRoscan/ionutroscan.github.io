@@ -2714,3 +2714,1379 @@ html[data-theme="dark"] .status-planned {
     }
 
 }
+
+/* ============================================================
+   DXK — SCRAPBOOK PROJECT VIEWER
+   ============================================================ */
+
+
+/* ------------------------------------------------------------
+   OVERLAY
+   ------------------------------------------------------------ */
+
+.scrapbook-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 24px;
+
+    opacity: 0;
+
+    pointer-events: none;
+
+    transition:
+        opacity 220ms ease;
+}
+
+
+.scrapbook-overlay.is-visible {
+    opacity: 1;
+
+    pointer-events: auto;
+}
+
+
+.scrapbook-overlay[hidden] {
+    display: none;
+}
+
+
+/* ------------------------------------------------------------
+   BACKDROP
+   ------------------------------------------------------------ */
+
+.scrapbook-backdrop {
+    position: absolute;
+    inset: 0;
+
+    background:
+        rgba(52, 38, 55, 0.38);
+
+    backdrop-filter:
+        blur(7px);
+
+    -webkit-backdrop-filter:
+        blur(7px);
+}
+
+
+/* ------------------------------------------------------------
+   WINDOW
+   ------------------------------------------------------------ */
+
+.scrapbook-window {
+    position: relative;
+
+    z-index: 1;
+
+    width: min(
+        920px,
+        100%
+    );
+
+    max-height:
+        min(
+            880px,
+            calc(100vh - 48px)
+        );
+
+    overflow-y: auto;
+
+    outline: none;
+
+    transform:
+        translateY(18px)
+        scale(0.97)
+        rotate(-0.35deg);
+
+    opacity: 0;
+
+    transition:
+        transform 260ms cubic-bezier(
+            0.22,
+            1,
+            0.36,
+            1
+        ),
+        opacity 220ms ease;
+
+    scrollbar-width: thin;
+}
+
+
+.scrapbook-overlay.is-visible
+.scrapbook-window {
+
+    transform:
+        translateY(0)
+        scale(1)
+        rotate(0deg);
+
+    opacity: 1;
+}
+
+
+/* ------------------------------------------------------------
+   PAPER
+   ------------------------------------------------------------ */
+
+.scrapbook-paper {
+    position: relative;
+
+    overflow: hidden;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,255,255,0.96),
+            rgba(255,248,242,0.98)
+        );
+
+    border:
+        1px solid
+        rgba(166, 125, 132, 0.28);
+
+    border-radius:
+        14px 18px 13px 17px;
+
+    box-shadow:
+        0 28px 70px
+        rgba(45, 28, 44, 0.28),
+
+        0 5px 16px
+        rgba(45, 28, 44, 0.10);
+
+    padding:
+        34px 38px 28px;
+
+    isolation: isolate;
+}
+
+
+/*
+    Very subtle paper texture.
+*/
+
+.scrapbook-paper::before {
+
+    content: "";
+
+    position: absolute;
+
+    inset: 0;
+
+    z-index: -1;
+
+    pointer-events: none;
+
+    opacity: 0.30;
+
+    background-image:
+        radial-gradient(
+            rgba(150, 116, 110, 0.14)
+            0.7px,
+            transparent 0.7px
+        );
+
+    background-size:
+        7px 7px;
+}
+
+
+/*
+    Decorative corner flower.
+*/
+
+.scrapbook-paper::after {
+
+    content: "✿";
+
+    position: absolute;
+
+    right: 26px;
+    bottom: 18px;
+
+    font-size: 42px;
+
+    opacity: 0.10;
+
+    transform:
+        rotate(14deg);
+
+    pointer-events: none;
+}
+
+
+/* ------------------------------------------------------------
+   CLOSE BUTTON
+   ------------------------------------------------------------ */
+
+.scrapbook-close {
+
+    position: absolute;
+
+    top: 15px;
+    right: 17px;
+
+    z-index: 5;
+
+    width: 38px;
+    height: 38px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid
+        rgba(166, 125, 132, 0.25);
+
+    border-radius: 50%;
+
+    background:
+        rgba(255,255,255,0.76);
+
+    color:
+        #8f6877;
+
+    font-size: 25px;
+
+    line-height: 1;
+
+    cursor: pointer;
+
+    transition:
+        transform 160ms ease,
+        background 160ms ease,
+        color 160ms ease;
+}
+
+
+.scrapbook-close:hover {
+
+    transform:
+        rotate(8deg)
+        scale(1.08);
+
+    background:
+        #fff0f4;
+
+    color:
+        #b65d7a;
+}
+
+
+.scrapbook-close:active {
+
+    transform:
+        scale(0.94);
+
+}
+
+
+/* ------------------------------------------------------------
+   HEADER
+   ------------------------------------------------------------ */
+
+.scrapbook-header {
+
+    padding-right:
+        55px;
+
+    margin-bottom:
+        26px;
+
+}
+
+
+.scrapbook-eyebrow {
+
+    display: flex;
+
+    flex-wrap: wrap;
+
+    align-items: center;
+
+    gap: 8px;
+
+    margin-bottom:
+        9px;
+
+    font-size:
+        0.76rem;
+
+    font-weight:
+        700;
+
+    letter-spacing:
+        0.08em;
+
+    text-transform:
+        uppercase;
+}
+
+
+.scrapbook-eyebrow > span {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    min-height: 26px;
+
+    padding:
+        4px 10px;
+
+    border-radius:
+        999px;
+
+    background:
+        #f7e8ee;
+
+    color:
+        #986277;
+
+}
+
+
+.scrapbook-eyebrow > span:last-child {
+
+    background:
+        #edf4e9;
+
+    color:
+        #71875e;
+
+}
+
+
+.scrapbook-eyebrow
+.scrapbook-status-planned {
+
+    background:
+        #f0ebf7 !important;
+
+    color:
+        #8975a4 !important;
+
+}
+
+
+.scrapbook-title {
+
+    margin:
+        0 0 7px;
+
+    color:
+        #543f4c;
+
+    font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+    font-size:
+        clamp(
+            2rem,
+            5vw,
+            3.15rem
+        );
+
+    line-height:
+        1.05;
+
+    letter-spacing:
+        -0.025em;
+}
+
+
+.scrapbook-meta {
+
+    margin:
+        0;
+
+    color:
+        #927d86;
+
+    font-size:
+        0.94rem;
+
+    line-height:
+        1.55;
+}
+
+
+/* ------------------------------------------------------------
+   CONTENT
+   ------------------------------------------------------------ */
+
+.scrapbook-content {
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        24px;
+
+}
+
+
+/* ------------------------------------------------------------
+   PREVIEW
+   ------------------------------------------------------------ */
+
+.scrapbook-media {
+
+    display:
+        flex;
+
+    justify-content:
+        center;
+}
+
+
+.scrapbook-preview {
+
+    position:
+        relative;
+
+    width:
+        min(
+            100%,
+            720px
+        );
+
+    margin:
+        5px auto 8px;
+
+    padding:
+        10px 10px 30px;
+
+    background:
+        #fff;
+
+    border:
+        1px solid
+        rgba(120, 92, 92, 0.14);
+
+    box-shadow:
+        0 9px 24px
+        rgba(68, 46, 55, 0.13);
+
+    transform:
+        rotate(-0.65deg);
+
+    transition:
+        transform 180ms ease;
+}
+
+
+.scrapbook-preview:hover {
+
+    transform:
+        rotate(0deg)
+        translateY(-2px);
+
+}
+
+
+.scrapbook-preview img {
+
+    display:
+        block;
+
+    width:
+        100%;
+
+    max-height:
+        470px;
+
+    object-fit:
+        contain;
+
+    border-radius:
+        3px;
+
+    background:
+        #f3edf0;
+}
+
+
+.scrapbook-preview figcaption {
+
+    position:
+        absolute;
+
+    left:
+        0;
+
+    right:
+        0;
+
+    bottom:
+        7px;
+
+    padding:
+        0 14px;
+
+    color:
+        #8c747e;
+
+    font-size:
+        0.77rem;
+
+    text-align:
+        center;
+
+    font-style:
+        italic;
+}
+
+
+.scrapbook-preview::after {
+
+    content: "";
+
+    position:
+        absolute;
+
+    top:
+        -8px;
+
+    left:
+        50%;
+
+    width:
+        92px;
+
+    height:
+        24px;
+
+    transform:
+        translateX(-50%)
+        rotate(-2deg);
+
+    background:
+        rgba(238, 211, 178, 0.58);
+
+    box-shadow:
+        0 1px 2px
+        rgba(80, 55, 45, 0.06);
+
+}
+
+
+/* ------------------------------------------------------------
+   SECTION LABELS
+   ------------------------------------------------------------ */
+
+.scrapbook-section-label {
+
+    margin-bottom:
+        9px;
+
+    color:
+        #a06d7d;
+
+    font-size:
+        0.74rem;
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        0.10em;
+
+    text-transform:
+        uppercase;
+}
+
+
+.scrapbook-section-label::before {
+
+    content:
+        "✦ ";
+
+}
+
+
+/* ------------------------------------------------------------
+   DESCRIPTION
+   ------------------------------------------------------------ */
+
+.scrapbook-description {
+
+    max-width:
+        760px;
+
+}
+
+
+.scrapbook-description p {
+
+    margin:
+        0;
+
+    color:
+        #66545d;
+
+    font-size:
+        1rem;
+
+    line-height:
+        1.75;
+}
+
+
+/* ------------------------------------------------------------
+   TAGS
+   ------------------------------------------------------------ */
+
+.scrapbook-tags {
+
+    padding:
+        15px 17px;
+
+    border:
+        1px dashed
+        rgba(166, 125, 132, 0.35);
+
+    border-radius:
+        10px;
+
+    background:
+        rgba(250, 241, 244, 0.60);
+}
+
+
+.scrapbook-tag-list {
+
+    display:
+        flex;
+
+    flex-wrap:
+        wrap;
+
+    gap:
+        7px;
+}
+
+
+.scrapbook-tag-list span {
+
+    display:
+        inline-flex;
+
+    padding:
+        5px 10px;
+
+    border-radius:
+        999px;
+
+    background:
+        #f3e6ee;
+
+    color:
+        #865d70;
+
+    font-size:
+        0.78rem;
+
+    font-weight:
+        650;
+}
+
+
+/* ------------------------------------------------------------
+   CODE
+   ------------------------------------------------------------ */
+
+.scrapbook-code {
+
+    overflow-x:
+        auto;
+
+    margin:
+        0;
+
+    padding:
+        17px 18px;
+
+    border:
+        1px solid
+        rgba(99, 75, 89, 0.16);
+
+    border-radius:
+        10px;
+
+    background:
+        #332c38;
+
+    color:
+        #f7edf4;
+
+    font-family:
+        "SFMono-Regular",
+        Consolas,
+        "Liberation Mono",
+        monospace;
+
+    font-size:
+        0.82rem;
+
+    line-height:
+        1.65;
+
+    box-shadow:
+        inset 0 1px 0
+        rgba(255,255,255,0.04);
+}
+
+
+/* ------------------------------------------------------------
+   STACK
+   ------------------------------------------------------------ */
+
+.scrapbook-stack {
+
+    padding:
+        16px 18px;
+
+    border-radius:
+        10px;
+
+    background:
+        #f5f0e8;
+
+    border:
+        1px solid
+        rgba(158, 132, 102, 0.18);
+}
+
+
+.scrapbook-stack ul {
+
+    display:
+        grid;
+
+    gap:
+        8px;
+
+    margin:
+        0;
+
+    padding:
+        0;
+
+    list-style:
+        none;
+}
+
+
+.scrapbook-stack li {
+
+    position:
+        relative;
+
+    padding-left:
+        22px;
+
+    color:
+        #685b58;
+
+    font-size:
+        0.9rem;
+
+    line-height:
+        1.5;
+}
+
+
+.scrapbook-stack li::before {
+
+    content:
+        "🌱";
+
+    position:
+        absolute;
+
+    left:
+        0;
+
+    top:
+        0;
+}
+
+
+/* ------------------------------------------------------------
+   ACTIONS
+   ------------------------------------------------------------ */
+
+.scrapbook-actions {
+
+    display:
+        flex;
+
+    flex-wrap:
+        wrap;
+
+    align-items:
+        center;
+
+    gap:
+        9px;
+
+    padding-top:
+        4px;
+}
+
+
+.scrapbook-action {
+
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    min-height:
+        42px;
+
+    padding:
+        9px 17px;
+
+    border-radius:
+        10px;
+
+    text-decoration:
+        none;
+
+    font-size:
+        0.86rem;
+
+    font-weight:
+        750;
+
+    transition:
+        transform 150ms ease,
+        box-shadow 150ms ease,
+        background 150ms ease;
+}
+
+
+.scrapbook-action:hover {
+
+    transform:
+        translateY(-2px);
+
+}
+
+
+.scrapbook-action-primary {
+
+    background:
+        #d98ba4;
+
+    color:
+        white;
+
+    box-shadow:
+        0 5px 12px
+        rgba(181, 102, 131, 0.20);
+}
+
+
+.scrapbook-action-primary:hover {
+
+    background:
+        #cc7894;
+
+    box-shadow:
+        0 7px 17px
+        rgba(181, 102, 131, 0.27);
+}
+
+
+.scrapbook-action-secondary {
+
+    background:
+        #f1e8ee;
+
+    color:
+        #77586a;
+
+}
+
+
+.scrapbook-action-secondary:hover {
+
+    background:
+        #e8dce5;
+
+}
+
+
+/* ------------------------------------------------------------
+   HINT
+   ------------------------------------------------------------ */
+
+.scrapbook-hint {
+
+    flex-basis:
+        100%;
+
+    padding-top:
+        3px;
+
+    color:
+        #8c7980;
+
+    font-size:
+        0.78rem;
+
+}
+
+
+.scrapbook-hint code {
+
+    padding:
+        2px 5px;
+
+    border-radius:
+        4px;
+
+    background:
+        #eee6eb;
+
+    color:
+        #76596a;
+
+    font-family:
+        monospace;
+}
+
+
+/* ------------------------------------------------------------
+   FOOTER
+   ------------------------------------------------------------ */
+
+.scrapbook-footer {
+
+    margin-top:
+        30px;
+
+    padding-top:
+        17px;
+
+    border-top:
+        1px dashed
+        rgba(150, 116, 126, 0.27);
+
+    color:
+        #aa8f99;
+
+    font-size:
+        0.73rem;
+
+    text-align:
+        center;
+
+    letter-spacing:
+        0.05em;
+}
+
+
+/* ------------------------------------------------------------
+   CARD INTERACTION
+   ------------------------------------------------------------ */
+
+.entry[role="button"] {
+
+    cursor:
+        pointer;
+
+}
+
+
+.entry[role="button"]:focus-visible {
+
+    outline:
+        3px solid
+        rgba(208, 131, 157, 0.42);
+
+    outline-offset:
+        4px;
+
+    border-radius:
+        10px;
+
+}
+
+
+/* ------------------------------------------------------------
+   RESPONSIVE
+   ------------------------------------------------------------ */
+
+@media (
+    max-width: 700px
+) {
+
+    .scrapbook-overlay {
+
+        padding:
+            10px;
+
+        align-items:
+            flex-start;
+
+    }
+
+
+    .scrapbook-window {
+
+        max-height:
+            calc(100vh - 20px);
+
+        margin-top:
+            10px;
+
+    }
+
+
+    .scrapbook-paper {
+
+        padding:
+            28px 20px 23px;
+
+        border-radius:
+            12px;
+
+    }
+
+
+    .scrapbook-title {
+
+        font-size:
+            2rem;
+
+    }
+
+
+    .scrapbook-preview {
+
+        padding-bottom:
+            27px;
+
+    }
+
+
+    .scrapbook-preview img {
+
+        max-height:
+            320px;
+
+    }
+
+
+    .scrapbook-action {
+
+        flex:
+            1 1 auto;
+
+    }
+
+}
+
+
+@media (
+    max-width: 430px
+) {
+
+    .scrapbook-header {
+
+        padding-right:
+            35px;
+
+    }
+
+
+    .scrapbook-eyebrow {
+
+        font-size:
+            0.67rem;
+
+    }
+
+
+    .scrapbook-title {
+
+        font-size:
+            1.72rem;
+
+    }
+
+
+    .scrapbook-description p {
+
+        font-size:
+            0.91rem;
+
+    }
+
+}
+
+
+/* ------------------------------------------------------------
+   DARK / DUSK THEME
+   ------------------------------------------------------------ */
+
+[data-theme="dark"]
+.scrapbook-paper {
+
+    background:
+        linear-gradient(
+            135deg,
+            #302936,
+            #29232e
+        );
+
+    border-color:
+        rgba(220, 182, 197, 0.16);
+
+    box-shadow:
+        0 30px 75px
+        rgba(0, 0, 0, 0.46);
+
+}
+
+
+[data-theme="dark"]
+.scrapbook-paper::before {
+
+    opacity:
+        0.16;
+
+}
+
+
+[data-theme="dark"]
+.scrapbook-title {
+
+    color:
+        #f1dce5;
+
+}
+
+
+[data-theme="dark"]
+.scrapbook-meta {
+
+    color:
+        #bda9b3;
+
+}
+
+
+[data-theme="dark"]
+.scrapbook-eyebrow > span {
+
+    background:
+        #493441;
+
+    color:
+        #e7bfd0;
+
+}
+
+
+[data-theme="dark"]
+.scrapbook-eyebrow > span:last-child {
+
+    background:
+        #374338;
+
+    color:
+        #c1d4b5;
+
+}
+
+
+[data-theme="dark"]
+.scrapbook-eyebrow
+.scrapbook-status-planned {
+
+    background:
+        #3e374b !important;
+
+    color:
+        #cdbfe0 !important;
+
+}
+
+
+[data-theme="dark"]
+.scrapbook-close {
+
+    background:
+        rgba(65, 53, 64, 0.9);
+
+    border-color:
+        rgba(226, 193, 208, 0.16);
+
+    color:
+        #dcb9c9;
+
+}
+
+
+[data-theme="dark"]
+.scrapbook-close:hover {
+
+    background:
+        #4a3541;
+
+    color:
+        #f0bfd2;
+
+}
+
+
+[data-theme="dark"]
+.scrapbook-description p {
+
+    color:
+        #d0c0c8;
+
+}
+
+
+[data-theme="dark"]
+.scrapbook-tags {
+
+    background:
+        rgba(75, 53, 65, 0.40);
+
+    border-color:
+        rgba(221, 174, 194, 0.22);
+
+}
+
+
+[data-theme="dark"]
+.scrapbook-tag-list span {
+
+    background:
+        #4a3543;
+
+    color:
+        #e1becd;
+
+}
+
+
+[data-theme="dark"]
+.scrapbook-stack {
+
+    background:
+        #39352f;
+
+    border-color:
+        rgba(219, 197, 157, 0.15);
+
+}
+
+
+[data-theme="dark"]
+.scrapbook-stack li {
+
+    color:
+        #d0c7bc;
+
+}
+
+
+[data-theme="dark"]
+.scrapbook-action-secondary {
+
+    background:
+        #453844;
+
+    color:
+        #e1c8d5;
+
+}
+
+
+[data-theme="dark"]
+.scrapbook-action-secondary:hover {
+
+    background:
+        #51404e;
+
+}
+
+
+[data-theme="dark"]
+.scrapbook-hint {
+
+    color:
+        #b9a7af;
+
+}
+
+
+[data-theme="dark"]
+.scrapbook-hint code {
+
+    background:
+        #40343e;
+
+    color:
+        #e0c1cf;
+
+}
+
+
+[data-theme="dark"]
+.scrapbook-footer {
+
+    border-color:
+        rgba(219, 179, 195, 0.18);
+
+    color:
+        #aa929e;
+
+}
+
+
+/* ------------------------------------------------------------
+   REDUCED MOTION
+   ------------------------------------------------------------ */
+
+@media (
+    prefers-reduced-motion: reduce
+) {
+
+    .scrapbook-overlay,
+    .scrapbook-window,
+    .scrapbook-preview,
+    .scrapbook-close,
+    .scrapbook-action {
+
+        transition:
+            none !important;
+
+    }
+
+}

@@ -2,7 +2,7 @@
     {
         "id": "001",
 
-        "name": "Clank Lorebook Importer",
+        "name": "Grimoire: Clank Lorebook Importer",
 
         "type": "extension",
 
@@ -16,30 +16,32 @@
 
         "meta": "Browser extension · Brave / Chromium · Manifest V3",
 
-        "desc": "Automates lorebook entry ingestion on Clank.world. Bypasses the site's reactive input barriers by piping text directly through the Chrome DevTools Protocol instead of simulating keystrokes.",
+        "desc": "A custom extension for clank.world that turns bulk lorebook entry into a small ritual. Drop structured .md or .txt files and Grimoire provisions, fills, and saves dozens of memory entries automatically — using Chrome DevTools Protocol injection so reactive fields never drop or cross-wire data.",
 
         "tags": [
             "Brave",
             "Chromium",
             "Manifest V3",
             "Chrome DevTools Protocol",
-            "Clank.world"
+            "Clank.world",
+            "lorebook"
         ],
 
         "previewImg": "clank-preview.png",
 
-        "caption": "the importer, mid-incantation ✨",
+        "caption": "the grimoire, mid-incantation ✨",
 
         "stamp": "Verified",
 
-        "detailTitle": "Accepted payload format",
+        "detailTitle": "Accepted lore format",
 
-        "codeBlock": "Title: [Entry Name]\nKeywords: [tag1, tag2]\nContent: [Lore description...]",
+        "codeBlock": "Title: Dunmoor Valley\nKeywords: region, valley, Millstone Valley\nContent: The rural farming region containing...\n\nTitle: Fria\nKeywords: Queen of Chaos, protagonist\nContent: The main character...",
 
         "stack": [
             "<code>manifest.json</code> — Manifest V3, CDP debugger permission",
-            "<code>background.js</code> — dispatches <code>Input.insertText</code> streams",
-            "<code>content.js</code> — DOM automation, drop-zone parser &amp; sequencer"
+            "<code>background.js</code> — OS-level <code>Input.insertText</code> + coordinate clicks via CDP",
+            "<code>content.js</code> — drop-zone parser, field traversal, save confirmation",
+            "Adjustable ritual pace + emergency <strong>STOP RITUAL</strong> kill switch"
         ],
 
         "downloadUrl": "clank-lorebook-importer.zip",

@@ -33,11 +33,19 @@
 
         "stamp": "Verified",
 
-        "detailTitle": "Accepted lore format",
+        "detailTitle": "Install & format notes",
+
 
         "codeBlock": "Title: Dunmoor Valley\nKeywords: region, valley, Millstone Valley\nContent: The rural farming region containing...\n\nTitle: Fria\nKeywords: Queen of Chaos, protagonist\nContent: The main character...",
 
         "stack": [
+            "<strong>How to install</strong>",
+            "1. Download the .zip and extract it somewhere safe (Desktop or Documents)",
+            "2. Open <code>brave://extensions</code> or <code>chrome://extensions</code>",
+            "3. Turn <strong>Developer mode</strong> ON (top right)",
+            "4. Click <strong>Load unpacked</strong> → select the extracted <code>clank-lorebook-importer</code> folder",
+            "5. Done — open your Lorebook on clank.world; the UI appears bottom-right",
+            "<strong>Built with</strong>",
             "<code>manifest.json</code> — Manifest V3, CDP debugger permission",
             "<code>background.js</code> — OS-level <code>Input.insertText</code> + coordinate clicks via CDP",
             "<code>content.js</code> — drop-zone parser, field traversal, save confirmation",
@@ -48,7 +56,7 @@
 
         "downloadText": "Download .zip 🌸",
 
-        "hint": "Extract → <code>brave://extensions</code> → Load unpacked"
+        "hint": "Extract → <code>brave://extensions</code> or <code>chrome://extensions</code> → Developer mode → Load unpacked"
     },
 
 

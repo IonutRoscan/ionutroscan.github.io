@@ -3,119 +3,124 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#050505">
+    <meta name="color-scheme" content="dark">
     <title>The Grimoire of Ionuț Roșcan</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
 </head>
 <body>
-
-    <!-- Ambient Floating Runes & Candlelight Backdrop -->
-    <div class="altar-background">
+    <div class="noise" aria-hidden="true"></div>
+    <div class="vignette" aria-hidden="true"></div>
+    <div class="altar-background" aria-hidden="true">
         <div class="candle-glow left"></div>
         <div class="candle-glow right"></div>
+        <div class="blood-moon"></div>
+        <div class="dust-field"></div>
     </div>
 
-    <!-- Header / Status Bar -->
+    <div class="presence-warning" id="presence-warning" aria-hidden="true">
+        <span>THE ARCHIVE NOTICED YOU</span>
+    </div>
+
     <header class="altar-header">
         <div class="status-indicator">
-            <span class="pulse-dot"></span> TOME UNSEALED · ARCHIVE ONLINE
+            <span class="pulse-dot"></span>
+            <span id="status-text">TOME UNSEALED · ARCHIVE ONLINE</span>
         </div>
-        <h1 class="tome-title">GRIMOIRE OF IONUȚ ROȘCAN</h1>
-        <p class="tome-subtitle">Artifacts, Digital Curiosities & Sound Invocations</p>
-        <button id="audio-toggle" class="audio-toggle-btn">🕯️ Kindle Ambient Resonance</button>
+        <h1 class="tome-title" data-text="GRIMOIRE OF IONUȚ ROȘCAN">GRIMOIRE OF IONUȚ ROȘCAN</h1>
+        <p class="tome-subtitle">Artifacts, Digital Curiosities &amp; Sound Invocations</p>
+        <div class="header-controls">
+            <button id="audio-toggle" class="audio-toggle-btn" type="button">🕯 Kindle Ambient Resonance</button>
+            <button id="veil-toggle" class="audio-toggle-btn" type="button">◈ Disturb the Veil</button>
+        </div>
     </header>
 
-    <!-- Tome Controller (Bookmark Ribbons) -->
-    <nav class="bookmark-ribbons">
-        <button class="ribbon-btn active" onclick="turnToPage(0)">I. Inscription</button>
-        <button class="ribbon-btn" onclick="turnToPage(1)">II. The Forge & Mana</button>
-        <button class="ribbon-btn" onclick="turnToPage(2)">III. Curiosities</button>
+    <nav class="bookmark-ribbons" aria-label="Archive sections">
+        <button class="ribbon-btn active" type="button" onclick="turnToPage(0)">I. Inscription</button>
+        <button class="ribbon-btn" type="button" onclick="turnToPage(1)">II. Artifacts</button>
+        <button class="ribbon-btn" type="button" onclick="turnToPage(2)">III. Curiosities</button>
     </nav>
 
-    <!-- THE 3D INTERACTIVE TOME -->
-    <div class="book-viewport">
+    <main class="book-viewport">
         <div class="tome-wrapper" id="tome">
-            
-            <!-- Spine Binding -->
-            <div class="book-spine"></div>
+            <div class="book-spine" aria-hidden="true"></div>
 
-            <!-- ================= PAGE 1 (INSCRIPTION & ARCHIVIST) ================= -->
-            <section class="tome-page-spread active" id="spread-0">
-                <!-- Left Leaf -->
+            <section class="tome-page-spread active" id="spread-0" aria-label="Inscription">
                 <div class="parchment-leaf left-leaf">
                     <div class="leaf-corner top-left"></div>
+                    <div class="leaf-corner bottom-left"></div>
                     <div class="leaf-content">
                         <div class="page-num">Folio I · Frontispiece</div>
                         <div class="sigil-emblem">🜁 ✦ 🜂</div>
                         <h2 class="leaf-heading">The Digital Codex</h2>
                         <p class="illuminated-p">
-                            <span class="first-letter">W</span>ithin these bound pages rest the artifacts, tools, and synthesized frequencies crafted by <strong>Ionuț Roșcan</strong>. 
+                            <span class="first-letter">W</span>ithin these bound pages rest the artifacts, tools, and synthesized frequencies crafted by <strong>Ionuț Roșcan</strong>.
                         </p>
-                        <p>
-                            Treat each script as an invocation—coded to bend browsers, process arcane structures, and shape sonic airwaves.
-                        </p>
+                        <p>Treat each script as an invocation—coded to bend browsers, process arcane structures, and shape sonic airwaves.</p>
+
                         <div class="seal-box">
                             <p class="cursed-whisper" title="Nothing comes from nothing. Do not linger.">
-                            ✦ NON OMNIS MORIAR · NIHIL FIT EX NIHILO ✦
-                        </p>
+                                ✦ NON OMNIS MORIAR · NIHIL FIT EX NIHILO ✦
+                            </p>
                             <span class="seal-icon">🜔</span>
                             <div class="seal-text">
                                 <strong>RESTRICTION:</strong> UNRESTRICTED<br>
                                 <strong>ORIGIN:</strong> VAULT OF ROSCAN
                             </div>
                         </div>
+
+                        <div class="marginalia">If you hear knocking, turn the page.</div>
                     </div>
                 </div>
 
-                <!-- Right Leaf -->
                 <div class="parchment-leaf right-leaf">
                     <div class="leaf-corner top-right"></div>
+                    <div class="leaf-corner bottom-right"></div>
                     <div class="leaf-content">
                         <div class="page-num">Folio II · The Archivist</div>
                         <h2 class="leaf-heading">About The Crafter</h2>
-                        <p>
-                            I am a programmer, sound designer, and music producer obsessed with creating strange, tangible things that bridge the gap between utility and imagination.
-                        </p>
-                        <p>
-                            If an idea can be constructed, automated, visualized, or sculpted into raw sonic resonance, chances are I'll build it.
-                        </p>
+                        <p>I am a programmer, sound designer, and music producer obsessed with creating strange, tangible things that bridge the gap between utility and imagination.</p>
+                        <p>If an idea can be constructed, automated, visualized, or sculpted into raw sonic resonance, chances are I'll build it.</p>
+
                         <div class="archivist-scroll">
                             <h4>Current Endeavors:</h4>
                             <ul>
                                 <li>Manipulating browser environments via extensions.</li>
                                 <li>Synthesizing aggressive, immersive audio landscapes.</li>
-                                <li>Developing curious mechanics & interactive tools.</li>
+                                <li>Developing curious mechanics &amp; interactive tools.</li>
                             </ul>
+                        </div>
+
+                        <div class="archive-meter">
+                            <div><span>ARCHIVE INTEGRITY</span><strong id="integrity-value">97%</strong></div>
+                            <div class="meter"><span id="integrity-bar"></span></div>
                         </div>
                     </div>
                 </div>
             </section>
 
-           <!-- ================= SPREAD 2: CLANK LOREBOOK IMPORTER ================= -->
-            <section class="tome-page-spread" id="spread-1">
-                <!-- Left Leaf: The Visual Relic Plate (Full Screenshot) -->
+            <section class="tome-page-spread" id="spread-1" aria-label="Artifacts">
                 <div class="parchment-leaf left-leaf relic-plate">
                     <div class="leaf-corner top-left"></div>
                     <div class="page-num">Folio III · Visual Manifestation</div>
-                    
                     <div class="full-relic-frame">
+                        <div class="frame-rune">✦ SPECIMEN / 001 ✦</div>
                         <img src="clank-preview.png" alt="Grimoire - Clank Lorebook Importer UI" class="relic-full-img">
+                        <div class="frame-rune">DO NOT FEED THE ARCHIVE</div>
                     </div>
                     <span class="plate-caption">✦ Figure 1.1: The Inscription Interface ✦</span>
                 </div>
 
-                <!-- Right Leaf: Overview, Invocation & Architecture -->
                 <div class="parchment-leaf right-leaf">
                     <div class="leaf-corner top-right"></div>
                     <div class="leaf-content">
-                        <div class="page-num">Folio IV · Dossier & Invocation</div>
+                        <div class="page-num">Folio IV · Dossier &amp; Invocation</div>
                         <div class="badge-tag">PRIMARY ARTIFACT</div>
                         <h2 class="leaf-heading">Clank Lorebook Importer</h2>
                         <span class="sub-label">Browser Extension · Brave / Chromium · by SaltSaaalt</span>
-                        
-                        <p class="artifact-summary">
-                            Forged to automate lorebook ingestion on Clank.world. Bypasses reactive state barriers by piping raw input via the Chrome DevTools Protocol (<code>chrome.debugger</code>).
-                        </p>
+
+                        <p class="artifact-summary">Forged to automate lorebook ingestion on Clank.world. Bypasses reactive state barriers by piping raw input via the Chrome DevTools Protocol (<code>chrome.debugger</code>).</p>
 
                         <div class="rune-scroll">
                             <strong>Invocation Protocol:</strong><br>
@@ -123,15 +128,13 @@
                         </div>
 
                         <div class="leaf-actions">
-                            <a href="clank-lorebook-importer.zip" class="grimoire-btn" download>
-                                ⚔ Equip Artifact (.ZIP)
-                            </a>
+                            <a href="clank-lorebook-importer.zip" class="grimoire-btn" download>⚔ Equip Artifact (.ZIP)</a>
                         </div>
 
-                        <div class="tech-dossier" style="margin-top: 15px;">
+                        <div class="tech-dossier">
                             <div class="code-breakdown">
                                 <strong>Accepted Text Payload (.md / .txt):</strong>
-                                <pre><code>Title: [Entry Name]
+<pre><code>Title: [Entry Name]
 Keywords: [tag1, tag2]
 Content: [Lore description...]</code></pre>
                             </div>
@@ -141,67 +144,83 @@ Content: [Lore description...]</code></pre>
                                 <ul>
                                     <li><code>manifest.json</code>: Manifest V3 with CDP debugger permissions.</li>
                                     <li><code>background.js</code>: Dispatches OS-level <code>Input.insertText</code> streams.</li>
-                                    <li><code>content.js</code>: DOM automation, drop-zone parser & sequencer.</li>
+                                    <li><code>content.js</code>: DOM automation, drop-zone parser &amp; sequencer.</li>
                                 </ul>
                             </div>
                         </div>
+
+                        <div class="classified-stamp">ARCHIVED · VERIFIED</div>
                     </div>
                 </div>
             </section>
-            <!-- ================= PAGE 3 (CURIOSITIES & SEAL) ================= -->
-            <section class="tome-page-spread" id="spread-2">
-                <!-- Left Leaf -->
+
+            <section class="tome-page-spread" id="spread-2" aria-label="Curiosities">
                 <div class="parchment-leaf left-leaf">
                     <div class="leaf-corner top-left"></div>
                     <div class="leaf-content">
                         <div class="page-num">Folio V · Utilities</div>
                         <h2 class="leaf-heading">The Worktable</h2>
+
                         <div class="curio-card">
                             <h3>🧪 JSON Formatter</h3>
                             <p>Cleanses, structures, and validates entangled rune payloads.</p>
                             <span class="status-pill">Ready for Inscription</span>
                         </div>
-                        <div class="curio-card" style="margin-top: 15px;">
+
+                        <div class="curio-card">
                             <h3>📦 Upcoming Relics</h3>
                             <p>Additional extensions and sonic toolkits are forged regularly in the private laboratory.</p>
                             <span class="status-pill">In Progress</span>
                         </div>
+
+                        <div class="curio-card cursed-card" id="sealed-curio" tabindex="0" role="button" aria-label="Inspect sealed curiosity">
+                            <h3>☽ Sealed Curiosity</h3>
+                            <p>There is an entry here that was not written by you.</p>
+                            <span class="status-pill">Classification: █████</span>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Right Leaf -->
                 <div class="parchment-leaf right-leaf">
                     <div class="leaf-corner top-right"></div>
                     <div class="leaf-content">
                         <div class="page-num">Folio VI · The Seal</div>
                         <h2 class="leaf-heading">The Vault Gate</h2>
                         <p>The archive grows as new curiosities and spells are cast.</p>
-                        
-                        <div class="altar-sigil-box" id="altar-sigil">
+
+                        <div class="altar-sigil-box" id="altar-sigil" tabindex="0" role="button" aria-label="Bind your presence">
                             <div class="inner-sigil">🜂 🜔 🜁</div>
                             <p class="sigil-prompt">Click the seal to bind your presence</p>
+                            <div class="sigil-ring"></div>
                         </div>
 
                         <div class="tome-links">
-                            <a href="https://github.com/ionutroscan" target="_blank">📜 GitHub Vault</a>
+                            <a href="https://github.com/ionutroscan" target="_blank" rel="noopener noreferrer">📜 GitHub Vault</a>
+                        </div>
+
+                        <div class="visitor-log">
+                            <span>VISITOR LOG</span>
+                            <strong id="visitor-count">001</strong>
                         </div>
                     </div>
                 </div>
             </section>
-
         </div>
-    </div>
+    </main>
 
-    <!-- Page Flip Controls -->
     <div class="tome-page-turners">
-        <button class="turner-btn" id="prev-btn" onclick="prevPage()">⟵ Turn Back</button>
+        <button class="turner-btn" id="prev-btn" type="button" onclick="prevPage()">⟵ Turn Back</button>
         <span class="spread-indicator" id="spread-count">I - II</span>
-        <button class="turner-btn" id="next-btn" onclick="nextPage()">Turn Leaf ⟶</button>
+        <button class="turner-btn" id="next-btn" type="button" onclick="nextPage()">Turn Leaf ⟶</button>
     </div>
 
     <footer class="altar-footer">
         THE ARCHIVE REMAINS OPEN TO THOSE WHO SEEK · IONUȚ ROȘCAN
+        <span class="footer-whisper">· <span id="footer-status">something is listening</span></span>
     </footer>
+
+    <div class="glitch-overlay" id="glitch-overlay" aria-hidden="true"></div>
+    <div class="whisper-text" id="whisper-text" aria-hidden="true"></div>
 
     <script src="script.js"></script>
 </body>

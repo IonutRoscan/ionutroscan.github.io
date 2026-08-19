@@ -87,25 +87,31 @@
                 </div>
             </section>
 
-            <!-- ================= PAGE 2 (FEATURED RELIC & TECHNICAL DOSSIER) ================= -->
+           <!-- ================= SPREAD 2: CLANK LOREBOOK IMPORTER ================= -->
             <section class="tome-page-spread" id="spread-1">
-                <!-- Left Leaf: The Relic Overview & Invocation -->
-                <div class="parchment-leaf left-leaf">
+                <!-- Left Leaf: The Visual Relic Plate (Full Screenshot) -->
+                <div class="parchment-leaf left-leaf relic-plate">
                     <div class="leaf-corner top-left"></div>
+                    <div class="page-num">Folio III · Visual Manifestation</div>
+                    
+                    <div class="full-relic-frame">
+                        <img src="clank-preview.png" alt="Grimoire - Clank Lorebook Importer UI" class="relic-full-img">
+                    </div>
+                    <span class="plate-caption">✦ Figure 1.1: The Inscription Interface ✦</span>
+                </div>
+
+                <!-- Right Leaf: Overview, Invocation & Architecture -->
+                <div class="parchment-leaf right-leaf">
+                    <div class="leaf-corner top-right"></div>
                     <div class="leaf-content">
-                        <div class="page-num">Folio III · Artifact Overview</div>
+                        <div class="page-num">Folio IV · Dossier & Invocation</div>
                         <div class="badge-tag">PRIMARY ARTIFACT</div>
                         <h2 class="leaf-heading">Clank Lorebook Importer</h2>
-                        <span class="sub-label">Browser Extension · Brave / Chromium</span>
+                        <span class="sub-label">Browser Extension · Brave / Chromium · by SaltSaaalt</span>
                         
                         <p class="artifact-summary">
-                            An arcane bridge forged to extract, convert, and weave narrative lorebooks directly into Clank.world AI characters without tedious manual transcription.
+                            Forged to automate lorebook ingestion on Clank.world. Bypasses reactive state barriers by piping raw input via the Chrome DevTools Protocol (<code>chrome.debugger</code>).
                         </p>
-
-                        <!-- Screenshot Preview Container -->
-                        <div class="artifact-preview-frame">
-                            <img src="clank-preview.png" alt="Clank Lorebook Importer Preview" class="preview-img" onerror="this.parentElement.style.display='none'">
-                        </div>
 
                         <div class="rune-scroll">
                             <strong>Invocation Protocol:</strong><br>
@@ -117,35 +123,21 @@
                                 ⚔ Equip Artifact (.ZIP)
                             </a>
                         </div>
-                    </div>
-                </div>
 
-                <!-- Right Leaf: Arcane Architecture & Technical Lore -->
-                <div class="parchment-leaf right-leaf">
-                    <div class="leaf-corner top-right"></div>
-                    <div class="leaf-content">
-                        <div class="page-num">Folio IV · Inner Mechanics</div>
-                        <h2 class="leaf-heading">Arcane Architecture</h2>
-                        <p class="sub-note">Bypassing Reactive State Barriers:</p>
-
-                        <div class="tech-dossier">
-                            <p>
-                                Modern reactive frameworks often swallow synthetic JavaScript input dispatches. To overcome this seal, this artifact binds directly to the <strong>Chrome DevTools Protocol (CDP)</strong> via <code>chrome.debugger</code>, mimicking true OS-level keystrokes.
-                            </p>
-
+                        <div class="tech-dossier" style="margin-top: 15px;">
                             <div class="code-breakdown">
-                                <strong>Supported Lorebook Format (.md):</strong>
+                                <strong>Accepted Text Payload (.md / .txt):</strong>
                                 <pre><code>Title: [Entry Name]
 Keywords: [tag1, tag2]
 Content: [Lore description...]</code></pre>
                             </div>
 
                             <div class="core-components">
-                                <h4>Core Components:</h4>
+                                <h4>Architecture:</h4>
                                 <ul>
-                                    <li><code>manifest.json</code>: Manifest V3 with debugger authorization.</li>
-                                    <li><code>background.js</code>: Manages CDP binding & <code>Input.insertText</code> streams.</li>
-                                    <li><code>content.js</code>: Text parsing, DOM queries, & automated entry looping.</li>
+                                    <li><code>manifest.json</code>: Manifest V3 with CDP debugger permissions.</li>
+                                    <li><code>background.js</code>: Dispatches OS-level <code>Input.insertText</code> streams.</li>
+                                    <li><code>content.js</code>: DOM automation, drop-zone parser & sequencer.</li>
                                 </ul>
                             </div>
                         </div>

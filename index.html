@@ -28,6 +28,11 @@
         <h1 class="tome-title">GRIMOIRE OF IONUȚ ROȘCAN</h1>
         <p class="tome-subtitle">Artifacts, Digital Curiosities & Sound Invocations</p>
         <div class="whisper-line" aria-live="polite"><span id="whisper-text">The archive is quiet.</span></div>
+        <div class="archive-core" aria-label="Archive condition">
+            <span>INTEGRITY <strong id="integrity-value">100%</strong></span>
+            <span class="core-track"><i id="integrity-fill"></i></span>
+            <span>CORRUPTION <strong id="corruption-value">0%</strong></span>
+        </div>
         <div class="header-controls">
             <button id="audio-toggle" class="audio-toggle-btn">🕯️ Kindle Ambient Resonance</button>
             <button id="veil-toggle" class="audio-toggle-btn">◈ Disturb the Veil</button>
@@ -190,9 +195,15 @@ Content: [Lore description...]</code></pre>
                         <h2 class="leaf-heading">The Vault Gate</h2>
                         <p>The archive grows as real artifacts are forged. Ideas may be recorded here before they are built.</p>
                         <div class="archive-ledger">
-                            <div><span>RELEASED</span><strong>001</strong></div>
+                            <div><span>RELEASED</span><strong id="released-count">001</strong></div>
                             <div><span>CONCEPTS</span><strong id="concept-count">001</strong></div>
-                            <div><span>SEALED</span><strong>000</strong></div>
+                            <div><span>SEALED</span><strong id="sealed-count">000</strong></div>
+                        </div>
+
+                        <div class="archive-condition">
+                            <div class="condition-heading"><span>ARCHIVE CONDITION</span><strong id="condition-label">STABLE</strong></div>
+                            <div class="condition-track"><i id="corruption-fill"></i></div>
+                            <p id="condition-note">No structural anomalies detected.</p>
                         </div>
                         
                         <div class="altar-sigil-box" id="altar-sigil" tabindex="0" role="button" aria-label="Bind your presence to the archive">
@@ -202,6 +213,7 @@ Content: [Lore description...]</code></pre>
 
                         <div class="tome-links">
                             <a href="https://github.com/ionutroscan" target="_blank">📜 GitHub Vault</a>
+                            <button class="archive-action" id="calm-archive" type="button">✦ Soothe the Archive</button>
                         </div>
                     </div>
                 </div>
@@ -220,6 +232,8 @@ Content: [Lore description...]</code></pre>
     <div class="archive-toast" id="archive-toast" role="status" aria-live="polite"></div>
     <div class="grain-layer" aria-hidden="true"></div>
     <div class="sigil-cursor" id="sigil-cursor" aria-hidden="true">✦</div>
+    <div class="candle-flame" id="candle-flame" aria-hidden="true"></div>
+    <div class="hidden-rune" id="hidden-rune" tabindex="0" role="button" aria-label="A hidden rune">∴</div>
 
     <footer class="altar-footer">
         <span id="footer-status">THE ARCHIVE REMAINS OPEN TO THOSE WHO SEEK · IONUȚ ROȘCAN</span>

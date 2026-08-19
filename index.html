@@ -69,35 +69,42 @@
             <article class="entry" data-status="stable">
                 <div class="entry-index">001</div>
 
-                <div class="entry-body">
-                    <div class="entry-top">
-                        <h3 class="entry-name">Clank Lorebook Importer</h3>
-                        <span class="status-tag status-stable">✓ stable</span>
-                    </div>
+                <div class="entry-body has-media">
+                    <figure class="entry-media">
+                        <img src="clank-preview.png" alt="Screenshot of the Clank Lorebook Importer interface — a dark ritual-styled panel titled Grimoire with a lore text field and a Bind Lore button.">
+                        <figcaption class="media-caption">the importer, mid-incantation</figcaption>
+                    </figure>
 
-                    <p class="entry-meta">Browser extension · Brave / Chromium · Manifest V3</p>
+                    <div class="entry-content">
+                        <div class="entry-top">
+                            <h3 class="entry-name">Clank Lorebook Importer</h3>
+                            <span class="status-tag status-stable">✓ stable</span>
+                        </div>
 
-                    <p class="entry-desc">
-                        Automates lorebook entry ingestion on Clank.world. Bypasses the
-                        site's reactive input barriers by piping text directly through
-                        the Chrome DevTools Protocol instead of simulating keystrokes.
-                    </p>
+                        <p class="entry-meta">Browser extension · Brave / Chromium · Manifest V3</p>
 
-                    <details class="entry-detail">
-                        <summary>Accepted payload format</summary>
-                        <pre class="code-block"><code>Title: [Entry Name]
+                        <p class="entry-desc">
+                            Automates lorebook entry ingestion on Clank.world. Bypasses the
+                            site's reactive input barriers by piping text directly through
+                            the Chrome DevTools Protocol instead of simulating keystrokes.
+                        </p>
+
+                        <details class="entry-detail">
+                            <summary>Accepted payload format</summary>
+                            <pre class="code-block"><code>Title: [Entry Name]
 Keywords: [tag1, tag2]
 Content: [Lore description...]</code></pre>
-                        <ul class="stack-list">
-                            <li><code>manifest.json</code> — Manifest V3, CDP debugger permission</li>
-                            <li><code>background.js</code> — dispatches <code>Input.insertText</code> streams</li>
-                            <li><code>content.js</code> — DOM automation, drop-zone parser &amp; sequencer</li>
-                        </ul>
-                    </details>
+                            <ul class="stack-list">
+                                <li><code>manifest.json</code> — Manifest V3, CDP debugger permission</li>
+                                <li><code>background.js</code> — dispatches <code>Input.insertText</code> streams</li>
+                                <li><code>content.js</code> — DOM automation, drop-zone parser &amp; sequencer</li>
+                            </ul>
+                        </details>
 
-                    <div class="entry-actions">
-                        <a class="btn-primary" href="clank-lorebook-importer.zip" download>Download .zip</a>
-                        <span class="entry-hint">Extract → <code>brave://extensions</code> → Load unpacked</span>
+                        <div class="entry-actions">
+                            <a class="btn-primary" href="clank-lorebook-importer.zip" download>Download .zip</a>
+                            <span class="entry-hint">Extract → <code>brave://extensions</code> → Load unpacked</span>
+                        </div>
                     </div>
                 </div>
             </article>

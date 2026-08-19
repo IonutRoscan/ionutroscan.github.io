@@ -21,6 +21,56 @@ document.addEventListener("DOMContentLoaded", () => {
         statusEl.textContent = `${stable} stable · ${planned} planned`;
     }
 
+    // ---- notebook tabs filtering logic ----
+    const tabButtons = document.querySelectorAll(".tab-btn");
+    const panel = document.getElementById("tab-all");
+
+    if (tabButtons.length > 0 && panel) {
+        tabButtons.forEach(btn => {
+            btn.addEventListener("click", () => {
+                tabButtons.forEach(b => {
+                    b.classList.remove("active");
+                    b.setAttribute("aria-selected", "false");
+                });
+                btn.classList.add("active");
+                btn.setAttribute("aria-selected", "true");
+
+                const targetType = btn.getAttribute("data-target");
+                const entries = panel.querySelectorAll(".entry");
+
+                entries.forEach(entry => {
+                    const status = entry.getAttribute("data-status");
+                    if (targetType === "tab-all") {
+                        entry.style.display = "grid";
+                    } else if (targetType === "tab-stable" && status === "stable") {
+                        entry.style.display = "grid";
+                    } else if (targetType === "tab-planned" && status === "planned") {
+                        entry.style.display = "grid";
+                    } else {
+                        entry.style.display = "none";
+                    }
+                });
+            });
+        });
+    }
+
+    // ---- floating background sparkles / confetti ----
+    const confettiContainer = document.querySelector(".confetti-container");
+    if (confettiContainer) {
+        const symbols = ["✿", "✨", "⭐", "♡", "🌸"];
+        const particleCount = 12;
+
+        for (let i = 0; i < particleCount; i++) {
+            const span = document.createElement("span");
+            span.className = "sparkle-particle";
+            span.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+            span.style.left = `${Math.random() * 100}vw`;
+            span.style.animationDelay = `${Math.random() * 8}s`;
+            span.style.animationDuration = `${6 + Math.random() * 6}s`;
+            confettiContainer.appendChild(span);
+        }
+    }
+
     // ---- theme toggle: cream (light) <-> soft dark ----
     const toggle = document.getElementById("theme-toggle");
     const icon = toggle ? toggle.querySelector(".theme-toggle-icon") : null;

@@ -59,9 +59,68 @@
         "hint": "Extract → <code>brave://extensions</code> or <code>chrome://extensions</code> → Developer mode → Load unpacked"
     },
 
-
     {
         "id": "002",
+
+        "name": "Obelisk: Clank Layout Builder",
+
+        "type": "extension",
+
+        "typeLabel": "🌸 Browser Extension",
+
+        "status": "stable",
+
+        "statusLabel": "✦ ready!",
+
+        "featured": true,
+
+        "meta": "Browser extension · Brave / Chromium · Manifest V3",
+
+        "desc": "A visual tool to automate Rehype markdown styling for Clank.world character profiles. Obelisk injects a premium 30-tool layout studio directly inside the Clank editor, allowing creators to generate complex CSS, 3D holographic cards, fake widgets, and embedded music straight into the markdown layer without breaking the host site.",
+
+        "tags": [
+            "Brave",
+            "Chromium",
+            "CSS Injection",
+            "Clank.world",
+            "Roleplay UI",
+            "Markdown"
+        ],
+
+        "previewImg": "obelisk-preview-image.png",
+
+        "caption": "the obelisk engine, fully booted ✦",
+
+        "stamp": "V1.3",
+
+        "detailTitle": "Install & feature notes",
+
+        "codeBlock": "<div style=\"border:1px solid #c4a35a; padding:10px;\">\n    <strong style=\"color:#c4a35a;\">[ OBELISK ENGINE ONLINE ]</strong>\n    <span style=\"color:#ccc;\">// EDIT MODE DETECTED</span>\n</div>",
+
+        "stack": [
+            "<strong>How to install</strong>",
+            "1. Download the .zip and extract it somewhere safe (Desktop or Documents)",
+            "2. Open <code>brave://extensions</code> or <code>chrome://extensions</code>",
+            "3. Turn <strong>Developer mode</strong> ON (top right)",
+            "4. Click <strong>Load unpacked</strong> → select the extracted <code>clank-layout-builder</code> folder",
+            "5. Done — open any Character Edit page on clank.world to trigger the boot sequence",
+            "<strong>Built with</strong>",
+            "<code>manifest.json</code> — Manifest V3 architecture",
+            "<code>content.js</code> — SPA routing, custom DOM injection, and 30 modular UI tools",
+            "<code>style.css</code> — Dark glassmorphism, CSS keyframe animations, and 3D transforms",
+            "Includes pure CSS hover states, SoundCloud iframe bypasses, and an animated intro sequence"
+        ],
+
+        "downloadUrl": "clank-layout-builder.zip",
+
+        "downloadText": "Download .zip 🌸",
+
+        "hint": "Extract → <code>brave://extensions</code> or <code>chrome://extensions</code> → Developer mode → Load unpacked"
+    },
+
+
+    {
+        "id": "003",
 
         "name": "Next cute creation",
 

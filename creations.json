@@ -60,71 +60,71 @@
     },
 
     {
-    "id": "002",
-
-    "name": "Obelisk: Clank Layout Builder",
-
-    "type": "extension",
-
-    "typeLabel": "🌸 Browser Extension",
-
-    "status": "stable",
-
-    "statusLabel": "✦ v2.0 ready!",
-
-    "featured": true,
-
-    "meta": "Browser extension · Brave / Chromium · Manifest V3",
-
-    "desc": "A visual layout and component builder for Clank.world character profiles. Obelisk adds a 47-tool studio directly to the Character Edit page, letting creators build styled sections, character UI, lore blocks, media embeds, fake widgets, interactive components and more through configurable live previews — then insert the finished result straight into the About editor.",
-
-    "tags": [
-        "Brave",
-        "Chromium",
-        "Manifest V3",
-        "Clank.world",
-        "Layout Builder",
-        "Roleplay UI",
-        "Live Preview",
-        "Profile Styling"
-    ],
-
-    "previewImg": "obelisk-preview-image.png",
-
-    "caption": "Obelisk 2.0, fully booted ✦",
-
-    "stamp": "V2.0",
-
-    "detailTitle": "Install & feature notes",
-
-    "codeBlock": "<div style=\"border:1px solid #c4a35a; padding:10px;\">\n    <strong style=\"color:#c4a35a;\">[ OBELISK ENGINE ONLINE ]</strong>\n    <span style=\"color:#ccc;\">// EDIT MODE DETECTED</span>\n</div>",
-
-    "stack": [
-        "<strong>How to install</strong>",
-        "1. Download the .zip and extract it somewhere safe (Desktop or Documents)",
-        "2. Open <code>brave://extensions</code> or <code>chrome://extensions</code>",
-        "3. Turn <strong>Developer mode</strong> ON (top right)",
-        "4. Click <strong>Load unpacked</strong> → select the extracted <code>clank-layout-builder</code> folder",
-        "5. Done — open any Character Edit page on clank.world and Obelisk will appear",
-        "<strong>What is inside</strong>",
-        "47 tools covering layouts, character presentation, lore, themed text, media, social/profile components and interactive widgets",
-        "Live previews for customizing components before inserting them into the profile",
-        "Search, Favorites, Recently Used tools, accent customization and persistent settings",
-        "Interactive tools including <strong>Spinning Photo Plane</strong> and <strong>Interactive Hotspot Image</strong>",
-        "Media tools including SoundCloud, Sketchfab, cinematic GIFs, tracklists and holographic cards",
-        "<strong>Obelisk 2.0 rebuild</strong>",
-        "<code>content.js</code> is now a small application bootstrap instead of containing the entire extension",
-        "Core systems are separated into storage, modal, fonts, controllers, panel UI and metadata modules",
-        "All 47 tools are organized into dedicated tool groups for easier maintenance and future additions",
-        "Legacy Photo Plane support remains available for older Obelisk-generated components"
-    ],
-
-    "downloadUrl": "clank-layout-builder.zip",
-
-    "downloadText": "Download Obelisk v2.0 🌸",
-
-    "hint": "Extract → <code>brave://extensions</code> or <code>chrome://extensions</code> → Developer mode → Load unpacked"
-}
+        "id": "002",
+    
+        "name": "Obelisk: Clank Layout Builder",
+    
+        "type": "extension",
+    
+        "typeLabel": "🌸 Browser Extension",
+    
+        "status": "stable",
+    
+        "statusLabel": "✦ v2.0 ready!",
+    
+        "featured": true,
+    
+        "meta": "Browser extension · Brave / Chromium · Manifest V3",
+    
+        "desc": "A visual layout and component builder for Clank.world character profiles. Obelisk adds a 47-tool studio directly to the Character Edit page, letting creators build styled sections, character UI, lore blocks, media embeds, fake widgets, interactive components and more through configurable live previews — then insert the finished result straight into the About editor.",
+    
+        "tags": [
+            "Brave",
+            "Chromium",
+            "Manifest V3",
+            "Clank.world",
+            "Layout Builder",
+            "Roleplay UI",
+            "Live Preview",
+            "Profile Styling"
+        ],
+    
+        "previewImg": "obelisk-preview-image.png",
+    
+        "caption": "Obelisk 2.0, fully booted ✦",
+    
+        "stamp": "V2.0",
+    
+        "detailTitle": "Install & feature notes",
+    
+        "codeBlock": "<div style=\"border:1px solid #c4a35a; padding:10px;\">\n    <strong style=\"color:#c4a35a;\">[ OBELISK ENGINE ONLINE ]</strong>\n    <span style=\"color:#ccc;\">// EDIT MODE DETECTED</span>\n</div>",
+    
+        "stack": [
+            "<strong>How to install</strong>",
+            "1. Download the .zip and extract it somewhere safe (Desktop or Documents)",
+            "2. Open <code>brave://extensions</code> or <code>chrome://extensions</code>",
+            "3. Turn <strong>Developer mode</strong> ON (top right)",
+            "4. Click <strong>Load unpacked</strong> → select the extracted <code>clank-layout-builder</code> folder",
+            "5. Done — open any Character Edit page on clank.world and Obelisk will appear",
+            "<strong>What is inside</strong>",
+            "47 tools covering layouts, character presentation, lore, themed text, media, social/profile components and interactive widgets",
+            "Live previews for customizing components before inserting them into the profile",
+            "Search, Favorites, Recently Used tools, accent customization and persistent settings",
+            "Interactive tools including <strong>Spinning Photo Plane</strong> and <strong>Interactive Hotspot Image</strong>",
+            "Media tools including SoundCloud, Sketchfab, cinematic GIFs, tracklists and holographic cards",
+            "<strong>Obelisk 2.0 rebuild</strong>",
+            "<code>content.js</code> is now a small application bootstrap instead of containing the entire extension",
+            "Core systems are separated into storage, modal, fonts, controllers, panel UI and metadata modules",
+            "All 47 tools are organized into dedicated tool groups for easier maintenance and future additions",
+            "Legacy Photo Plane support remains available for older Obelisk-generated components"
+        ],
+    
+        "downloadUrl": "clank-layout-builder.zip",
+    
+        "downloadText": "Download Obelisk v2.0 🌸",
+    
+        "hint": "Extract → <code>brave://extensions</code> or <code>chrome://extensions</code> → Developer mode → Load unpacked"
+    }
 
 
     {

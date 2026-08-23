@@ -35,7 +35,6 @@
 
         "detailTitle": "Install & format notes",
 
-
         "codeBlock": "Title: Dunmoor Valley\nKeywords: region, valley, Millstone Valley\nContent: The rural farming region containing...\n\nTitle: Fria\nKeywords: Queen of Chaos, protagonist\nContent: The main character...",
 
         "stack": [
@@ -61,23 +60,23 @@
 
     {
         "id": "002",
-    
+
         "name": "Obelisk: Clank Layout Builder",
-    
+
         "type": "extension",
-    
+
         "typeLabel": "🌸 Browser Extension",
-    
+
         "status": "stable",
-    
+
         "statusLabel": "✦ v2.0 ready!",
-    
+
         "featured": true,
-    
+
         "meta": "Browser extension · Brave / Chromium · Manifest V3",
-    
+
         "desc": "A visual layout and component builder for Clank.world character profiles. Obelisk adds a 47-tool studio directly to the Character Edit page, letting creators build styled sections, character UI, lore blocks, media embeds, fake widgets, interactive components and more through configurable live previews — then insert the finished result straight into the About editor.",
-    
+
         "tags": [
             "Brave",
             "Chromium",
@@ -88,17 +87,17 @@
             "Live Preview",
             "Profile Styling"
         ],
-    
+
         "previewImg": "obelisk-preview-image.png",
-    
+
         "caption": "Obelisk 2.0, fully booted ✦",
-    
+
         "stamp": "V2.0",
-    
+
         "detailTitle": "Install & feature notes",
-    
+
         "codeBlock": "<div style=\"border:1px solid #c4a35a; padding:10px;\">\n    <strong style=\"color:#c4a35a;\">[ OBELISK ENGINE ONLINE ]</strong>\n    <span style=\"color:#ccc;\">// EDIT MODE DETECTED</span>\n</div>",
-    
+
         "stack": [
             "<strong>How to install</strong>",
             "1. Download the .zip and extract it somewhere safe (Desktop or Documents)",
@@ -118,14 +117,13 @@
             "All 47 tools are organized into dedicated tool groups for easier maintenance and future additions",
             "Legacy Photo Plane support remains available for older Obelisk-generated components"
         ],
-    
-        "downloadUrl": "clank-layout-builder.zip",
-    
-        "downloadText": "Download Obelisk v2.0 🌸",
-    
-        "hint": "Extract → <code>brave://extensions</code> or <code>chrome://extensions</code> → Developer mode → Load unpacked"
-    }
 
+        "downloadUrl": "clank-layout-builder.zip",
+
+        "downloadText": "Download Obelisk v2.0 🌸",
+
+        "hint": "Extract → <code>brave://extensions</code> or <code>chrome://extensions</code> → Developer mode → Load unpacked"
+    },
 
     {
         "id": "003",

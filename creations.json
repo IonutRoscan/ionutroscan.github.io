@@ -93,10 +93,10 @@
         "type": "extension",
         "typeLabel": "🌸 Browser Extension",
         "status": "stable",
-        "statusLabel": "✦ v1.0 ready!",
+        "statusLabel": "✦ v1.1.0 ready!",
         "featured": true,
         "meta": "Browser extension · Brave / Chromium · Manifest V3 · Clank.world chat customization",
-        "desc": "A client-side chat customization and roleplay toolkit for clank.world. Furina turns the chat page into a personal atelier with per-conversation themes, live MP4/WebM wallpapers, styled message bubbles and typography, stickers, atmosphere, music, Reader/Focus tools, visual effects, import/export, scoped custom CSS, and persistent Director Notes that can keep user-defined RP rules and continuity reminders in active context while hiding Furina's generated reminder block from the local transcript.",
+        "desc": "A client-side chat customization and roleplay toolkit for clank.world. Furina turns the chat page into a personal atelier with per-conversation themes, live MP4/WebM wallpapers, styled message bubbles and typography, stickers, atmosphere, music, Reader/Focus tools, visual effects, import/export, scoped custom CSS, persistent Director Notes for RP rules and continuity, and an interface available in both English and Spanish.",
         "tags": [
             "Brave",
             "Chromium",
@@ -108,7 +108,10 @@
             "Live Wallpapers",
             "Director Notes",
             "Stickers",
-            "Ambience"
+            "Ambience",
+            "English",
+            "Spanish",
+            "Localization"
         ],
         "previewImages": [
             {
@@ -122,16 +125,21 @@
                 "alt": "Furina Clank Chat Atelier workspace panel"
             }
         ],
-        "stamp": "V1.0",
+        "stamp": "V1.1.0",
         "detailTitle": "Install & feature notes",
         "codeBlock": "chrome://extensions\nDeveloper mode → ON\nLoad unpacked → select the extracted Furina folder",
         "stack": [
             "<strong>How to install</strong>",
-            "1. Download <code>Furina-Clank-Chat-Atelier-1.0.0.zip</code> and extract it somewhere you plan to keep it",
+            "1. Download <code>Furina-Clank-Chat-Atelier-1.1.0.zip</code> and extract it somewhere you plan to keep it",
             "2. Open <code>brave://extensions</code> or <code>chrome://extensions</code>",
             "3. Turn <strong>Developer mode</strong> ON",
             "4. Click <strong>Load unpacked</strong> and select the extracted Furina folder",
             "5. Open a chat on clank.world — Furina's launcher will appear on supported chat routes",
+            "<strong>New in Furina 1.1.0</strong>",
+            "Furina's interface is now available in <strong>English</strong> and <strong>Español</strong>",
+            "Use <strong>Tools → Language</strong> to choose Automatic, English, or Español",
+            "Automatic mode follows the browser language when Furina has a matching translation and falls back to English otherwise",
+            "Changing the interface language never rewrites your chats, saved Director Notes, presets, stickers, URLs, CSS, or other user-authored content",
             "<strong>Look & themes</strong>",
             "Global or per-conversation themes with solid, gradient, image and direct MP4/WebM video backgrounds",
             "Separate assistant/user bubbles, glass effects, textures, borders, shadows, typography, avatar frames and color grading",
@@ -141,13 +149,14 @@
             "Atmosphere effects, direct audio/SoundCloud ambience, Reader/Focus presentation tools and screenshot-friendly viewing",
             "<strong>Director Notes / RP control</strong>",
             "Per-conversation persistent RP rules and continuity notes can be attached to normal outgoing messages as explicit <code>ooc:</code> guidance",
+            "Built-in Director templates can be generated in the currently selected Furina interface language",
             "Furina hides only its own uniquely marked generated Director block from the local transcript; ordinary user-written OOC remains visible",
             "Director Notes are reminders, not backend memory edits, and cannot guarantee model compliance",
             "<strong>Sharing & advanced tools</strong>",
             "Theme presets, theme import/export, Full Setup portability, diagnostics and scoped Advanced CSS"
         ],
-        "downloadUrl": "Furina-Clank-Chat-Atelier-1.0.0.zip",
-        "downloadText": "Download Furina 1.0.0 ✦",
+        "downloadUrl": "Furina-Clank-Chat-Atelier-1.1.0.zip",
+        "downloadText": "Download Furina 1.1.0 ✦",
         "hint": "Extract → <code>brave://extensions</code> or <code>chrome://extensions</code> → Developer mode → Load unpacked"
     },
     {

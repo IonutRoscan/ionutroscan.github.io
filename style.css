@@ -1733,6 +1733,42 @@ html[data-theme="dark"] .status-planned {
 }
 
 
+.entry-media-count {
+    position: absolute;
+
+    left: 12px;
+    top: 12px;
+
+    padding:
+        4px 7px;
+
+    border-radius:
+        999px;
+
+    background:
+        rgba(52, 38, 55, 0.72);
+
+    color:
+        #ffffff;
+
+    font-family:
+        var(--font-mono);
+
+    font-size:
+        0.54rem;
+
+    line-height:
+        1;
+
+    box-shadow:
+        0 3px 9px
+        rgba(52, 38, 55, 0.15);
+
+    backdrop-filter:
+        blur(5px);
+}
+
+
 .media-caption {
 
     padding:
@@ -3290,6 +3326,235 @@ html[data-theme="dark"] .status-planned {
 
 
 /* ------------------------------------------------------------
+   PREVIEW GALLERY
+   ------------------------------------------------------------ */
+
+.scrapbook-gallery {
+    width:
+        min(
+            100%,
+            760px
+        );
+}
+
+
+.scrapbook-gallery-controls {
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    gap:
+        12px;
+
+    margin:
+        3px 0 10px;
+}
+
+
+.scrapbook-gallery-arrow {
+    width:
+        36px;
+
+    height:
+        32px;
+
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    border:
+        1px solid
+        rgba(166, 125, 132, 0.25);
+
+    border-radius:
+        9px;
+
+    background:
+        #f8edf2;
+
+    color:
+        #986277;
+
+    cursor:
+        pointer;
+
+    transition:
+        transform 150ms ease,
+        background 150ms ease;
+}
+
+
+.scrapbook-gallery-arrow:hover {
+    transform:
+        translateY(-2px);
+
+    background:
+        #f3dfe8;
+}
+
+
+.scrapbook-gallery-counter {
+    min-width:
+        48px;
+
+    color:
+        #927d86;
+
+    font-family:
+        var(--font-mono);
+
+    font-size:
+        0.68rem;
+
+    text-align:
+        center;
+}
+
+
+.scrapbook-gallery-thumbs {
+    display:
+        flex;
+
+    justify-content:
+        center;
+
+    flex-wrap:
+        wrap;
+
+    gap:
+        8px;
+
+    margin-bottom:
+        7px;
+}
+
+
+.scrapbook-gallery-thumb {
+    width:
+        82px;
+
+    height:
+        58px;
+
+    padding:
+        4px;
+
+    border:
+        1px solid
+        rgba(166, 125, 132, 0.24);
+
+    border-radius:
+        8px;
+
+    background:
+        #ffffff;
+
+    cursor:
+        pointer;
+
+    opacity:
+        0.68;
+
+    overflow:
+        hidden;
+
+    transition:
+        opacity 150ms ease,
+        transform 150ms ease,
+        border-color 150ms ease,
+        box-shadow 150ms ease;
+}
+
+
+.scrapbook-gallery-thumb:hover,
+.scrapbook-gallery-thumb.is-active {
+    opacity:
+        1;
+
+    transform:
+        translateY(-2px);
+
+    border-color:
+        #d98ba4;
+
+    box-shadow:
+        0 5px 13px
+        rgba(181, 102, 131, 0.16);
+}
+
+
+.scrapbook-gallery-thumb img {
+    width:
+        100%;
+
+    height:
+        100%;
+
+    object-fit:
+        cover;
+
+    border-radius:
+        4px;
+}
+
+
+[data-theme="dark"]
+.scrapbook-gallery-arrow {
+    background:
+        #453844;
+
+    border-color:
+        rgba(226, 193, 208, 0.16);
+
+    color:
+        #e1c8d5;
+}
+
+
+[data-theme="dark"]
+.scrapbook-gallery-arrow:hover {
+    background:
+        #51404e;
+}
+
+
+[data-theme="dark"]
+.scrapbook-gallery-counter {
+    color:
+        #bda9b3;
+}
+
+
+[data-theme="dark"]
+.scrapbook-gallery-thumb {
+    background:
+        #3d3340;
+
+    border-color:
+        rgba(226, 193, 208, 0.13);
+}
+
+
+[data-theme="dark"]
+.scrapbook-gallery-thumb.is-active,
+[data-theme="dark"]
+.scrapbook-gallery-thumb:hover {
+    border-color:
+        #d98ba4;
+}
+
+
+/* ------------------------------------------------------------
    SECTION LABELS
    ------------------------------------------------------------ */
 
@@ -4294,3 +4559,27 @@ html[data-theme="dark"] .status-planned {
         var(--lavender);
 }
 
+
+
+/* ============================================================
+   34. PROJECT GALLERY — MOBILE POLISH
+   ============================================================ */
+
+@media (max-width: 430px) {
+
+    .scrapbook-gallery-thumb {
+        width: 66px;
+        height: 48px;
+    }
+
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+
+    .scrapbook-gallery-arrow,
+    .scrapbook-gallery-thumb {
+        transition: none !important;
+    }
+
+}

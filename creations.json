@@ -1,23 +1,14 @@
 [
     {
         "id": "001",
-
         "name": "Grimoire: Clank Lorebook Importer",
-
         "type": "extension",
-
         "typeLabel": "🌸 Browser Extension",
-
         "status": "stable",
-
         "statusLabel": "✦ ready!",
-
         "featured": true,
-
         "meta": "Browser extension · Brave / Chromium · Manifest V3",
-
         "desc": "A custom extension for clank.world that turns bulk lorebook entry into a small ritual. Drop structured .md or .txt files and Grimoire provisions, fills, and saves dozens of memory entries automatically — using Chrome DevTools Protocol injection so reactive fields never drop or cross-wire data.",
-
         "tags": [
             "Brave",
             "Chromium",
@@ -26,17 +17,11 @@
             "Clank.world",
             "lorebook"
         ],
-
         "previewImg": "clank-preview.png",
-
         "caption": "the grimoire, mid-incantation ✨",
-
         "stamp": "Verified",
-
         "detailTitle": "Install & format notes",
-
         "codeBlock": "Title: Dunmoor Valley\nKeywords: region, valley, Millstone Valley\nContent: The rural farming region containing...\n\nTitle: Fria\nKeywords: Queen of Chaos, protagonist\nContent: The main character...",
-
         "stack": [
             "<strong>How to install</strong>",
             "1. Download the .zip and extract it somewhere safe (Desktop or Documents)",
@@ -50,33 +35,20 @@
             "<code>content.js</code> — drop-zone parser, field traversal, save confirmation",
             "Adjustable ritual pace + emergency <strong>STOP RITUAL</strong> kill switch"
         ],
-
         "downloadUrl": "clank-lorebook-importer.zip",
-
         "downloadText": "Download .zip 🌸",
-
         "hint": "Extract → <code>brave://extensions</code> or <code>chrome://extensions</code> → Developer mode → Load unpacked"
     },
-
     {
         "id": "002",
-
         "name": "Obelisk: Clank Layout Builder",
-
         "type": "extension",
-
         "typeLabel": "🌸 Browser Extension",
-
         "status": "stable",
-
         "statusLabel": "✦ v2.0 ready!",
-
         "featured": true,
-
         "meta": "Browser extension · Brave / Chromium · Manifest V3",
-
         "desc": "A visual layout and component builder for Clank.world character profiles. Obelisk adds a 47-tool studio directly to the Character Edit page, letting creators build styled sections, character UI, lore blocks, media embeds, fake widgets, interactive components and more through configurable live previews — then insert the finished result straight into the About editor.",
-
         "tags": [
             "Brave",
             "Chromium",
@@ -87,17 +59,11 @@
             "Live Preview",
             "Profile Styling"
         ],
-
         "previewImg": "obelisk-preview-image.png",
-
         "caption": "Obelisk 2.0, fully booted ✦",
-
         "stamp": "V2.0",
-
         "detailTitle": "Install & feature notes",
-
         "codeBlock": "<div style=\"border:1px solid #c4a35a; padding:10px;\">\n    <strong style=\"color:#c4a35a;\">[ OBELISK ENGINE ONLINE ]</strong>\n    <span style=\"color:#ccc;\">// EDIT MODE DETECTED</span>\n</div>",
-
         "stack": [
             "<strong>How to install</strong>",
             "1. Download the .zip and extract it somewhere safe (Desktop or Documents)",
@@ -117,35 +83,85 @@
             "All 47 tools are organized into dedicated tool groups for easier maintenance and future additions",
             "Legacy Photo Plane support remains available for older Obelisk-generated components"
         ],
-
         "downloadUrl": "clank-layout-builder.zip",
-
         "downloadText": "Download Obelisk v2.0 🌸",
-
         "hint": "Extract → <code>brave://extensions</code> or <code>chrome://extensions</code> → Developer mode → Load unpacked"
     },
-
     {
         "id": "003",
-
+        "name": "Furina: Clank Chat Atelier",
+        "type": "extension",
+        "typeLabel": "🌸 Browser Extension",
+        "status": "stable",
+        "statusLabel": "✦ v1.0 ready!",
+        "featured": true,
+        "meta": "Browser extension · Brave / Chromium · Manifest V3 · Clank.world chat customization",
+        "desc": "A client-side chat customization and roleplay toolkit for clank.world. Furina turns the chat page into a personal atelier with per-conversation themes, live MP4/WebM wallpapers, styled message bubbles and typography, stickers, atmosphere, music, Reader/Focus tools, visual effects, import/export, scoped custom CSS, and persistent Director Notes that can keep user-defined RP rules and continuity reminders in active context while hiding Furina's generated reminder block from the local transcript.",
+        "tags": [
+            "Brave",
+            "Chromium",
+            "Manifest V3",
+            "Clank.world",
+            "Chat Customizer",
+            "Roleplay",
+            "Themes",
+            "Live Wallpapers",
+            "Director Notes",
+            "Stickers",
+            "Ambience"
+        ],
+        "previewImages": [
+            {
+                "src": "furina-preview-example.png",
+                "caption": "a Furina-customized Clank chat ✦",
+                "alt": "Example Clank chat customized with a Furina theme"
+            },
+            {
+                "src": "furina-preview-panel.png",
+                "caption": "the Atelier Workspace panel",
+                "alt": "Furina Clank Chat Atelier workspace panel"
+            }
+        ],
+        "stamp": "V1.0",
+        "detailTitle": "Install & feature notes",
+        "codeBlock": "chrome://extensions\nDeveloper mode → ON\nLoad unpacked → select the extracted Furina folder",
+        "stack": [
+            "<strong>How to install</strong>",
+            "1. Download <code>Furina-Clank-Chat-Atelier-1.0.0.zip</code> and extract it somewhere you plan to keep it",
+            "2. Open <code>brave://extensions</code> or <code>chrome://extensions</code>",
+            "3. Turn <strong>Developer mode</strong> ON",
+            "4. Click <strong>Load unpacked</strong> and select the extracted Furina folder",
+            "5. Open a chat on clank.world — Furina's launcher will appear on supported chat routes",
+            "<strong>Look & themes</strong>",
+            "Global or per-conversation themes with solid, gradient, image and direct MP4/WebM video backgrounds",
+            "Separate assistant/user bubbles, glass effects, textures, borders, shadows, typography, avatar frames and color grading",
+            "Animated gradients, edge glow, message entrance effects, particles, corner ornaments, separators and other optional cosmetic layers",
+            "<strong>Scene & immersion</strong>",
+            "Draggable/resizable stickers with layouts and a sticker library",
+            "Atmosphere effects, direct audio/SoundCloud ambience, Reader/Focus presentation tools and screenshot-friendly viewing",
+            "<strong>Director Notes / RP control</strong>",
+            "Per-conversation persistent RP rules and continuity notes can be attached to normal outgoing messages as explicit <code>ooc:</code> guidance",
+            "Furina hides only its own uniquely marked generated Director block from the local transcript; ordinary user-written OOC remains visible",
+            "Director Notes are reminders, not backend memory edits, and cannot guarantee model compliance",
+            "<strong>Sharing & advanced tools</strong>",
+            "Theme presets, theme import/export, Full Setup portability, diagnostics and scoped Advanced CSS"
+        ],
+        "downloadUrl": "Furina-Clank-Chat-Atelier-1.0.0.zip",
+        "downloadText": "Download Furina 1.0.0 ✦",
+        "hint": "Extract → <code>brave://extensions</code> or <code>chrome://extensions</code> → Developer mode → Load unpacked"
+    },
+    {
+        "id": "004",
         "name": "Next cute creation",
-
         "type": "experiment",
-
         "typeLabel": "🧪 Future Experiment",
-
         "status": "planned",
-
         "statusLabel": "☁ sprouting",
-
         "meta": "A little placeholder for whatever comes next",
-
         "desc": "This little patch is waiting to bloom. Future tools, plugins, and experiments will sprout here when they're ready.",
-
         "tags": [
             "coming soon"
         ],
-
         "isPlanned": true
     }
 ]

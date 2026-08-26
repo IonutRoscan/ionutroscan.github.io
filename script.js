@@ -222,7 +222,121 @@ function renderCreations() {
 
 
 /* ============================================================
-   07. CREATE PROJECT ENTRY
+   07. PROJECT PREVIEW MEDIA
+   ============================================================ */
+
+/*
+    Projects can use either the original single-image format:
+
+        "previewImg": "example.png"
+
+    or the newer gallery format:
+
+        "previewImages": [
+            "example-a.png",
+            {
+                "src": "example-b.png",
+                "caption": "another view",
+                "alt": "Description of the image"
+            }
+        ]
+
+    Keeping both formats means older workshop entries continue to work.
+*/
+function getCreationPreviewImages(
+    creation
+) {
+
+    const rawItems =
+        Array.isArray(
+            creation.previewImages
+        )
+            ? creation.previewImages
+            : (
+                creation.previewImg
+                    ? [
+                        {
+                            src:
+                                creation.previewImg,
+                            caption:
+                                creation.caption || "",
+                            alt:
+                                creation.name ||
+                                "Project preview"
+                        }
+                    ]
+                    : []
+            );
+
+
+    return rawItems
+        .map(
+            item => {
+
+                if (
+                    typeof item === "string"
+                ) {
+
+                    return {
+                        src:
+                            item,
+                        caption:
+                            "",
+                        alt:
+                            creation.name ||
+                            "Project preview"
+                    };
+
+                }
+
+
+                if (
+                    !item ||
+                    typeof item !== "object" ||
+                    typeof item.src !== "string"
+                ) {
+                    return null;
+                }
+
+
+                return {
+                    src:
+                        item.src,
+                    caption:
+                        item.caption || "",
+                    alt:
+                        item.alt ||
+                        creation.name ||
+                        "Project preview"
+                };
+
+            }
+        )
+        .filter(
+            item =>
+                item &&
+                item.src.trim()
+        );
+
+}
+
+
+function getPrimaryPreview(
+    creation
+) {
+
+    return (
+        getCreationPreviewImages(
+            creation
+        )[0] ||
+        null
+    );
+
+}
+
+
+/* ============================================================
+   08. CREATE PROJECT ENTRY
    ============================================================ */
 
 function createEntry(
@@ -312,10 +426,10 @@ function createEntry(
         </div>
 
 
-        <div class="entry-body ${creation.previewImg ? "has-media" : ""}">
+        <div class="entry-body ${getCreationPreviewImages(creation).length ? "has-media" : ""}">
 
             ${
-                creation.previewImg
+                getCreationPreviewImages(creation).length
                     ? createMediaHTML(creation)
                     : ""
             }
@@ -433,13 +547,32 @@ function createMediaHTML(
     creation
 ) {
 
+    const previews =
+        getCreationPreviewImages(
+            creation
+        );
+
+
     const image =
-        creation.previewImg;
+        previews[0];
+
+
+    if (!image) {
+        return "";
+    }
 
 
     const caption =
+        image.caption ||
         creation.caption ||
         "a little workshop treasure";
+
+
+    const extraCount =
+        Math.max(
+            0,
+            previews.length - 1
+        );
 
 
     return `
@@ -447,10 +580,8 @@ function createMediaHTML(
         <figure class="entry-media">
 
             <img
-                src="${escapeAttribute(image)}"
-                alt="${escapeAttribute(
-                    creation.name || "Project preview"
-                )}"
+                src="${escapeAttribute(image.src)}"
+                alt="${escapeAttribute(image.alt)}"
                 loading="lazy"
                 onerror="this.closest('.entry-media').classList.add('media-error'); this.style.display='none';"
             >
@@ -467,6 +598,20 @@ function createMediaHTML(
             <figcaption class="media-caption">
                 ${escapeHTML(caption)}
             </figcaption>
+
+
+            ${
+                extraCount > 0
+                    ? `
+                        <span
+                            class="entry-media-count"
+                            title="${previews.length} preview images"
+                        >
+                            +${extraCount} photo${extraCount === 1 ? "" : "s"}
+                        </span>
+                    `
+                    : ""
+            }
 
 
             ${
@@ -2342,7 +2487,13 @@ function populateScrapbookMedia(
         "";
 
 
-    if (!creation.previewImg) {
+    const previews =
+        getCreationPreviewImages(
+            creation
+        );
+
+
+    if (!previews.length) {
 
         container.hidden =
             true;
@@ -2356,6 +2507,16 @@ function populateScrapbookMedia(
         false;
 
 
+    const gallery =
+        document.createElement(
+            "div"
+        );
+
+
+    gallery.className =
+        "scrapbook-gallery";
+
+
     const figure =
         document.createElement(
             "figure"
@@ -2366,37 +2527,130 @@ function populateScrapbookMedia(
         "scrapbook-preview";
 
 
-    figure.innerHTML = `
-
-        <img
-            src="${escapeAttribute(
-                creation.previewImg
-            )}"
-            alt="${escapeAttribute(
-                creation.name ||
-                "Project preview"
-            )}"
-        >
-
-        ${
-            creation.caption
-                ? `
-                    <figcaption>
-                        ${escapeHTML(
-                            creation.caption
-                        )}
-                    </figcaption>
-                `
-                : ""
-        }
-
-    `;
-
-
     const image =
-        figure.querySelector(
+        document.createElement(
             "img"
         );
+
+
+    const caption =
+        document.createElement(
+            "figcaption"
+        );
+
+
+    figure.append(
+        image,
+        caption
+    );
+
+
+    gallery.appendChild(
+        figure
+    );
+
+
+    let activeIndex =
+        0;
+
+
+    function showPreview(
+        index
+    ) {
+
+        activeIndex =
+            (
+                index +
+                previews.length
+            ) %
+            previews.length;
+
+
+        const preview =
+            previews[activeIndex];
+
+
+        figure.classList.remove(
+            "preview-error"
+        );
+
+
+        const fallback =
+            figure.querySelector(
+                ".scrapbook-preview-fallback"
+            );
+
+
+        if (fallback) {
+            fallback.remove();
+        }
+
+
+        image.style.display =
+            "block";
+
+
+        image.src =
+            preview.src;
+
+
+        image.alt =
+            preview.alt;
+
+
+        caption.textContent =
+            preview.caption ||
+            creation.caption ||
+            "";
+
+
+        caption.hidden =
+            !caption.textContent;
+
+
+        gallery
+            .querySelectorAll(
+                ".scrapbook-gallery-thumb"
+            )
+            .forEach(
+                (button, buttonIndex) => {
+
+                    const selected =
+                        buttonIndex ===
+                        activeIndex;
+
+
+                    button.classList.toggle(
+                        "is-active",
+                        selected
+                    );
+
+
+                    button.setAttribute(
+                        "aria-current",
+                        selected
+                            ? "true"
+                            : "false"
+                    );
+
+                }
+            );
+
+
+        const counter =
+            gallery.querySelector(
+                ".scrapbook-gallery-counter"
+            );
+
+
+        if (counter) {
+
+            counter.textContent =
+                `${activeIndex + 1} / ${previews.length}`;
+
+        }
+
+    }
 
 
     image.addEventListener(
@@ -2412,38 +2666,207 @@ function populateScrapbookMedia(
                 "none";
 
 
-            const fallback =
-                document.createElement(
-                    "div"
+            if (
+                !figure.querySelector(
+                    ".scrapbook-preview-fallback"
+                )
+            ) {
+
+                const fallback =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                fallback.className =
+                    "scrapbook-preview-fallback";
+
+
+                fallback.setAttribute(
+                    "aria-hidden",
+                    "true"
                 );
 
 
-            fallback.className =
-                "scrapbook-preview-fallback";
+                fallback.textContent =
+                    "✿";
 
 
-            fallback.setAttribute(
-                "aria-hidden",
-                "true"
-            );
+                figure.insertBefore(
+                    fallback,
+                    figure.firstChild
+                );
 
-
-            fallback.textContent =
-                "✿";
-
-
-            figure.insertBefore(
-                fallback,
-                figure.firstChild
-            );
+            }
 
         }
     );
 
 
+    if (
+        previews.length > 1
+    ) {
+
+        const controls =
+            document.createElement(
+                "div"
+            );
+
+
+        controls.className =
+            "scrapbook-gallery-controls";
+
+
+        controls.innerHTML = `
+
+            <button
+                class="scrapbook-gallery-arrow"
+                type="button"
+                data-gallery-previous
+                aria-label="Previous preview image"
+            >
+                ←
+            </button>
+
+
+            <span
+                class="scrapbook-gallery-counter"
+                aria-live="polite"
+            ></span>
+
+
+            <button
+                class="scrapbook-gallery-arrow"
+                type="button"
+                data-gallery-next
+                aria-label="Next preview image"
+            >
+                →
+            </button>
+
+        `;
+
+
+        controls
+            .querySelector(
+                "[data-gallery-previous]"
+            )
+            .addEventListener(
+                "click",
+                () => {
+                    showPreview(
+                        activeIndex - 1
+                    );
+                }
+            );
+
+
+        controls
+            .querySelector(
+                "[data-gallery-next]"
+            )
+            .addEventListener(
+                "click",
+                () => {
+                    showPreview(
+                        activeIndex + 1
+                    );
+                }
+            );
+
+
+        gallery.appendChild(
+            controls
+        );
+
+
+        const thumbnails =
+            document.createElement(
+                "div"
+            );
+
+
+        thumbnails.className =
+            "scrapbook-gallery-thumbs";
+
+
+        previews.forEach(
+            (preview, index) => {
+
+                const button =
+                    document.createElement(
+                        "button"
+                    );
+
+
+                button.className =
+                    "scrapbook-gallery-thumb";
+
+
+                button.type =
+                    "button";
+
+
+                button.setAttribute(
+                    "aria-label",
+                    `Show preview ${index + 1}`
+                );
+
+
+                const thumb =
+                    document.createElement(
+                        "img"
+                    );
+
+
+                thumb.src =
+                    preview.src;
+
+
+                thumb.alt =
+                    "";
+
+
+                thumb.loading =
+                    "lazy";
+
+
+                button.appendChild(
+                    thumb
+                );
+
+
+                button.addEventListener(
+                    "click",
+                    () => {
+                        showPreview(
+                            index
+                        );
+                    }
+                );
+
+
+                thumbnails.appendChild(
+                    button
+                );
+
+            }
+        );
+
+
+        gallery.appendChild(
+            thumbnails
+        );
+
+    }
+
+
     container.appendChild(
-        figure
+        gallery
     );
+
+
+    showPreview(0);
 
 }
 

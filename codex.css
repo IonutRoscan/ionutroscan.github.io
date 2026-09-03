@@ -516,3 +516,129 @@ body {
 #codex-status {
   color: var(--accent-gold);
 }
+
+/* ============================================================
+   MOBILE & TOUCH HARNESS (<= 768px)
+   ============================================================ */
+
+@media (max-width: 768px) {
+  body {
+    height: 100svh;
+  }
+
+  .codex-chassis {
+    grid-template-rows: 50px 1fr 140px 32px;
+    height: 100svh;
+  }
+
+  .codex-header {
+    padding: 0 16px;
+  }
+
+  .emblem-title {
+    font-size: 0.75rem;
+  }
+
+  .telemetry-tag {
+    display: none;
+  }
+
+  /* Stack deck: Dossier on top, rotary selector docked to bottom */
+  .codex-deck {
+    display: contents;
+  }
+
+  .carrier-chamber {
+    order: 1;
+    height: 100%;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .cartridge-bay {
+    padding: 16px;
+  }
+
+  .cartridge-blueprint {
+    padding: 16px;
+  }
+
+  .blueprint-title {
+    font-size: 1.85rem;
+  }
+
+  .blueprint-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .blueprint-schematic {
+    min-height: 200px;
+    max-height: 240px;
+  }
+
+  /* Bottom Horizontal Rotary Cockpit */
+  .rotary-bay {
+    order: 2;
+    height: 140px;
+    border-right: 0;
+    border-top: 2px solid var(--chassis-rim);
+    perspective: 800px;
+    background: #080a0f;
+  }
+
+  .rotary-controls {
+    display: none; /* Hide search input on compact mobile to maximize dial stage */
+  }
+
+  .rotary-stage {
+    touch-action: pan-y;
+  }
+
+  .rotary-reticle {
+    top: 14px;
+    bottom: 14px;
+    left: calc(50% - 75px);
+    right: auto;
+    width: 150px;
+    height: auto;
+    border: 1px dashed var(--accent-gold);
+    border-top: 3px solid var(--accent-gold);
+    border-left: 1px dashed var(--accent-gold);
+    background: rgba(196, 163, 90, 0.06);
+  }
+
+  .drum-node {
+    top: calc(50% - 22px);
+    left: calc(50% - 70px);
+    right: auto;
+    width: 140px;
+    height: 44px;
+    padding: 0 10px;
+  }
+
+  .drum-node-title {
+    font-size: 0.72rem;
+  }
+
+  .blueprint-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .action-relay {
+    display: flex;
+    justify-content: center;
+    min-height: 46px;
+    padding: 12px;
+  }
+
+  .codex-footer {
+    order: 3;
+    padding: 0 16px;
+  }
+
+  .telemetry-meta {
+    display: none;
+  }
+}

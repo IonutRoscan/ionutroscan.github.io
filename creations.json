@@ -251,7 +251,7 @@
             "Overview shows publish readiness and whether Character, Dialogue, Scene, and Initial Messages match the live Clank form; apply sections individually or use <strong>Apply All</strong>",
             "Import from Clank can pull an already-started creation form into the active Daedalus project",
             "<strong>Presentation</strong>",
-            "ChatGPT-inspired dark theme by default, plus a persistent light theme and dedicated extension icons"
+            "Green-dark theme by default, plus a persistent light theme and dedicated extension icons"
         ],
         "downloadUrl": "Daedalus-Clank-Character-Forge-1.0.0.zip",
         "downloadText": "Download Daedalus 1.0.0",

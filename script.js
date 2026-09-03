@@ -1,6 +1,6 @@
 /* ============================================================
-   DXK — LITTLE WORKSHOP
-   V2 JavaScript
+   DXK — THE NOCTURNE ARCHIVE
+   Project registry and archive viewer
    ============================================================ */
 
 
@@ -13,9 +13,9 @@ const CONFIG = {
 
     themeStorageKey: "dxk-theme",
 
-    defaultTheme: "light",
+    defaultTheme: "dark",
 
-    sparkleCount: 18,
+    sparkleCount: 22,
 
     searchDelay: 80
 };
@@ -26,15 +26,15 @@ const CONFIG = {
    ============================================================ */
 
 const MASCOT_MESSAGES = [
-    "welcome! ☁️",
-    "please enjoy the little workshop ✿",
-    "something cute is brewing... 🌱",
-    "don't touch the mysterious button ♡",
-    "welcome home, developer ✨",
-    "everything here was made with love",
-    "the shelves are open! 🌸",
-    "take your time looking around ♡",
-    "a quiet corner for little tools ☁️"
+    "signal acquired.",
+    "archive synchronized.",
+    "continuity thread detected.",
+    "the stage is yours.",
+    "all systems nominal.",
+    "another world is waiting.",
+    "memory lattice stable.",
+    "transmission received.",
+    "welcome back, creator."
 ];
 
 
@@ -100,7 +100,7 @@ async function init() {
     setupTabs();
 
     updateWorkshopStatus(
-        "workshop is open ✦"
+        "archive online"
     );
 
 
@@ -124,14 +124,14 @@ async function init() {
     } catch (error) {
 
         console.error(
-            "DXK workshop failed to load:",
+            "DXK archive failed to load:",
             error
         );
 
         showLoadError();
 
         updateWorkshopStatus(
-            "something spilled on the desk..."
+            "registry connection interrupted"
         );
 
     }
@@ -190,8 +190,8 @@ function renderCreations() {
 
         panel.innerHTML =
             createEmptyState(
-                "The shelves are empty",
-                "Nothing has been logged in the workshop yet. 🌱"
+                "The archive is empty",
+                "No projects have been catalogued yet."
             );
 
         updateVisibleCount();
@@ -367,8 +367,8 @@ function createEntry(
         creation.statusLabel ||
         (
             isPlanned
-                ? "☁ sprouting"
-                : "✦ ready!"
+                ? "In development"
+                : "Released"
         );
 
 
@@ -416,6 +416,9 @@ function createEntry(
     if (creation.id) {
         article.dataset.id =
             String(creation.id);
+
+        article.id =
+            `project-${creation.id}`;
     }
 
 
@@ -444,7 +447,7 @@ function createEntry(
                         <h3 class="entry-name">
                             ${escapeHTML(
                                 creation.name ||
-                                "Untitled creation"
+                                "Untitled project"
                             )}
                         </h3>
 
@@ -483,7 +486,7 @@ function createEntry(
                     ${
                         escapeHTML(
                             creation.desc ||
-                            "No description has been added yet."
+                            "No description is available yet."
                         )
                     }
                 </p>
@@ -565,7 +568,7 @@ function createMediaHTML(
     const caption =
         image.caption ||
         creation.caption ||
-        "a little workshop treasure";
+        "Project preview";
 
 
     const extraCount =
@@ -591,7 +594,7 @@ function createMediaHTML(
                 class="entry-media-placeholder"
                 aria-hidden="true"
             >
-                ✿
+                ◈
             </div>
 
 
@@ -709,7 +712,7 @@ function createDetailsHTML(
             <summary>
                 ${escapeHTML(
                     creation.detailTitle ||
-                    "workshop notes"
+                    "Project notes"
                 )}
             </summary>
 
@@ -779,7 +782,7 @@ function createPrimaryAction(
             >
                 ${escapeHTML(
                     creation.downloadText ||
-                    "Get it ✿"
+                    "Download"
                 )}
             </a>
 
@@ -908,7 +911,7 @@ function getTypeLabel(
     const labels = {
 
         extension:
-            "🌸 Browser extension",
+            "Browser extension",
 
         tool:
             "🧰 Tool",
@@ -1517,9 +1520,26 @@ function applyTheme() {
 
     } else {
 
-        root.removeAttribute(
-            "data-theme"
+        root.setAttribute(
+            "data-theme",
+            "light"
         );
+
+    }
+
+
+    const themeColor =
+        document.querySelector(
+            'meta[name="theme-color"]'
+        );
+
+
+    if (themeColor) {
+
+        themeColor.content =
+            isDark
+                ? "#080910"
+                : "#f3f3f8";
 
     }
 
@@ -1605,8 +1625,8 @@ function updateThemeButton() {
 
         label.textContent =
             isDark
-                ? "Dusk"
-                : "Cream";
+                ? "Dark"
+                : "Light";
 
     }
 
@@ -1620,8 +1640,8 @@ function updateThemeButton() {
     button.setAttribute(
         "title",
         isDark
-            ? "Switch to Cream theme"
-            : "Switch to Dusk theme"
+            ? "Switch to light theme"
+            : "Switch to dark theme"
     );
 
 }
@@ -1692,9 +1712,11 @@ function createSparkles() {
     const symbols = [
         "✦",
         "✧",
-        "✿",
-        "♡",
-        "·"
+        "◇",
+        "+",
+        "·",
+        "0",
+        "1"
     ];
 
 
@@ -2044,13 +2066,13 @@ function createScrapbookViewer() {
                         <span
                             id="scrapbook-type"
                         >
-                            🧪 PROJECT
+                            PROJECT RECORD
                         </span>
 
                         <span
                             id="scrapbook-status"
                         >
-                            ✦ ready!
+                            RELEASED
                         </span>
                     </div>
 
@@ -2122,7 +2144,7 @@ function createScrapbookViewer() {
                 <div class="scrapbook-footer">
 
                     <span>
-                        ✿ little workshop archive ✿
+                        DXK / NOCTURNE ARCHIVE / PROJECT RECORD
                     </span>
 
                 </div>
@@ -2370,8 +2392,8 @@ function populateScrapbook(
         creation.statusLabel ||
         (
             isPlanned
-                ? "☁ sprouting"
-                : "✦ ready!"
+                ? "In development"
+                : "Released"
         );
 
 
@@ -2395,7 +2417,7 @@ function populateScrapbook(
 
         title.textContent =
             creation.name ||
-            "Untitled creation";
+            "Untitled project";
 
     }
 
@@ -2689,7 +2711,7 @@ function populateScrapbookMedia(
 
 
                 fallback.textContent =
-                    "✿";
+                    "◇";
 
 
                 figure.insertBefore(
@@ -2960,7 +2982,7 @@ function populateScrapbookTags(
     container.innerHTML = `
 
         <div class="scrapbook-section-label">
-            little labels
+            Project tags
         </div>
 
 
@@ -3006,7 +3028,7 @@ function populateScrapbookDetails(
 
     const title =
         creation.detailTitle ||
-        "workshop notes";
+        "Project notes";
 
 
     const code =
@@ -3154,7 +3176,7 @@ function populateScrapbookActions(
             >
                 ${escapeHTML(
                     creation.downloadText ||
-                    "Download 🌸"
+                    "Download"
                 )}
             </a>
 

@@ -28,6 +28,7 @@ const CONFIG = {
 const MASCOT_MESSAGES = [
     "signal acquired.",
     "archive synchronized.",
+    "character forge online.",
     "continuity thread detected.",
     "the stage is yours.",
     "all systems nominal.",

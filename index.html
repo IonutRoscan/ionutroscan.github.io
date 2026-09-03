@@ -1,200 +1,62 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <title>DXK — The Nocturne Archive</title>
-    <meta name="description" content="Browser extensions, creator tools, experiments, and digital projects by DXK / SaltSaaalt.">
-    <meta name="theme-color" content="#080910">
-
-    <script>
-        (() => {
-            try {
-                const saved = localStorage.getItem("dxk-theme");
-                document.documentElement.dataset.theme = saved === "light" ? "light" : "dark";
-            } catch (_) {
-                document.documentElement.dataset.theme = "dark";
-            }
-        })();
-    </script>
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NOCTURNE CODEX // TACTILE ROTARY ARCHIVE</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="codex.css">
 </head>
-
 <body>
-    <a class="skip-link" href="#workshop">Skip to projects</a>
-
-    <div class="confetti-container" aria-hidden="true"></div>
-    <div class="blob blob-a" aria-hidden="true"></div>
-    <div class="blob blob-b" aria-hidden="true"></div>
-    <div class="blob blob-c" aria-hidden="true"></div>
-    <div class="noise" aria-hidden="true"></div>
-
-    <header class="site-header">
-        <a class="mark" href="#top" aria-label="DXK — return to top">
-            <span class="mark-glyph" aria-hidden="true">DXK</span>
-            <span class="mark-copy">
-                <strong>NOCTURNE ARCHIVE</strong>
-                <small>DIGITAL WORKS · 2026</small>
-            </span>
-        </a>
-
-        <div class="header-right">
-            <div class="header-status" title="Archive status">
-                <span class="dot" aria-hidden="true"></span>
-                <span id="system-status">initializing archive…</span>
-            </div>
-
-            <a class="header-link" href="#workshop">Creations</a>
-
-            <a class="header-link" href="https://github.com/ionutroscan" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
-
-            <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch color theme" aria-pressed="true">
-                <span class="theme-toggle-track" aria-hidden="true">
-                    <span class="theme-toggle-icon">☾</span>
-                </span>
-                <span class="theme-toggle-label">Dark</span>
-            </button>
-        </div>
+  <div class="codex-chassis">
+    <!-- Master Header Deck -->
+    <header class="codex-header">
+      <div class="brand-emblem">
+        <div class="emblem-core">NX</div>
+        <div class="emblem-title">NOCTURNE // CODEX MECHANICAL DECK</div>
+      </div>
+      <div class="header-telemetry">
+        <span class="telemetry-tag">RECORDS: <strong id="dial-count">00</strong></span>
+        <button class="chassis-btn" id="audio-toggle" type="button" aria-pressed="true">ACOUSTICS [ON]</button>
+      </div>
     </header>
 
-    <main id="top">
-        <section class="hero" aria-labelledby="hero-title">
-            <div class="hero-grid" aria-hidden="true"></div>
+    <!-- Main Mechanical Deck -->
+    <main class="codex-deck">
+      <!-- Left: Rotary Drum Selector -->
+      <aside class="rotary-bay" aria-label="Rotary Selector">
+        <div class="rotary-controls">
+          <input type="search" id="codex-search" class="codex-input" placeholder="SEEK IDENTIFIER / TAG..." autocomplete="off" spellcheck="false">
+        </div>
+        <div class="rotary-stage" id="rotary-stage">
+          <div class="rotary-reticle"></div>
+          <div class="rotary-track" id="rotary-track"></div>
+        </div>
+      </aside>
 
-            <div class="hero-content">
-                <p class="reveal eyebrow"><span>01</span> Independent digital workshop</p>
-
-                <h1 class="reveal wordmark" id="hero-title">
-                    Building tools for the
-                    <em>worlds between words.</em>
-                </h1>
-
-                <p class="reveal alias">DXK <span>/</span> <span class="handle">SaltSaaalt</span></p>
-
-                <p class="reveal lede">
-                    Browser extensions and creator tools shaped around roleplay, customization, and the joy of making software feel personal.
-                </p>
-
-                <div class="reveal hero-links">
-                    <a class="hero-link hero-link-primary" href="#workshop">
-                        Enter the archive <span aria-hidden="true">↓</span>
-                    </a>
-
-                    <a class="hero-link" href="https://github.com/ionutroscan" target="_blank" rel="noopener noreferrer">
-                        View source <span aria-hidden="true">↗</span>
-                    </a>
-                </div>
-
-                <dl class="reveal hero-metrics" aria-label="Archive summary">
-                    <div><dt>04</dt><dd>Public tools</dd></div>
-                    <div><dt>01</dt><dd>Character Forge</dd></div>
-                    <div><dt>08</dt><dd>Furina languages</dd></div>
-                </dl>
-            </div>
-
-            <div class="reveal hero-mascot" aria-label="Interactive archive signal">
-                <button class="mascot-bubble" type="button" aria-live="polite">signal acquired.</button>
-                <div class="signal-stage" aria-hidden="true">
-                    <div class="signal-orbit signal-orbit-outer"></div>
-                    <div class="signal-orbit signal-orbit-inner"></div>
-                    <div class="signal-cross signal-cross-a"></div>
-                    <div class="signal-cross signal-cross-b"></div>
-                    <div class="signal-core"><span>DXK</span></div>
-                    <span class="signal-coordinate coordinate-a">44°26′N</span>
-                    <span class="signal-coordinate coordinate-b">DAEDALUS_1.0</span>
-                </div>
-            </div>
-
-            <div class="hero-scroll" aria-hidden="true"><span></span> SCROLL TO INDEX</div>
-        </section>
-
-        <section class="desk" aria-labelledby="desk-heading">
-            <div class="desk-card">
-                <div class="desk-decoration" aria-hidden="true">1.0</div>
-
-                <div class="desk-content">
-                    <p class="section-kicker">Latest transmission</p>
-                    <h2 id="desk-heading">Daedalus 1.0 — The Character Forge</h2>
-                    <p>
-                        Daedalus turns ClankWorld character creation into a full creator workspace: persistent drafts, structured builders, reusable AI & roleplay rules, dialogue and scene tools, intro management, inspection, backups, and controlled sync back into Clank.
-                    </p>
-                </div>
-
-                <div class="desk-note">
-                    <span class="desk-note-icon" aria-hidden="true">✦</span>
-                    <span><strong>Archive status</strong><br><span id="desk-status">systems coming online</span></span>
-                </div>
-
-                <a class="desk-action" href="#project-004">Inspect release <span aria-hidden="true">↘</span></a>
-            </div>
-        </section>
-
-        <section class="registry" id="workshop" aria-labelledby="registry-heading">
-            <div class="registry-head">
-                <div>
-                    <p class="section-kicker">Project index</p>
-                    <h2 id="registry-heading">The archive</h2>
-                    <p class="registry-intro">Released extensions, experiments, and works still taking shape.</p>
-                </div>
-
-                <span class="registry-count"><span id="entry-count">0</span> entries catalogued</span>
-            </div>
-
-            <div class="workshop-tools">
-                <label class="search-box" for="project-search">
-                    <span class="search-icon" aria-hidden="true">⌕</span>
-                    <input id="project-search" type="search" placeholder="Search projects, features, or tags…" autocomplete="off" spellcheck="false">
-                    <span class="search-hint" aria-hidden="true" title="Press / to search">/</span>
-                </label>
-
-                <div class="visible-count" aria-live="polite">Displaying <strong id="visible-count">0</strong></div>
-            </div>
-
-            <div class="notebook-tabs" role="tablist" aria-label="Project filters">
-                <button class="tab-btn active" id="tab-button-all" role="tab" aria-selected="true" aria-controls="tab-all" data-target="tab-all" type="button">All</button>
-                <button class="tab-btn" id="tab-button-stable" role="tab" aria-selected="false" aria-controls="tab-all" data-target="tab-stable" type="button">Released</button>
-                <button class="tab-btn" id="tab-button-planned" role="tab" aria-selected="false" aria-controls="tab-all" data-target="tab-planned" type="button">In development</button>
-                <span class="tab-divider" aria-hidden="true"></span>
-                <button class="tab-btn tab-type" role="tab" aria-selected="false" aria-controls="tab-all" data-target="type-extension" type="button">Extensions</button>
-                <button class="tab-btn tab-type" role="tab" aria-selected="false" aria-controls="tab-all" data-target="type-tool" type="button">Tools</button>
-                <button class="tab-btn tab-type" role="tab" aria-selected="false" aria-controls="tab-all" data-target="type-game" type="button">Games</button>
-                <button class="tab-btn tab-type" role="tab" aria-selected="false" aria-controls="tab-all" data-target="type-experiment" type="button">Experiments</button>
-            </div>
-
-            <div class="notebook-panel active" id="tab-all" role="tabpanel" aria-labelledby="tab-button-all">
-                <div class="registry-loading">
-                    <span class="loading-sparkle" aria-hidden="true">◈</span>
-                    <span>Decoding project registry…</span>
-                </div>
-            </div>
-
-            <div class="no-results" id="no-results" hidden>
-                <div class="no-results-icon" aria-hidden="true">∅</div>
-                <h3>No matching transmission</h3>
-                <p>Try a different title, feature, or category.</p>
-            </div>
-        </section>
+      <!-- Right: Pneumatic Cassette Carrier Chamber -->
+      <section class="carrier-chamber" id="bay-mount" aria-label="Cartridge Bay"></section>
     </main>
 
-    <footer class="site-footer">
-        <div class="footer-left">
-            <span>DXK / SaltSaaalt</span>
-            <span class="footer-flower" aria-hidden="true">◆</span>
-            <span>Independent tools for imagined worlds.</span>
-        </div>
-
-        <div class="footer-right">
-            <span>© 2026</span>
-            <a href="#top">Back to top ↑</a>
-            <a href="https://github.com/ionutroscan" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
-        </div>
+    <!-- Lower Status Deck -->
+    <footer class="codex-footer">
+      <div class="status-indicator">
+        <span id="codex-status">INITIALIZING SYSTEM CHASSIS...</span>
+      </div>
+      <div class="telemetry-meta">
+        <span>INTERACTION: SCROLL / DRAG DIAL · KEYS: [W/S] OR [UP/DOWN]</span>
+      </div>
     </footer>
+  </div>
 
-    <script src="script.js"></script>
+  <!-- Mechanical Engine Modules -->
+  <script src="audio-feedback.js"></script>
+  <script src="rotary-engine.js"></script>
+  <script src="cassette-loader.js"></script>
+  <script src="codex-app.js"></script>
 </body>
 </html>

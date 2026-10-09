@@ -1,12 +1,14 @@
 # DoxowkSpace
 
-The personal hub of **Ionut Alexandru Roscan** (doxowk / LOXXANI): a small gallery of open-source browser extensions and games, plus links to my music.
+Hi, I'm Ionut (doxowk). This is the repo behind my personal hub, **[ionutroscan.github.io](https://ionutroscan.github.io/)**.
 
-**Live site: [ionutroscan.github.io](https://ionutroscan.github.io/)**
+I build open-source browser extensions and games in Godot, and under the name LOXXANI I also make music. This site is the one place where all of that lives: a small gallery of the things I've made, with links to the code, install instructions and screenshots, and a way to find my music and get in touch. Everything here is made by me, in the open.
 
-A single static page built with plain HTML, CSS and JavaScript. No framework and no build step.
+Most of my extensions are for [ClankWorld](https://www.clank.world), and they're the reason this page exists. I wanted a single place where people could see what each tool does, how to install it, and where the source is, instead of hunting through separate repos. The page itself is plain HTML, CSS and JavaScript, with no framework and no build step, so it's easy to change whenever I add something new.
 
 ## Projects
+
+Here's what's in the gallery right now. Each project has its own panel on the site with details, screenshots where I have them, and a how-to-install guide for the extensions.
 
 | Project | What it is | Repository |
 | --- | --- | --- |
@@ -16,8 +18,6 @@ A single static page built with plain HTML, CSS and JavaScript. No framework and
 | **Obelisk** | Clank Layout Builder: a visual builder for character "Edit about" pages | [GitHub](https://github.com/IonutRoscan/Obelisk-Clank-Layout-Builder) |
 | **Halation** | YouTube ambient-light glow for Chromium browsers | [GitHub](https://github.com/IonutRoscan/Halation) |
 | **Queen of Chaos** | A PS1-style 3D action RPG in Godot (early development) | — |
-
-Each project panel on the site has install instructions and screenshots where available.
 
 ## Files
 
@@ -30,7 +30,7 @@ assets/        cover icons and preview screenshots
 
 ## Adding or editing a project
 
-Everything shown in the gallery comes from the `projects` array at the top of `script.js`. To add a project, copy an existing entry and change:
+Everything in the gallery comes from the `projects` array at the top of `script.js`. When I have something new to show, I copy an existing entry and change:
 
 - `id`: used in the URL, so `#daedalus` opens that project's panel directly
 - `title`, `description`, `tags`, `details`, `facts`, `links`
@@ -43,7 +43,7 @@ Contact and music links are the `contactLinks` and `musicLinks` arrays further d
 
 ## Running locally
 
-Open `index.html` directly, or serve the folder so everything behaves like the live site:
+I just open `index.html`, or serve the folder so it behaves like the live site:
 
 ```
 python -m http.server 8000
@@ -53,4 +53,4 @@ then visit `http://localhost:8000`.
 
 ## Deployment
 
-Hosted with GitHub Pages from the `main` branch. Pushing to `main` updates the live site after a minute or two.
+The site is hosted with GitHub Pages from the `main` branch. When I push to `main`, the live site updates after a minute or two.

@@ -1,173 +1,147 @@
-<!doctype html>
-<html lang="en" data-theme="dark">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="dark light">
-  <meta name="theme-color" content="#08070d">
-  <meta name="description" content="A living archive of extensions, experiments, and strange little worlds created by DXK.">
-  <title>DXK // Archive Between Worlds</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#000000">
+    <meta name="description" content="DoxowkSpace — Developer portfolio: projects, tools and experiments.">
+
+    <title>DoxowkSpace</title>
+
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
 </head>
 <body>
-  <a class="skip-link" href="#archive-stage">Skip to creations</a>
-  <canvas class="world-canvas" id="world-canvas" aria-hidden="true"></canvas>
-  <div class="grain" aria-hidden="true"></div>
-  <div class="cursor-aura" id="cursor-aura" aria-hidden="true"></div>
-
-  <header class="site-header">
-    <a class="brand" href="#archive-stage" aria-label="DXK archive home">
-      <span class="brand-sigil" aria-hidden="true">DXK</span>
-      <span class="brand-copy">
-        <strong>Archive Between Worlds</strong>
-        <small>Extensions · Experiments · Impossible things</small>
-      </span>
-    </a>
-
-    <div class="header-actions">
-      <button class="quiet-button" id="search-open" type="button" aria-haspopup="dialog">
-        <span aria-hidden="true">⌕</span><span class="desktop-label">Find a creation</span><kbd>/</kbd>
-      </button>
-      <button class="icon-button" id="audio-toggle" type="button" aria-pressed="false" aria-label="Enable interface sounds">
-        <span class="audio-icon" aria-hidden="true">◖</span>
-      </button>
-      <button class="icon-button" id="theme-toggle" type="button" aria-label="Use light theme">
-        <span aria-hidden="true">☼</span>
-      </button>
-    </div>
-  </header>
-
-  <main>
-    <section class="archive-stage" id="archive-stage" aria-labelledby="project-title">
-      <div class="world-index" aria-label="Creation index">
-        <div class="index-heading">
-          <span>World index</span>
-          <strong id="project-count">00</strong>
-        </div>
-        <nav class="world-list" id="world-list"></nav>
-        <div class="index-progress" aria-hidden="true"><span id="index-progress-fill"></span></div>
-      </div>
-
-      <div class="artifact-stage" id="artifact-stage">
-        <div class="stage-orbit orbit-one" aria-hidden="true"></div>
-        <div class="stage-orbit orbit-two" aria-hidden="true"></div>
-        <div class="stage-glyph" id="stage-glyph" aria-hidden="true">◇</div>
-
-        <figure class="media-frame" id="media-frame" data-shape="landscape">
-          <div class="media-backdrop" id="media-backdrop" aria-hidden="true"></div>
-          <button class="media-open" id="media-open" type="button" aria-label="Open image at full size">
-            <img id="project-image" alt="" decoding="async">
-          </button>
-          <div class="media-empty" id="media-empty" hidden>
-            <span aria-hidden="true">◇</span>
-            <p>No visual transmission yet</p>
-          </div>
-          <figcaption class="media-caption">
-            <span id="image-caption"></span>
-            <span id="gallery-count"></span>
-          </figcaption>
-          <div class="gallery-controls" id="gallery-controls" hidden>
-            <button id="gallery-prev" type="button" aria-label="Previous image">←</button>
-            <button id="gallery-next" type="button" aria-label="Next image">→</button>
-          </div>
-        </figure>
-
-        <div class="gallery-dots" id="gallery-dots" aria-label="Image gallery"></div>
-      </div>
-
-      <article class="project-intro" id="project-intro" aria-live="polite">
-        <div class="project-kicker">
-          <span id="project-id">000</span>
-          <span class="kicker-line" aria-hidden="true"></span>
-          <span id="project-type">Archive record</span>
-        </div>
-
-        <h1 id="project-title">Opening the archive…</h1>
-        <p class="project-meta" id="project-meta"></p>
-        <p class="project-description" id="project-description"></p>
-
-        <div class="project-tags" id="project-tags"></div>
-
-        <div class="project-actions" id="project-actions"></div>
-
-        <button class="record-link" id="record-link" type="button">
-          Enter full archive record <span aria-hidden="true">↓</span>
+    
+<main class="space">
+    <header class="topbar">
+        <button class="text-control" id="menu-button" type="button">
+            MENU
         </button>
-      </article>
 
-      <div class="stage-status" aria-hidden="true">
-        <span class="status-pulse"></span>
-        <span id="stage-status-text">Locating archive…</span>
-      </div>
+        <a class="wordmark" href="#" aria-label="DoxowkSpace home">
+            doxowk<span>space</span>
+        </a>
+
+        <a class="text-control" id="github-link" href="https://github.com/" target="_blank" rel="noopener">GITHUB ↗</a>
+    </header>
+
+    <section class="gallery" aria-label="Project gallery">
+        <button class="artwork side-artwork left-artwork" aria-label="Previous project">
+            <span class="artwork-art art-blue"></span>
+        </button>
+
+        <div class="featured">
+            <p class="collection-label">DOXOWKSPACE</p>
+
+            <button class="artwork main-artwork" id="featured-artwork"
+                aria-label="Open project details">
+                <span class="artwork-art art-main"></span>
+                <span class="artwork-number">01</span>
+            </button>
+
+            <div class="project-info" aria-live="polite">
+                <h1 id="project-title">PROJECT ONE</h1>
+                <p id="project-description">A WORK IN PROGRESS</p>
+                <p class="project-tags" id="project-tags"></p>
+                <button class="explore-link" id="project-details" type="button">VIEW PROJECT</button>
+            </div>
+        </div>
+
+        <button class="artwork side-artwork right-artwork" aria-label="Next project">
+            <span class="artwork-art art-red"></span>
+        </button>
     </section>
 
-    <section class="record-section" id="record-section" aria-labelledby="record-title">
-      <div class="record-watermark" id="record-watermark" aria-hidden="true">◇</div>
-      <div class="record-heading">
-        <span class="section-index">Selected world / complete record</span>
-        <h2 id="record-title">Archive record</h2>
-        <p id="record-summary"></p>
-      </div>
+    <div class="about-inline">
+        <span>ABOUT THIS SPACE</span>
+        <p>Selected repositories, tools and experiments.</p>
+    </div>
 
-      <div class="record-grid">
-        <section class="record-panel record-details" id="record-details-panel">
-          <div class="panel-label">Field notes</div>
-          <div id="record-details"></div>
+    <footer class="bottombar">
+        <span class="counter" id="project-counter">01 / 03</span>
+
+        <div class="gallery-controls">
+            <button class="arrow-control" id="previous-button"
+                aria-label="Previous project">←</button>
+
+            <button class="gallery-indicator" id="gallery-indicator"
+                aria-label="Advance to next project">
+                <span></span>
+            </button>
+
+            <button class="arrow-control" id="next-button"
+                aria-label="Next project">→</button>
+        </div>
+
+        <span class="footer-label">INDEPENDENT PROJECTS</span>
+    </footer>
+</main>
+
+
+    <aside class="detail" id="detail" aria-hidden="true" aria-labelledby="detail-title">
+        <button class="text-control detail-close" id="detail-close" type="button">CLOSE</button>
+
+        <div class="detail-inner">
+            <div class="detail-art"><span class="artwork-art"></span></div>
+
+            <div class="detail-body">
+                <p class="detail-kicker" id="detail-kicker"></p>
+                <h2 id="detail-title"></h2>
+                <p class="detail-text" id="detail-text"></p>
+                <dl class="detail-facts" id="detail-facts"></dl>
+                <div class="detail-links" id="detail-links"></div>
+                <div class="detail-tools" id="detail-tools" hidden>
+                    <p class="detail-kicker" id="detail-tools-label"></p>
+                    <div class="detail-links" id="detail-tools-links"></div>
+                </div>
+                <details class="detail-install" id="detail-install" hidden>
+                    <summary>HOW TO INSTALL</summary>
+                    <ol id="detail-install-steps"></ol>
+                    <p class="install-note" id="detail-install-note" hidden></p>
+                </details>
+            </div>
+
+            <section class="detail-previews" id="detail-previews" hidden>
+                <p class="detail-kicker">PREVIEWS</p>
+                <div class="preview-row" id="detail-previews-row"></div>
+            </section>
+        </div>
+    </aside>
+
+    <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Preview image">
+        <button class="text-control lightbox-close" id="lightbox-close" type="button">CLOSE</button>
+        <button class="arrow-control lightbox-prev" id="lightbox-prev" type="button" aria-label="Previous image">←</button>
+        <figure class="lightbox-figure">
+            <img id="lightbox-image" alt="">
+            <figcaption id="lightbox-caption"></figcaption>
+        </figure>
+        <button class="arrow-control lightbox-next" id="lightbox-next" type="button" aria-label="Next image">→</button>
+    </div>
+
+    <nav class="menu" id="menu" aria-hidden="true" aria-label="Menu">
+        <button class="text-control menu-close" id="menu-close" type="button">CLOSE</button>
+
+        <ul>
+            <li><button type="button" data-close>PROJECTS</button></li>
+            <li><a id="menu-github" href="https://github.com/" target="_blank" rel="noopener">GITHUB ↗</a></li>
+        </ul>
+
+        <section class="about" id="about">
+            <span>ABOUT</span>
+            <p class="about-name">DOXOWK / IONUT ALEXANDRU ROSCAN / LOXXANI</p>
+            <p>Developer building open-source browser extensions and games in Godot. As LOXXANI, I'm also an established music producer. Everything here is made by me, in the open.</p>
         </section>
 
-        <section class="record-panel record-stack" id="record-stack-panel">
-          <div class="panel-label">Inside the creation</div>
-          <ul id="record-stack"></ul>
+        <section class="contact" id="music">
+            <span>MUSIC / LOXXANI</span>
+            <div class="contact-links" id="music-links"></div>
         </section>
 
-        <section class="record-panel record-code" id="record-code-panel">
-          <div class="panel-label" id="record-code-label">Recovered fragment</div>
-          <pre><code id="record-code"></code></pre>
+        <section class="contact" id="contact">
+            <span>CONTACT</span>
+            <div class="contact-links" id="contact-links"></div>
         </section>
-      </div>
-
-      <div class="record-footer">
-        <div id="record-actions"></div>
-        <p id="record-hint"></p>
-      </div>
-    </section>
-  </main>
-
-  <footer class="site-footer">
-    <p>Built as a doorway, not a display case.</p>
-    <a href="#archive-stage">Return to the worlds ↑</a>
-  </footer>
-
-  <dialog class="search-dialog" id="search-dialog">
-    <form method="dialog" class="search-shell">
-      <div class="search-topline">
-        <label for="archive-search">Search the archive</label>
-        <button value="cancel" class="dialog-close" aria-label="Close search">×</button>
-      </div>
-      <input id="archive-search" type="search" placeholder="Name, tag, platform, feature…" autocomplete="off">
-      <div class="search-results" id="search-results"></div>
-      <p class="search-help"><kbd>↑</kbd><kbd>↓</kbd> move · <kbd>Enter</kbd> open · <kbd>Esc</kbd> close</p>
-    </form>
-  </dialog>
-
-  <dialog class="lightbox" id="lightbox">
-    <button class="lightbox-close" id="lightbox-close" type="button" aria-label="Close full-size image">×</button>
-    <button class="lightbox-arrow lightbox-prev" id="lightbox-prev" type="button" aria-label="Previous image">←</button>
-    <figure>
-      <img id="lightbox-image" alt="">
-      <figcaption id="lightbox-caption"></figcaption>
-    </figure>
-    <button class="lightbox-arrow lightbox-next" id="lightbox-next" type="button" aria-label="Next image">→</button>
-  </dialog>
-
-  <div class="load-error" id="load-error" role="alert" hidden>
-    <span>Archive link interrupted.</span>
-    <button id="retry-load" type="button">Try again</button>
-  </div>
-
-  <script src="script.js"></script>
+    </nav>
 </body>
 </html>

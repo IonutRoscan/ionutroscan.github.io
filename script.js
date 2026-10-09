@@ -1,626 +1,900 @@
-(() => {
-  "use strict";
+// ADD YOUR PROJECTS HERE. One object per project:
+//   id                  -> used in the URL (#furina) so a project can be linked directly
+//   title, description  -> text under the artwork
+//   tags                -> small line under the description
+//   image               -> cover icon in /assets ('' = use the CSS artwork named in `artwork`;
+//                          if the file is missing the CSS artwork is used automatically)
+//   details             -> paragraph shown in the project panel
+//   facts               -> [label, value] rows in the panel
+//   links               -> buttons in the panel ([] = none)
+//   tools (optional)    -> small companion tools shown under the links
+//   previews (optional) -> screenshots in /assets: [{src, caption}]. Missing files are skipped.
+//   install (optional)  -> adds a collapsible HOW TO INSTALL guide:
+//                          {folder, after, note}
+const chromiumInstall = install => [
+  "Open the GitHub page (the **GITHUB** button above), click **Code → Download ZIP**, and extract it somewhere you plan to keep it. The browser loads the extension from that folder, so don't delete it afterwards.",
+  'Open `brave://extensions` or `chrome://extensions`.',
+  'Turn **Developer mode** ON (top right).',
+  `Click **Load unpacked** and select the extracted ${install.folder} folder (the one containing \`manifest.json\`).`,
+  install.after
+]
 
-  const CONFIG = {
-    dataFile: "creations.json",
-    themeKey: "dxk-archive-theme",
-    audioKey: "dxk-archive-audio"
-  };
-
-  const VISUALS = {
-    "001": { accent: "#d8ad5a", rgb: "216, 173, 90", secondary: "#ffdd8a", glyph: "✦" },
-    "002": { accent: "#56d6cb", rgb: "86, 214, 203", secondary: "#8be9ff", glyph: "◈" },
-    "003": { accent: "#a786ff", rgb: "167, 134, 255", secondary: "#ff91dd", glyph: "♢" },
-    "004": { accent: "#f17478", rgb: "241, 116, 120", secondary: "#ffb76d", glyph: "⌁" },
-    "005": { accent: "#9ba1b6", rgb: "155, 161, 182", secondary: "#d8dbea", glyph: "◇" }
-  };
-
-  const state = {
-    creations: [],
-    activeIndex: 0,
-    galleryIndex: 0,
-    switchTimer: 0,
-    searchIndex: 0,
-    searchMatches: [],
-    audioEnabled: localStorage.getItem(CONFIG.audioKey) === "on"
-  };
-
-  const dom = {};
-  let audio = null;
-  let ambient = null;
-
-  document.addEventListener("DOMContentLoaded", init);
-
-  async function init() {
-    cacheDOM();
-    applyStoredTheme();
-    bindUI();
-    ambient = createAmbientField(dom.canvas);
-    updateAudioButton();
-    await loadArchive();
-  }
-
-  function cacheDOM() {
-    const ids = [
-      "world-canvas", "cursor-aura", "world-list", "project-count", "index-progress-fill",
-      "artifact-stage", "stage-glyph", "media-frame", "media-backdrop", "media-open",
-      "project-image", "media-empty", "image-caption", "gallery-count", "gallery-controls",
-      "gallery-prev", "gallery-next", "gallery-dots", "project-id", "project-type",
-      "project-title", "project-meta", "project-description", "project-tags", "project-actions",
-      "record-link", "stage-status-text", "record-section", "record-watermark", "record-title",
-      "record-summary", "record-details-panel", "record-details", "record-stack-panel",
-      "record-stack", "record-code-panel", "record-code-label", "record-code", "record-actions",
-      "record-hint", "search-open", "search-dialog", "archive-search", "search-results",
-      "lightbox", "lightbox-image", "lightbox-caption", "lightbox-close", "lightbox-prev",
-      "lightbox-next", "audio-toggle", "theme-toggle", "load-error", "retry-load"
-    ];
-
-    ids.forEach(id => {
-      dom[toCamel(id)] = document.getElementById(id);
-    });
-    dom.canvas = dom.worldCanvas;
-  }
-
-  function toCamel(value) {
-    return value.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
-  }
-
-  async function loadArchive() {
-    dom.loadError.hidden = true;
-    dom.stageStatusText.textContent = "Locating archive…";
-
-    try {
-      const response = await fetch(CONFIG.dataFile, { cache: "no-cache" });
-      if (!response.ok) throw new Error(`Archive request failed: ${response.status}`);
-      const data = await response.json();
-      if (!Array.isArray(data) || !data.length) throw new Error("Archive is empty");
-
-      state.creations = data;
-      buildWorldIndex();
-      const requested = location.hash.replace(/^#world-/, "");
-      const requestedIndex = state.creations.findIndex(item => String(item.id) === requested);
-      selectProject(requestedIndex >= 0 ? requestedIndex : 0, { immediate: true, updateHash: false });
-    } catch (error) {
-      console.error(error);
-      dom.loadError.hidden = false;
-      dom.stageStatusText.textContent = "Archive link interrupted";
-    }
-  }
-
-  function bindUI() {
-    dom.galleryPrev.addEventListener("click", () => stepGallery(-1));
-    dom.galleryNext.addEventListener("click", () => stepGallery(1));
-    dom.mediaOpen.addEventListener("click", openLightbox);
-    dom.lightboxClose.addEventListener("click", () => dom.lightbox.close());
-    dom.lightboxPrev.addEventListener("click", () => stepGallery(-1, true));
-    dom.lightboxNext.addEventListener("click", () => stepGallery(1, true));
-    dom.lightbox.addEventListener("click", event => {
-      if (event.target === dom.lightbox) dom.lightbox.close();
-    });
-
-    dom.recordLink.addEventListener("click", () => {
-      dom.recordSection.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth" });
-    });
-
-    dom.searchOpen.addEventListener("click", openSearch);
-    dom.archiveSearch.addEventListener("input", () => renderSearch(dom.archiveSearch.value));
-    dom.archiveSearch.addEventListener("keydown", handleSearchKeys);
-    dom.searchDialog.addEventListener("close", () => {
-      dom.archiveSearch.value = "";
-      state.searchIndex = 0;
-    });
-
-    dom.audioToggle.addEventListener("click", toggleAudio);
-    dom.themeToggle.addEventListener("click", toggleTheme);
-    dom.retryLoad.addEventListener("click", loadArchive);
-
-    window.addEventListener("keydown", handleGlobalKeys);
-    window.addEventListener("pointermove", event => {
-      if (dom.cursorAura) {
-        dom.cursorAura.style.left = `${event.clientX}px`;
-        dom.cursorAura.style.top = `${event.clientY}px`;
+const projects = [
+  {
+    id: 'furina',
+    title: 'FURINA',
+    description: 'CLANK CHAT ATELIER',
+    tags: ['CHROMIUM', 'FIREFOX', 'JAVASCRIPT'],
+    image: 'assets/furina-icon.png',
+    artwork: 'art-main',
+    details:
+      'A client-side extension for ClankWorld that adds chat theming, roleplay immersion tools, Director notes and continuity tracking, sound effects and scene presentation. Plain JavaScript with no build step, minimal permissions, and an interface translated into nine languages.',
+    facts: [
+      ['PLATFORM', 'CHROMIUM · FIREFOX'],
+      ['LICENSE', 'MIT'],
+      ['STATUS', 'OPEN SOURCE']
+    ],
+    previews: [
+      {
+        src: 'assets/furina-preview-example.png',
+        caption: 'A Clank chat customized with Furina'
+      },
+      {
+        src: 'assets/furina-panel-full-preview.png',
+        caption: 'The full Furina workspace panel'
+      },
+      {
+        src: 'assets/furina-panel-essentials-preview.png',
+        caption: 'The Essentials view of the panel'
+      },
+      {
+        src: 'assets/furina-scenenavigation-preview.png',
+        caption: 'Scene navigation'
       }
-      ambient?.setPointer(event.clientX, event.clientY);
-    }, { passive: true });
-
-    window.addEventListener("hashchange", () => {
-      const requested = location.hash.replace(/^#world-/, "");
-      const index = state.creations.findIndex(item => String(item.id) === requested);
-      if (index >= 0 && index !== state.activeIndex) selectProject(index, { updateHash: false });
-    });
-  }
-
-  function buildWorldIndex() {
-    dom.worldList.replaceChildren();
-    dom.projectCount.textContent = String(state.creations.length).padStart(2, "0");
-
-    state.creations.forEach((item, index) => {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "world-button";
-      button.dataset.index = String(index);
-      button.setAttribute("aria-label", `Open ${item.name}`);
-
-      const number = document.createElement("span");
-      number.className = "world-number";
-      number.textContent = item.id || String(index + 1).padStart(3, "0");
-
-      const name = document.createElement("span");
-      name.className = "world-name";
-      name.textContent = item.name || "Untitled world";
-
-      button.append(number, name);
-      button.addEventListener("click", () => selectProject(index));
-      dom.worldList.append(button);
-    });
-  }
-
-  function selectProject(index, options = {}) {
-    if (!state.creations[index]) return;
-    const { immediate = false, updateHash = true } = options;
-    const change = () => {
-      state.activeIndex = index;
-      state.galleryIndex = 0;
-      const item = state.creations[index];
-      applyVisualIdentity(item);
-      renderProject(item);
-      updateWorldIndex();
-      dom.artifactStage.classList.remove("is-switching");
-      if (updateHash) history.replaceState(null, "", `#world-${item.id}`);
-      playTone("select");
-    };
-
-    clearTimeout(state.switchTimer);
-    if (immediate || prefersReducedMotion()) {
-      change();
-      return;
-    }
-
-    dom.artifactStage.classList.add("is-switching");
-    state.switchTimer = window.setTimeout(change, 210);
-  }
-
-  function applyVisualIdentity(item) {
-    const visual = {
-      ...(VISUALS[item.id] || VISUALS["005"]),
-      ...(item.visual || {})
-    };
-    const root = document.documentElement;
-    root.style.setProperty("--accent", visual.accent);
-    root.style.setProperty("--accent-rgb", visual.rgb);
-    root.style.setProperty("--accent-2", visual.secondary);
-    dom.stageGlyph.textContent = visual.glyph;
-    dom.recordWatermark.textContent = visual.glyph;
-    ambient?.setColor(visual.rgb);
-  }
-
-  function renderProject(item) {
-    dom.projectId.textContent = item.id || "000";
-    dom.projectType.textContent = item.typeLabel || item.type || "Archive record";
-    dom.projectTitle.textContent = item.name || "Untitled world";
-    dom.projectMeta.textContent = item.meta || "";
-    dom.projectDescription.textContent = item.desc || "No field notes have been recovered yet.";
-    dom.stageStatusText.textContent = `${item.statusLabel || item.status || "record located"} · world ${item.id || state.activeIndex + 1}`;
-    dom.recordTitle.textContent = item.name || "Archive record";
-    dom.recordSummary.textContent = item.desc || "";
-
-    renderTags(item.tags || []);
-    renderActions(item, dom.projectActions);
-    renderActions(item, dom.recordActions);
-    renderGallery(item);
-    renderRecord(item);
-  }
-
-  function renderTags(tags) {
-    dom.projectTags.replaceChildren();
-    tags.slice(0, 8).forEach(tag => {
-      const chip = document.createElement("span");
-      chip.textContent = tag;
-      dom.projectTags.append(chip);
-    });
-  }
-
-  function renderActions(item, target) {
-    target.replaceChildren();
-    const actions = [];
-    if (item.downloadUrl) actions.push({ href: item.downloadUrl, label: item.downloadText || "Download", primary: true, download: true });
-    if (item.github) actions.push({ href: item.github, label: "View repository ↗", external: true });
-    if (item.url) actions.push({ href: item.url, label: "Open creation ↗", external: true });
-
-    actions.forEach(action => {
-      const link = document.createElement("a");
-      link.className = `action-button${action.primary ? " primary" : ""}`;
-      link.href = action.href;
-      link.textContent = action.label;
-      if (action.download) link.setAttribute("download", "");
-      if (action.external) {
-        link.target = "_blank";
-        link.rel = "noopener noreferrer";
+    ],
+    install: {
+      folder: 'Furina',
+      after:
+        "Open a chat on clank.world. Furina's launcher appears on supported chat routes.",
+      note: 'On Firefox, install from the Firefox add-on page instead.'
+    },
+    links: [
+      {
+        label: 'GITHUB',
+        url: 'https://github.com/IonutRoscan/Furina-Clank-Chat-Atelier'
+      },
+      {label: 'WEBSITE', url: 'https://ionutroscan.github.io/furina/'},
+      {
+        label: 'FIREFOX ADD-ON',
+        url: 'https://addons.mozilla.org/en-US/firefox/addon/furina-clank-chat-atelier/'
       }
-      link.addEventListener("pointerdown", () => playTone("press"));
-      target.append(link);
-    });
-  }
-
-  function renderGallery(item) {
-    const images = getImages(item);
-    dom.galleryDots.replaceChildren();
-    dom.galleryControls.hidden = images.length <= 1;
-    dom.galleryCount.textContent = images.length > 1 ? `01 / ${String(images.length).padStart(2, "0")}` : "";
-    dom.mediaOpen.hidden = images.length === 0;
-    dom.mediaEmpty.hidden = images.length > 0;
-
-    images.forEach((image, index) => {
-      const dot = document.createElement("button");
-      dot.type = "button";
-      dot.className = `gallery-dot${index === 0 ? " is-active" : ""}`;
-      dot.setAttribute("aria-label", `Show image ${index + 1}: ${image.caption}`);
-      dot.addEventListener("click", () => showImage(index));
-      dom.galleryDots.append(dot);
-    });
-
-    if (images.length) showImage(0);
-    else {
-      dom.projectImage.removeAttribute("src");
-      dom.mediaBackdrop.style.backgroundImage = "none";
-      dom.imageCaption.textContent = "Awaiting visual transmission";
-      dom.mediaFrame.dataset.shape = "landscape";
-    }
-  }
-
-  function getImages(item = state.creations[state.activeIndex]) {
-    if (!item) return [];
-    if (Array.isArray(item.previewImages)) {
-      return item.previewImages.map((entry, index) => {
-        if (typeof entry === "string") return { src: entry, caption: item.caption || `${item.name} · image ${index + 1}`, alt: item.name };
-        return {
-          src: entry.src,
-          caption: entry.caption || item.caption || `${item.name} · image ${index + 1}`,
-          alt: entry.alt || entry.caption || item.name
-        };
-      }).filter(entry => entry.src);
-    }
-    return item.previewImg ? [{ src: item.previewImg, caption: item.caption || item.name, alt: item.caption || item.name }] : [];
-  }
-
-  function showImage(index, syncLightbox = false) {
-    const images = getImages();
-    if (!images.length) return;
-    state.galleryIndex = (index + images.length) % images.length;
-    const image = images[state.galleryIndex];
-    dom.projectImage.style.opacity = "0";
-    dom.projectImage.alt = image.alt;
-    dom.projectImage.onload = () => {
-      const ratio = dom.projectImage.naturalWidth / Math.max(1, dom.projectImage.naturalHeight);
-      dom.mediaFrame.dataset.shape = ratio > 1.25 ? "landscape" : ratio < .8 ? "portrait" : "square";
-      dom.projectImage.style.opacity = "1";
-    };
-    dom.projectImage.onerror = () => {
-      dom.projectImage.style.opacity = "0";
-      dom.imageCaption.textContent = "Visual transmission unavailable";
-    };
-    dom.projectImage.src = image.src;
-    dom.mediaBackdrop.style.backgroundImage = `url("${encodeCssUrl(image.src)}")`;
-    dom.imageCaption.textContent = image.caption;
-    dom.galleryCount.textContent = images.length > 1
-      ? `${String(state.galleryIndex + 1).padStart(2, "0")} / ${String(images.length).padStart(2, "0")}`
-      : "";
-    [...dom.galleryDots.children].forEach((dot, dotIndex) => dot.classList.toggle("is-active", dotIndex === state.galleryIndex));
-    if (syncLightbox && dom.lightbox.open) updateLightbox();
-  }
-
-  function stepGallery(direction, syncLightbox = false) {
-    showImage(state.galleryIndex + direction, syncLightbox);
-    playTone("tick");
-  }
-
-  function openLightbox() {
-    if (!getImages().length) return;
-    updateLightbox();
-    dom.lightbox.showModal();
-  }
-
-  function updateLightbox() {
-    const image = getImages()[state.galleryIndex];
-    if (!image) return;
-    dom.lightboxImage.src = image.src;
-    dom.lightboxImage.alt = image.alt;
-    dom.lightboxCaption.textContent = image.caption;
-    const multiple = getImages().length > 1;
-    dom.lightboxPrev.hidden = !multiple;
-    dom.lightboxNext.hidden = !multiple;
-  }
-
-  function renderRecord(item) {
-    const stack = Array.isArray(item.stack) ? item.stack : [];
-    dom.recordStack.replaceChildren();
-    stack.forEach(line => {
-      const entry = document.createElement("li");
-      entry.innerHTML = sanitizeInline(line);
-      dom.recordStack.append(entry);
-    });
-    dom.recordStackPanel.hidden = stack.length === 0;
-
-    dom.recordDetails.replaceChildren();
-    const details = document.createElement("p");
-    details.innerHTML = item.detailTitle
-      ? `<strong>${escapeHTML(item.detailTitle)}</strong>`
-      : `<strong>${escapeHTML(item.statusLabel || "Archive notes")}</strong>`;
-    const meta = document.createElement("p");
-    meta.textContent = item.meta || "This record is still taking shape.";
-    dom.recordDetails.append(details, meta);
-    dom.recordDetailsPanel.hidden = !item.detailTitle && !item.meta;
-
-    dom.recordCodePanel.hidden = !item.codeBlock;
-    dom.recordCodeLabel.textContent = item.detailTitle || "Recovered fragment";
-    dom.recordCode.textContent = item.codeBlock || "";
-    dom.recordHint.innerHTML = item.hint ? sanitizeInline(item.hint) : "";
-  }
-
-  function updateWorldIndex() {
-    [...dom.worldList.children].forEach((button, index) => {
-      const active = index === state.activeIndex;
-      button.classList.toggle("is-active", active);
-      button.setAttribute("aria-current", active ? "true" : "false");
-      if (active) button.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "nearest", inline: "nearest" });
-    });
-    const progress = ((state.activeIndex + 1) / state.creations.length) * 100;
-    dom.indexProgressFill.style.width = `${progress}%`;
-  }
-
-  function openSearch() {
-    renderSearch("");
-    dom.searchDialog.showModal();
-    requestAnimationFrame(() => dom.archiveSearch.focus());
-  }
-
-  function renderSearch(query) {
-    const needle = query.trim().toLowerCase();
-    state.searchMatches = state.creations
-      .map((item, index) => ({ item, index }))
-      .filter(({ item }) => !needle || [item.name, item.desc, item.meta, item.typeLabel, ...(item.tags || [])].join(" ").toLowerCase().includes(needle));
-    state.searchIndex = 0;
-    dom.searchResults.replaceChildren();
-
-    if (!state.searchMatches.length) {
-      const empty = document.createElement("p");
-      empty.className = "search-empty";
-      empty.textContent = "Nothing in the archive matches that signal.";
-      dom.searchResults.append(empty);
-      return;
-    }
-
-    state.searchMatches.forEach(({ item, index }, resultIndex) => {
-      const visual = VISUALS[item.id] || VISUALS["005"];
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = `search-result${resultIndex === 0 ? " is-focused" : ""}`;
-      button.innerHTML = `
-        <span class="search-result-symbol" aria-hidden="true">${escapeHTML(visual.glyph)}</span>
-        <span><strong>${escapeHTML(item.name)}</strong><small>${escapeHTML(item.typeLabel || item.type || "Archive record")}</small></span>
-        <span>${escapeHTML(item.id || "")}</span>`;
-      button.addEventListener("click", () => chooseSearchResult(index));
-      dom.searchResults.append(button);
-    });
-  }
-
-  function handleSearchKeys(event) {
-    if (!state.searchMatches.length) return;
-    if (event.key === "ArrowDown" || event.key === "ArrowUp") {
-      event.preventDefault();
-      const direction = event.key === "ArrowDown" ? 1 : -1;
-      state.searchIndex = (state.searchIndex + direction + state.searchMatches.length) % state.searchMatches.length;
-      updateSearchFocus();
-    } else if (event.key === "Enter") {
-      event.preventDefault();
-      chooseSearchResult(state.searchMatches[state.searchIndex].index);
-    }
-  }
-
-  function updateSearchFocus() {
-    [...dom.searchResults.children].forEach((node, index) => node.classList.toggle("is-focused", index === state.searchIndex));
-    dom.searchResults.children[state.searchIndex]?.scrollIntoView({ block: "nearest" });
-  }
-
-  function chooseSearchResult(index) {
-    dom.searchDialog.close();
-    selectProject(index);
-    window.scrollTo({ top: 0, behavior: prefersReducedMotion() ? "auto" : "smooth" });
-  }
-
-  function handleGlobalKeys(event) {
-    if ((event.key === "/" || ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k")) && !isTyping()) {
-      event.preventDefault();
-      if (!dom.searchDialog.open) openSearch();
-      return;
-    }
-    if (dom.searchDialog.open || dom.lightbox.open || isTyping()) return;
-    if (event.key === "ArrowRight") selectProject((state.activeIndex + 1) % state.creations.length);
-    if (event.key === "ArrowLeft") selectProject((state.activeIndex - 1 + state.creations.length) % state.creations.length);
-  }
-
-  function isTyping() {
-    return ["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement?.tagName) || document.activeElement?.isContentEditable;
-  }
-
-  function applyStoredTheme() {
-    const saved = localStorage.getItem(CONFIG.themeKey);
-    const theme = saved || (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
-    document.documentElement.dataset.theme = theme;
-    updateThemeButton();
-  }
-
-  function toggleTheme() {
-    const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
-    document.documentElement.dataset.theme = next;
-    localStorage.setItem(CONFIG.themeKey, next);
-    updateThemeButton();
-    playTone("press");
-  }
-
-  function updateThemeButton() {
-    const light = document.documentElement.dataset.theme === "light";
-    dom.themeToggle.innerHTML = `<span aria-hidden="true">${light ? "☾" : "☼"}</span>`;
-    dom.themeToggle.setAttribute("aria-label", light ? "Use dark theme" : "Use light theme");
-  }
-
-  function toggleAudio() {
-    state.audioEnabled = !state.audioEnabled;
-    localStorage.setItem(CONFIG.audioKey, state.audioEnabled ? "on" : "off");
-    if (state.audioEnabled) {
-      const AudioEngine = window.AudioContext || window.webkitAudioContext;
-      if (!AudioEngine) {
-        state.audioEnabled = false;
-        localStorage.setItem(CONFIG.audioKey, "off");
-        updateAudioButton();
-        return;
+    ]
+  },
+  {
+    id: 'daedalus',
+    title: 'DAEDALUS',
+    description: 'CLANK CHARACTER FORGE',
+    tags: ['CHROMIUM', 'JAVASCRIPT'],
+    image: 'assets/daedalus-icon.png',
+    artwork: 'art-blue',
+    details:
+      'A local character-creation workspace for ClankWorld. Build characters in persistent projects with autosave and backups, use the guided creator or structured prompt builders, choose what a roleplay should track with RP Systems and a state-display designer, and plan whole worlds in The Labyrinth with relationships, a timeline, a plot board and exportable world-bible documents. Nothing reaches Clank until you apply it, and everything stays in your browser.',
+    facts: [
+      ['PLATFORM', 'CHROMIUM'],
+      ['LICENSE', 'MIT'],
+      ['STATUS', 'OPEN SOURCE']
+    ],
+    previews: [
+      {
+        src: 'assets/daedalus_preview_1.png',
+        caption: 'Daedalus character-creation workspace'
+      },
+      {
+        src: 'assets/daedalus_preview_2.png',
+        caption: 'Structured creator tools inside Daedalus'
+      },
+      {
+        src: 'assets/daedalus_preview_3.png',
+        caption: 'Daedalus project and roleplay tooling'
       }
-      audio ||= new AudioEngine();
-      if (audio.state === "suspended") audio.resume();
-      playTone("select");
+    ],
+    install: {
+      folder: 'Daedalus',
+      after:
+        'Open `https://www.clank.world/create`. The Daedalus launcher appears on the character creation page.'
+    },
+    links: [
+      {
+        label: 'GITHUB',
+        url: 'https://github.com/IonutRoscan/Daedalus-Clank-Character-Forge'
+      }
+    ]
+  },
+  {
+    id: 'grimoire',
+    title: 'GRIMOIRE',
+    description: 'LOREBOOK IMPORTER',
+    tags: ['CHROMIUM', 'JAVASCRIPT'],
+    image: 'assets/grimoire-icon.png',
+    artwork: 'art-red',
+    details:
+      'Imports TXT, Markdown and supported JSON lorebooks into ClankWorld through a parchment-style grimoire interface. Preview entries, review conversion notes and recover drafts before filling a lorebook. Everything runs locally, and no drafts leave your browser.',
+    facts: [
+      ['PLATFORM', 'CHROMIUM'],
+      ['LICENSE', 'MIT'],
+      ['STATUS', 'OPEN SOURCE']
+    ],
+    previews: [
+      {src: 'assets/grimoire-preview.png', caption: "Grimoire's Menu"}
+    ],
+    install: {
+      folder: 'clank-lorebook-importer',
+      after:
+        'Open your Lorebook on clank.world. The Grimoire panel appears at the bottom right.'
+    },
+    links: [
+      {
+        label: 'GITHUB',
+        url: 'https://github.com/IonutRoscan/Grimoire-ClankWorld'
+      }
+    ]
+  },
+  {
+    id: 'obelisk',
+    title: 'OBELISK',
+    description: 'CLANK LAYOUT BUILDER',
+    tags: ['CHROMIUM', 'HTML / CSS'],
+    image: 'assets/obelisk-icon.png',
+    artwork: 'art-blue',
+    details:
+      'A visual panel for ClankWorld creators that generates the HTML and CSS for character "Edit about" pages, so layouts can be designed by eye instead of written by hand.',
+    facts: [
+      ['PLATFORM', 'CHROMIUM'],
+      ['LICENSE', 'MIT'],
+      ['STATUS', 'OPEN SOURCE']
+    ],
+    previews: [
+      {
+        src: 'assets/obelisk-preview-1.png',
+        caption: 'Obelisk 2.0 creator workspace'
+      },
+      {
+        src: 'assets/obelisk-preview-2.png',
+        caption: 'Obelisk Studio Mode'
+      }
+    ],
+    install: {
+      folder: 'clank-layout-builder',
+      after:
+        'Open any Character Edit page on clank.world. Obelisk appears there.'
+    },
+    links: [
+      {
+        label: 'GITHUB',
+        url: 'https://github.com/IonutRoscan/Obelisk-Clank-Layout-Builder'
+      }
+    ],
+    tools: [
+      {
+        label: 'PHOTO PLANE VIEWER',
+        url: 'https://github.com/IonutRoscan/photo-plane-viewer'
+      },
+      {
+        label: 'STELE SHADER ENGINE',
+        url: 'https://github.com/IonutRoscan/stele-shader-engine'
+      }
+    ]
+  },
+  {
+    id: 'halation',
+    title: 'HALATION',
+    description: 'YOUTUBE AMBIENT LIGHT',
+    tags: ['CHROMIUM', 'JAVASCRIPT'],
+    image: 'assets/halation-icon.png',
+    artwork: 'art-main',
+    details:
+      "Recreates YouTube's ambient-light glow in Chromium browsers, spilling the colours of the video onto the page around the player.",
+    facts: [
+      ['PLATFORM', 'CHROMIUM'],
+      ['LICENSE', 'MIT'],
+      ['STATUS', 'OPEN SOURCE']
+    ],
+    previews: [
+      {
+        src: 'assets/halation-preview.png',
+        caption: 'Halation ambient light on YouTube'
+      }
+    ],
+    links: [{label: 'GITHUB', url: 'https://github.com/IonutRoscan/Halation'}]
+  },
+  {
+    id: 'queen-of-chaos',
+    title: 'QUEEN OF CHAOS',
+    description: 'GAME IN DEVELOPMENT',
+    tags: ['GODOT', '3D ACTION RPG'],
+    image: '', // swap in 'assets/queen-of-chaos-icon.png' when you have one
+    artwork: 'art-qoc',
+    details:
+      'A third-person action RPG and platformer with a PS1-style look. You play Fria, the self-proclaimed Queen of Chaos, fighting through a fallen modern world where a phenomenon called Memory makes people forget how to function. Fast parkour movement, a scythe built around combo chains, and a pistol used to stun rather than kill. Early development.',
+    facts: [
+      ['GENRE', 'ACTION RPG / PLATFORMER'],
+      ['ENGINE', 'GODOT'],
+      ['PLATFORM', 'PC'],
+      ['STATUS', 'EARLY DEVELOPMENT']
+    ],
+    links: []
+  }
+]
+
+// Your GitHub profile (used by the top-right link and the menu).
+const profileLinks = {
+  github: 'https://github.com/IonutRoscan'
+}
+
+const gallery = document.querySelector('.gallery')
+const featuredArtwork = document.querySelector('#featured-artwork')
+const title = document.querySelector('#project-title')
+const description = document.querySelector('#project-description')
+const counter = document.querySelector('#project-counter')
+const leftArtwork = document.querySelector('.left-artwork')
+const rightArtwork = document.querySelector('.right-artwork')
+const projectInfo = document.querySelector('.project-info')
+const detail = document.querySelector('#detail')
+const projectTags = document.querySelector('#project-tags')
+const menu = document.querySelector('#menu')
+const isOverlayOpen = () =>
+  menu.classList.contains('is-open') || detail.classList.contains('is-open')
+
+let activeProject = 0
+let isTransitioning = false
+let wheelAccumulator = 0
+let wheelResetTimer
+
+const transitionDuration = 750
+
+function setArtwork(element, project) {
+  const art = element.querySelector('.artwork-art')
+
+  art.className = `artwork-art ${project.imageReady ? 'has-image' : project.artwork}`
+  art.style.backgroundImage = project.imageReady
+    ? `url("${project.image}")`
+    : ''
+}
+
+function updateGallery() {
+  const previous =
+    projects[(activeProject + projects.length - 1) % projects.length]
+
+  const current = projects[activeProject]
+
+  const next = projects[(activeProject + 1) % projects.length]
+
+  title.textContent = current.title
+  description.textContent = current.description
+  projectTags.textContent = (current.tags || []).join('  ·  ')
+
+  counter.textContent = `${String(activeProject + 1).padStart(2, '0')} / ${String(projects.length).padStart(2, '0')}`
+
+  setArtwork(featuredArtwork, current)
+  setArtwork(leftArtwork, previous)
+  setArtwork(rightArtwork, next)
+
+  featuredArtwork.querySelector('.artwork-number').textContent = String(
+    activeProject + 1
+  ).padStart(2, '0')
+}
+
+const slideEasing = 'cubic-bezier(0.22, 1, 0.36, 1)'
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
+
+function centerOf(rect) {
+  return {x: rect.left + rect.width / 2, y: rect.top + rect.height / 2}
+}
+
+// Slides `element` so its box lands exactly on `target` (position + size).
+// Uses composite: 'add' so the element's own CSS transform (the side
+// artworks are positioned with one) is kept underneath the animation.
+function moveTo(element, from, target) {
+  const a = centerOf(from)
+  const b = centerOf(target)
+  const scale = target.width / from.width
+
+  return element.animate(
+    [
+      {transform: 'translate(0px, 0px) scale(1)'},
+      {transform: `translate(${b.x - a.x}px, ${b.y - a.y}px) scale(${scale})`}
+    ],
+    {
+      duration: transitionDuration,
+      easing: slideEasing,
+      fill: 'forwards',
+      composite: 'add'
     }
-    updateAudioButton();
+  )
+}
+
+function fadeTo(element, props) {
+  return element.animate([props], {
+    duration: transitionDuration,
+    easing: slideEasing,
+    fill: 'forwards'
+  })
+}
+
+// Only use a cover icon once it has actually loaded; otherwise keep the CSS artwork.
+projects.forEach(project => {
+  if (!project.image) return
+
+  const probe = new Image()
+  probe.onload = () => {
+    project.imageReady = true
+    if (!isTransitioning) updateGallery()
+  }
+  probe.src = project.image
+})
+
+function showProject(direction) {
+  if (isTransitioning || direction === 0) return
+
+  const step = direction > 0 ? 1 : -1
+  const nextIndex = (activeProject + step + projects.length) % projects.length
+
+  if (reducedMotion.matches) {
+    activeProject = nextIndex
+    updateGallery()
+    return
   }
 
-  function updateAudioButton() {
-    dom.audioToggle.setAttribute("aria-pressed", String(state.audioEnabled));
-    dom.audioToggle.setAttribute("aria-label", state.audioEnabled ? "Disable interface sounds" : "Enable interface sounds");
-    dom.audioToggle.querySelector(".audio-icon").textContent = state.audioEnabled ? "◉" : "◖";
-  }
+  isTransitioning = true
+  gallery.classList.add('is-transitioning')
+  projectInfo.classList.add('is-changing')
 
-  function playTone(kind) {
-    if (!state.audioEnabled) return;
-    try {
-      const AudioEngine = window.AudioContext || window.webkitAudioContext;
-      if (!AudioEngine) return;
-      audio ||= new AudioEngine();
-      const now = audio.currentTime;
-      const oscillator = audio.createOscillator();
-      const gain = audio.createGain();
-      const filter = audio.createBiquadFilter();
-      const presets = {
-        select: [220, 78, .12, .055],
-        tick: [680, 260, .045, .028],
-        press: [320, 125, .075, .035]
-      };
-      const [start, end, duration, volume] = presets[kind] || presets.tick;
-      oscillator.type = kind === "select" ? "sine" : "triangle";
-      oscillator.frequency.setValueAtTime(start, now);
-      oscillator.frequency.exponentialRampToValueAtTime(end, now + duration);
-      filter.type = "lowpass";
-      filter.frequency.value = 1600;
-      gain.gain.setValueAtTime(volume, now);
-      gain.gain.exponentialRampToValueAtTime(.0001, now + duration);
-      oscillator.connect(filter).connect(gain).connect(audio.destination);
-      oscillator.start(now);
-      oscillator.stop(now + duration);
-    } catch (_) {
-      state.audioEnabled = false;
-      updateAudioButton();
+  // Freeze the idle float where it is so nothing jumps when the slide starts.
+  const floatValue = getComputedStyle(featuredArtwork).translate
+  const floatY =
+    floatValue && floatValue !== 'none'
+      ? parseFloat(floatValue.split(' ')[1]) || 0
+      : 0
+
+  featuredArtwork.style.animation = 'none'
+  featuredArtwork.style.translate = `0px ${floatY}px`
+
+  // Measure every slot BEFORE animating anything.
+  const mainRect = featuredArtwork.getBoundingClientRect()
+  const leftRect = leftArtwork.getBoundingClientRect()
+  const rightRect = rightArtwork.getBoundingClientRect()
+
+  // Where the main artwork sits at rest (no float offset).
+  const mainRest = new DOMRect(
+    mainRect.left,
+    mainRect.top - floatY,
+    mainRect.width,
+    mainRect.height
+  )
+
+  // Direction-dependent roles.
+  const incoming = step > 0 ? rightArtwork : leftArtwork // becomes the main one
+  const incomingRect = step > 0 ? rightRect : leftRect
+  const outgoing = step > 0 ? leftArtwork : rightArtwork // slides off-screen
+  const outgoingRect = step > 0 ? leftRect : rightRect
+  const mainDestination = step > 0 ? leftRect : rightRect // main -> side slot
+
+  const offscreenRect = new DOMRect(
+    outgoingRect.left + (step > 0 ? -1 : 1) * outgoingRect.width * 1.1,
+    outgoingRect.top,
+    outgoingRect.width * 0.85,
+    outgoingRect.height
+  )
+
+  incoming.style.zIndex = '2'
+
+  const animations = [
+    moveTo(featuredArtwork, mainRect, mainDestination),
+    fadeTo(featuredArtwork, {opacity: 0.48, filter: 'brightness(0.72)'}),
+
+    moveTo(incoming, incomingRect, mainRest),
+    fadeTo(incoming, {opacity: 1, filter: 'brightness(1)'}),
+
+    moveTo(outgoing, outgoingRect, offscreenRect),
+    fadeTo(outgoing, {opacity: 0})
+  ]
+
+  Promise.all(animations.map(animation => animation.finished))
+    .then(() => {
+      const artworks = [featuredArtwork, leftArtwork, rightArtwork]
+
+      // The animations ended exactly on the new resting layout, so swap the
+      // content and drop all temporary state in the same frame: no visible jump.
+      artworks.forEach(element => {
+        element.style.transition = 'none'
+      })
+
+      activeProject = nextIndex
+      updateGallery()
+
+      animations.forEach(animation => animation.cancel())
+
+      featuredArtwork.style.animation = ''
+      featuredArtwork.style.translate = ''
+      incoming.style.zIndex = ''
+
+      void gallery.offsetWidth // commit the reset before re-enabling transitions
+
+      artworks.forEach(element => {
+        element.style.transition = ''
+      })
+
+      // The far side slot just received a brand-new project: fade it in.
+      const arrived = step > 0 ? rightArtwork : leftArtwork
+      arrived.animate(
+        [{opacity: 0}, {opacity: getComputedStyle(arrived).opacity}],
+        {duration: 450, easing: 'ease-out'}
+      )
+
+      projectInfo.classList.remove('is-changing')
+      gallery.classList.remove('is-transitioning')
+      isTransitioning = false
+    })
+    .catch(() => {
+      // Animation was interrupted (e.g. tab torn down): just recover cleanly.
+      animations.forEach(animation => animation.cancel())
+      featuredArtwork.style.animation = ''
+      featuredArtwork.style.translate = ''
+      incoming.style.zIndex = ''
+      projectInfo.classList.remove('is-changing')
+      gallery.classList.remove('is-transitioning')
+      isTransitioning = false
+    })
+}
+
+document.querySelector('#previous-button').addEventListener('click', () => {
+  showProject(-1)
+})
+
+document.querySelector('#next-button').addEventListener('click', () => {
+  showProject(1)
+})
+
+document.querySelector('#gallery-indicator').addEventListener('click', () => {
+  showProject(1)
+})
+
+leftArtwork.addEventListener('click', () => {
+  showProject(-1)
+})
+
+rightArtwork.addEventListener('click', () => {
+  showProject(1)
+})
+
+featuredArtwork.addEventListener('click', () => {
+  openDetail()
+})
+
+document.querySelector('#project-details').addEventListener('click', () => {
+  openDetail()
+})
+
+document.querySelector('#detail-close').addEventListener('click', () => {
+  closeDetail()
+})
+
+function makeLink(label, url) {
+  const link = document.createElement('a')
+  link.className = 'explore-link'
+  link.href = url
+  link.target = '_blank'
+  link.rel = 'noopener'
+  link.textContent = `${label} ↗`
+  return link
+}
+
+// Turns `code` and **bold** markers in a string into real elements (no innerHTML).
+function richText(text) {
+  const fragment = document.createDocumentFragment()
+
+  text.split(/(`[^`]+`|\*\*[^*]+\*\*)/).forEach(part => {
+    if (!part) return
+
+    if (part.startsWith('`')) {
+      const code = document.createElement('code')
+      code.textContent = part.slice(1, -1)
+      fragment.append(code)
+    } else if (part.startsWith('**')) {
+      const strong = document.createElement('strong')
+      strong.textContent = part.slice(2, -2)
+      fragment.append(strong)
+    } else {
+      fragment.append(part)
     }
+  })
+
+  return fragment
+}
+
+function fillInstall(project) {
+  const box = document.querySelector('#detail-install')
+  const note = document.querySelector('#detail-install-note')
+
+  box.hidden = !project.install
+  box.open = false
+  if (!project.install) return
+
+  document.querySelector('#detail-install-steps').replaceChildren(
+    ...chromiumInstall(project.install).map(step => {
+      const item = document.createElement('li')
+      item.append(richText(step))
+      return item
+    })
+  )
+
+  note.textContent = project.install.note || ''
+  note.hidden = !project.install.note
+}
+
+// Screenshots. Each thumbnail is dropped again if its file doesn't exist.
+const previewSection = document.querySelector('#detail-previews')
+const previewRow = document.querySelector('#detail-previews-row')
+
+function fillPreviews(project) {
+  const items = project.previews || []
+
+  previewSection.hidden = items.length === 0
+
+  previewRow.replaceChildren(
+    ...items.map(item => {
+      const button = document.createElement('button')
+      const image = document.createElement('img')
+      const caption = document.createElement('span')
+
+      button.type = 'button'
+      button.className = 'preview-thumb'
+      button.dataset.src = item.src
+      button.dataset.caption = item.caption || ''
+      button.setAttribute('aria-label', `Enlarge: ${item.caption || 'preview'}`)
+
+      image.alt = item.caption || ''
+      image.loading = 'lazy'
+      image.decoding = 'async'
+      image.addEventListener('error', () => {
+        button.remove()
+        previewSection.hidden = previewRow.children.length === 0
+      })
+      image.src = item.src
+
+      caption.textContent = item.caption || ''
+
+      button.append(image, caption)
+      button.addEventListener('click', () => {
+        openLightbox([...previewRow.children].indexOf(button))
+      })
+      return button
+    })
+  )
+}
+
+// Lightbox for the screenshots
+const lightbox = document.querySelector('#lightbox')
+const lightboxImage = document.querySelector('#lightbox-image')
+const lightboxCaption = document.querySelector('#lightbox-caption')
+let lightboxIndex = 0
+
+function lightboxItems() {
+  return [...previewRow.children].map(button => ({
+    src: button.dataset.src,
+    caption: button.dataset.caption
+  }))
+}
+
+function showLightboxImage() {
+  const items = lightboxItems()
+  if (items.length === 0) return closeLightbox()
+
+  lightboxIndex = (lightboxIndex + items.length) % items.length
+  lightboxImage.src = items[lightboxIndex].src
+  lightboxImage.alt = items[lightboxIndex].caption
+  lightboxCaption.textContent = `${items[lightboxIndex].caption}  ·  ${lightboxIndex + 1} / ${items.length}`
+
+  const single = items.length < 2
+  document.querySelector('#lightbox-prev').style.visibility = single
+    ? 'hidden'
+    : ''
+  document.querySelector('#lightbox-next').style.visibility = single
+    ? 'hidden'
+    : ''
+}
+
+function openLightbox(index) {
+  lightboxIndex = Math.max(index, 0)
+  showLightboxImage()
+  lightbox.classList.add('is-open')
+  lightbox.setAttribute('aria-hidden', 'false')
+}
+
+function closeLightbox() {
+  lightbox.classList.remove('is-open')
+  lightbox.setAttribute('aria-hidden', 'true')
+}
+
+function stepLightbox(direction) {
+  lightboxIndex += direction
+  showLightboxImage()
+}
+
+document
+  .querySelector('#lightbox-close')
+  .addEventListener('click', closeLightbox)
+document.querySelector('#lightbox-prev').addEventListener('click', () => {
+  stepLightbox(-1)
+})
+document.querySelector('#lightbox-next').addEventListener('click', () => {
+  stepLightbox(1)
+})
+
+// Clicking the dark backdrop (not the image or buttons) closes it.
+lightbox.addEventListener('click', event => {
+  if (event.target === lightbox) closeLightbox()
+})
+
+function fillDetail(project) {
+  document.querySelector('#detail-kicker').textContent =
+    `${String(projects.indexOf(project) + 1).padStart(2, '0')} / ${String(projects.length).padStart(2, '0')}`
+  document.querySelector('#detail-title').textContent =
+    `${project.title} · ${project.description}`
+  document.querySelector('#detail-text').textContent = project.details
+
+  setArtwork(detail.querySelector('.detail-art'), project)
+
+  const facts = document.querySelector('#detail-facts')
+  facts.replaceChildren(
+    ...project.facts.flatMap(([label, value]) => {
+      const term = document.createElement('dt')
+      const definition = document.createElement('dd')
+      term.textContent = label
+      definition.textContent = value
+      return [term, definition]
+    })
+  )
+
+  const links = project.links.map(item => makeLink(item.label, item.url))
+
+  document.querySelector('#detail-links').replaceChildren(...links)
+
+  fillInstall(project)
+  fillPreviews(project)
+
+  const tools = project.tools || []
+  document.querySelector('#detail-tools').hidden = tools.length === 0
+  document.querySelector('#detail-tools-label').textContent =
+    `USED BY ${project.title}`
+  document
+    .querySelector('#detail-tools-links')
+    .replaceChildren(...tools.map(item => makeLink(item.label, item.url)))
+}
+
+function setDetail(open) {
+  if (!open) closeLightbox()
+  detail.classList.toggle('is-open', open)
+  detail.setAttribute('aria-hidden', String(!open))
+  if (open) detail.scrollTop = 0
+}
+
+function setHash(hash) {
+  try {
+    history.pushState(null, '', hash || location.pathname + location.search)
+  } catch {
+    // Some environments (e.g. file://) block this; the panel still works.
+  }
+}
+
+function openDetail() {
+  if (isTransitioning) return
+
+  const project = projects[activeProject]
+  fillDetail(project)
+  setDetail(true)
+  setHash(`#${project.id}`)
+}
+
+function closeDetail() {
+  setDetail(false)
+  if (location.hash) setHash('')
+}
+
+// Deep links (#halation) and the browser back button.
+function syncFromHash() {
+  const index = projects.findIndex(
+    project => `#${project.id}` === location.hash
+  )
+
+  if (index === -1) {
+    setDetail(false)
+    return
   }
 
-  function createAmbientField(canvas) {
-    if (!canvas || prefersReducedMotion()) return null;
-    const context = canvas.getContext("2d");
-    if (!context) return null;
-    let width = 0;
-    let height = 0;
-    let ratio = 1;
-    let color = [157, 124, 255];
-    let pointer = { x: innerWidth * .7, y: innerHeight * .35 };
-    let frame = 0;
-    const points = Array.from({ length: 32 }, (_, index) => ({
-      x: Math.random(), y: Math.random(), vx: (Math.random() - .5) * .00009,
-      vy: (Math.random() - .5) * .00009, size: index % 7 === 0 ? 1.8 : .8
-    }));
+  if (index !== activeProject && !isTransitioning) {
+    activeProject = index
+    updateGallery()
+  }
 
-    const resize = () => {
-      width = innerWidth;
-      height = innerHeight;
-      ratio = Math.min(devicePixelRatio || 1, 2);
-      canvas.width = width * ratio;
-      canvas.height = height * ratio;
-      canvas.style.width = `${width}px`;
-      canvas.style.height = `${height}px`;
-      context.setTransform(ratio, 0, 0, ratio, 0, 0);
-    };
+  fillDetail(projects[index])
+  setDetail(true)
+}
 
-    const draw = () => {
-      context.clearRect(0, 0, width, height);
-      points.forEach(point => {
-        point.x += point.vx;
-        point.y += point.vy;
-        if (point.x < -.05) point.x = 1.05;
-        if (point.x > 1.05) point.x = -.05;
-        if (point.y < -.05) point.y = 1.05;
-        if (point.y > 1.05) point.y = -.05;
-      });
+window.addEventListener('popstate', syncFromHash)
 
-      for (let i = 0; i < points.length; i++) {
-        const a = points[i];
-        const ax = a.x * width;
-        const ay = a.y * height;
-        const pointerDistance = Math.hypot(ax - pointer.x, ay - pointer.y);
-        const alpha = pointerDistance < 280 ? .36 : .16;
-        context.fillStyle = `rgba(${color.join(",")},${alpha})`;
-        context.beginPath();
-        context.arc(ax, ay, a.size, 0, Math.PI * 2);
-        context.fill();
+// Contact links. The email is assembled here so it isn't sitting in the HTML as plain text.
+const contactLinks = [
+  {label: 'EMAIL', href: `mailto:${['loxxbeats', 'gmail.com'].join('@')}`},
+  {label: 'INSTAGRAM', href: 'https://www.instagram.com/ionutroscan'},
+  {label: 'REDDIT', href: 'https://www.reddit.com/user/doxowk'},
+  {label: 'DISCORD @LOXXANI', copy: '@LOXXANI'} // no profile URL: click copies the handle
+]
 
-        for (let j = i + 1; j < points.length; j++) {
-          const b = points[j];
-          const bx = b.x * width;
-          const by = b.y * height;
-          const distance = Math.hypot(ax - bx, ay - by);
-          if (distance < 155) {
-            context.strokeStyle = `rgba(${color.join(",")},${(1 - distance / 155) * .1})`;
-            context.lineWidth = .7;
-            context.beginPath();
-            context.moveTo(ax, ay);
-            context.lineTo(bx, by);
-            context.stroke();
-          }
+const musicLinks = [
+  {label: 'SOUNDCLOUD', href: 'https://soundcloud.com/loxxani'},
+  {
+    label: 'YOUTUBE',
+    href: 'https://www.youtube.com/channel/UCHuFWnfmaXFEiR1KZu3UNsg'
+  }
+]
+
+function renderLinks(selector, items) {
+  document.querySelector(selector).replaceChildren(
+    ...items.map(item => {
+      if (item.href) {
+        const link = document.createElement('a')
+        link.className = 'explore-link'
+        link.href = item.href
+        link.textContent = item.label
+        if (item.href.startsWith('http')) {
+          link.target = '_blank'
+          link.rel = 'noopener'
+          link.textContent += ' ↗'
         }
+        return link
       }
-      frame = requestAnimationFrame(draw);
-    };
 
-    resize();
-    draw();
-    window.addEventListener("resize", resize, { passive: true });
-    return {
-      setColor(rgb) { color = String(rgb).split(",").map(value => Number(value.trim()) || 0); },
-      setPointer(x, y) { pointer = { x, y }; },
-      destroy() { cancelAnimationFrame(frame); window.removeEventListener("resize", resize); }
-    };
+      const button = document.createElement('button')
+      button.type = 'button'
+      button.className = 'explore-link'
+      button.textContent = item.label
+      button.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(item.copy)
+          button.textContent = 'COPIED'
+        } catch {
+          button.textContent = item.copy
+        }
+        window.setTimeout(() => {
+          button.textContent = item.label
+        }, 1600)
+      })
+      return button
+    })
+  )
+}
+
+renderLinks('#contact-links', contactLinks)
+renderLinks('#music-links', musicLinks)
+
+function setMenu(open) {
+  menu.classList.toggle('is-open', open)
+  menu.setAttribute('aria-hidden', String(!open))
+}
+
+document.querySelector('#menu-button').addEventListener('click', () => {
+  setMenu(true)
+})
+
+document.querySelector('#menu-close').addEventListener('click', () => {
+  setMenu(false)
+})
+
+menu.querySelectorAll('[data-close]').forEach(item => {
+  item.addEventListener('click', () => setMenu(false))
+})
+
+document.querySelector('#github-link').href = profileLinks.github
+document.querySelector('#menu-github').href = profileLinks.github
+
+// Touch swipe
+let touchStartX = null
+
+gallery.addEventListener(
+  'touchstart',
+  event => {
+    touchStartX = event.touches[0].clientX
+  },
+  {passive: true}
+)
+
+gallery.addEventListener('touchend', event => {
+  if (touchStartX === null) return
+
+  const distance = event.changedTouches[0].clientX - touchStartX
+  touchStartX = null
+
+  if (Math.abs(distance) > 40) showProject(distance < 0 ? 1 : -1)
+})
+
+// One gesture = one slide. After a slide starts, wheel events are swallowed
+// until the stream goes quiet, so trackpad inertia can't trigger extra slides.
+let wheelLocked = false
+let wheelUnlockTimer
+const wheelQuietTime = 160
+
+function lockWheel() {
+  wheelLocked = true
+  window.clearTimeout(wheelUnlockTimer)
+  wheelUnlockTimer = window.setTimeout(() => {
+    wheelLocked = false
+  }, wheelQuietTime)
+}
+
+document.addEventListener(
+  'wheel',
+  event => {
+    if (isOverlayOpen()) return // let the open panel scroll normally
+
+    event.preventDefault()
+
+    const delta =
+      Math.abs(event.deltaY) > Math.abs(event.deltaX)
+        ? event.deltaY
+        : event.deltaX
+
+    if (Math.abs(delta) < 1) return
+
+    // Still animating or still coasting: keep extending the lock, do nothing.
+    if (wheelLocked || isTransitioning) {
+      lockWheel()
+      wheelAccumulator = 0
+      return
+    }
+
+    wheelAccumulator += delta
+
+    window.clearTimeout(wheelResetTimer)
+
+    wheelResetTimer = window.setTimeout(() => {
+      wheelAccumulator = 0
+    }, 120)
+
+    if (Math.abs(wheelAccumulator) >= 35) {
+      const direction = wheelAccumulator > 0 ? 1 : -1
+      wheelAccumulator = 0
+      lockWheel()
+      showProject(direction)
+    }
+  },
+  {passive: false}
+)
+
+document.addEventListener('keydown', event => {
+  // The lightbox sits on top of everything: it gets the keys first.
+  if (lightbox.classList.contains('is-open')) {
+    if (event.key === 'Escape') closeLightbox()
+    else if (event.key === 'ArrowRight') stepLightbox(1)
+    else if (event.key === 'ArrowLeft') stepLightbox(-1)
+    return
   }
 
-  function sanitizeInline(value) {
-    const template = document.createElement("template");
-    template.innerHTML = String(value || "");
-    const allowed = new Set(["STRONG", "CODE", "EM", "BR"]);
-    [...template.content.querySelectorAll("*")].forEach(node => {
-      if (!allowed.has(node.tagName)) node.replaceWith(...node.childNodes);
-      else [...node.attributes].forEach(attribute => node.removeAttribute(attribute.name));
-    });
-    return template.innerHTML;
+  if (event.key === 'Escape') {
+    setMenu(false)
+    closeDetail()
   }
 
-  function escapeHTML(value) {
-    return String(value || "")
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
-  }
+  if (event.repeat || isOverlayOpen()) return
 
-  function encodeCssUrl(value) {
-    return String(value || "").replace(/["\\\n\r]/g, character => `\\${character}`);
+  if (event.key === 'ArrowRight') {
+    event.preventDefault()
+    showProject(1)
+  } else if (event.key === 'ArrowLeft') {
+    event.preventDefault()
+    showProject(-1)
   }
+})
 
-  function prefersReducedMotion() {
-    return matchMedia("(prefers-reduced-motion: reduce)").matches;
-  }
-})();
+updateGallery()
+syncFromHash()
